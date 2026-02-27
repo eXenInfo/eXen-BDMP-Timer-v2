@@ -3,9 +3,20 @@ import { ref, computed } from 'vue'
 import { loadFromStorage, saveToStorage } from '../services/storage.js'
 import { DEFAULT_DISCIPLINES, EPP_DISCIPLINE } from '../services/defaultDisciplines.js'
 
+// Version der Standard-Disziplinen — erhöhen wenn sich Defaults ändern
+const DEFAULTS_VERSION = 2
+
 export const useDisciplineStore = defineStore('disciplines', () => {
-  // Alle Disziplinen: { name: stages[] } für normale, EPP separat als { name: eppObject }
-  const disciplines = ref(loadFromStorage('DISCIPLINES', { ...DEFAULT_DISCIPLINES }))
+  // Standard-Disziplinen aktualisieren wenn neue Version vorhanden
+  const storedVersion = loadFromStorage('DISCIPLINES_VERSION', 0)
+  let initialDisciplines = loadFromStorage('DISCIPLINES', null)
+  if (!initialDisciplines || storedVersion < DEFAULTS_VERSION) {
+    initialDisciplines = { ...DEFAULT_DISCIPLINES }
+    saveToStorage('DISCIPLINES', initialDisciplines)
+    saveToStorage('DISCIPLINES_VERSION', DEFAULTS_VERSION)
+  }
+
+  const disciplines = ref(initialDisciplines)
   const activeDisciplineName = ref(loadFromStorage('ACTIVE_DISCIPLINE', null))
 
   // EPP ist immer verfügbar, wird nicht in disciplines gespeichert
