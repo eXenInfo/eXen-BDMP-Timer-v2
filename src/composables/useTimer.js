@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useTimerStore } from '../stores/timerStore.js'
 import { useAudio } from './useAudio.js'
 import { useSettingsStore } from '../stores/settingsStore.js'
@@ -15,6 +15,8 @@ export function useTimer() {
 
   let interval = null
   let stages = []
+  let singleStageMode = false
+  let singleStageIndex = 0
 
   function load(disciplineStages) {
     stages = JSON.parse(JSON.stringify(disciplineStages))
@@ -23,6 +25,18 @@ export function useTimer() {
 
   function start() {
     if (timerStore.state !== 'idle') return
+    singleStageMode = false
+    _startPrep()
+  }
+
+  /** Startet nur ein einzelnes Match — nach Abschluss zurück zu diesem Match */
+  function startSingleStage(index) {
+    _clearInterval()
+    singleStageMode = true
+    singleStageIndex = index
+    timerStore.setStageIndex(index)
+    timerStore.setRepetition(1)
+    timerStore.setState('idle')
     _startPrep()
   }
 
@@ -80,18 +94,19 @@ export function useTimer() {
       } else {
         _startRunning()
       }
-    } else if (stage.pauseAfter) {
-      // Manuelle Pause nach Phase
-      timerStore.setState('idle')
-      timerStore.setRepetition(1)
-      const nextIndex = timerStore.currentStageIndex + 1
-      if (nextIndex < stages.length) {
-        timerStore.setStageIndex(nextIndex)
-      } else {
-        _finish()
-      }
     } else {
-      _advanceStage()
+      // Alle Wiederholungen done — weiter oder finish
+      if (singleStageMode) {
+        _finish()
+      } else if (stage.pauseAfter) {
+        timerStore.setState('idle')
+        timerStore.setRepetition(1)
+        const nextIndex = timerStore.currentStageIndex + 1
+        if (nextIndex < stages.length) timerStore.setStageIndex(nextIndex)
+        else _finish()
+      } else {
+        _advanceStage()
+      }
     }
   }
 
@@ -112,19 +127,25 @@ export function useTimer() {
     timerStore.setState('idle')
   }
 
-  function resume() {
-    if (timerStore.state !== 'idle') return
-    _startRunning()
-  }
-
   function reset() {
     _clearInterval()
+    singleStageMode = false
     timerStore.reset()
-    if (stages.length > 0) timerStore.setState('idle')
   }
 
+  /** Nach Finish im Einzelmodus zurück zum trainierten Match */
+  function resetToSingleStage() {
+    _clearInterval()
+    timerStore.setStageIndex(singleStageIndex)
+    timerStore.setRepetition(1)
+    timerStore.setState('idle')
+    timerStore.setTimeLeft(0)
+  }
+
+  /** Normales startStage (für Komplett-Modus ab einer Phase) */
   function startStage(index) {
     _clearInterval()
+    singleStageMode = false
     timerStore.setStageIndex(index)
     timerStore.setRepetition(1)
     timerStore.setState('idle')
@@ -145,6 +166,7 @@ export function useTimer() {
   const currentStage = computed(() => stages[timerStore.currentStageIndex] ?? null)
   const nextStage = computed(() => stages[timerStore.currentStageIndex + 1] ?? null)
   const totalStages = computed(() => stages.length)
+  const isSingleMode = computed(() => singleStageMode)
   const progressPercent = computed(() => {
     const stage = currentStage.value
     if (!stage) return 0
@@ -155,7 +177,7 @@ export function useTimer() {
   })
 
   return {
-    currentStage, nextStage, totalStages, progressPercent,
-    start, pause, resume, reset, load, startStage
+    currentStage, nextStage, totalStages, progressPercent, isSingleMode,
+    start, pause, reset, load, startStage, startSingleStage, resetToSingleStage
   }
 }
