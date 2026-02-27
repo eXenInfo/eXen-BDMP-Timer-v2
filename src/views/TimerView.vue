@@ -87,14 +87,27 @@
         <div class="px-4 py-4">
           <!-- Start-Button mit Match-Anzeige (im Idle-Modus) -->
           <div v-if="timerStore.state === 'idle'" class="flex flex-col gap-3 w-full max-w-sm mx-auto">
-            <!-- Gewähltes Match anzeigen -->
-            <div class="bg-gray-800 rounded-xl px-4 py-3 text-center">
-              <div class="text-xs text-gray-500 mb-1">Ausgewähltes Match</div>
-              <div class="text-white font-semibold text-sm leading-snug">
-                {{ firstLine(selectedStage?.name ?? '–') }}
+            <!-- RO-Beschreibung für gewähltes Match -->
+            <div class="bg-gray-800 rounded-xl px-4 py-4">
+              <div class="text-xs text-amber-400 font-semibold uppercase tracking-wide mb-2">
+                {{ disciplineStore.activeDisciplineName }}
               </div>
-              <div v-if="selectedStage" class="text-xs text-gray-500 mt-1">
-                {{ stageMeta(selectedStage) }}
+
+              <div v-if="selectedStage" class="space-y-0.5 mb-3">
+                <div
+                  v-for="(line, i) in stageNameLines(selectedStage)"
+                  :key="i"
+                  :class="i === 0 ? 'text-white font-semibold text-sm leading-snug' : 'text-gray-300 text-xs leading-snug'"
+                >{{ line }}</div>
+              </div>
+              <div v-else class="text-gray-500 text-sm mb-3">–</div>
+
+              <div v-if="selectedStage" class="border-t border-gray-700 pt-2 flex flex-wrap gap-x-4 gap-y-1">
+                <span
+                  v-for="item in stageInfoItems(selectedStage)"
+                  :key="item"
+                  class="text-xs text-gray-400"
+                >{{ item }}</span>
               </div>
             </div>
 
@@ -204,12 +217,25 @@ function firstLine(name) {
   return (name ?? '').split('\n')[0]
 }
 
-function stageMeta(stage) {
-  if (!stage) return ''
-  const parts = []
-  if (stage.duration) parts.push(fmtSeconds(stage.duration))
-  if (stage.repetitions > 1) parts.push(`${stage.repetitions}×`)
-  return parts.join(' · ')
+function stageNameLines(stage) {
+  return (stage?.name ?? '').split('\n').map(l => l.trim()).filter(l => l)
+}
+
+function stageInfoItems(stage) {
+  if (!stage) return []
+  const items = []
+  if (stage.prepTime > 0) items.push(`Vorbereitung: ${stage.prepTime}s`)
+  items.push(`Zeitlimit: ${fmtSeconds(stage.duration)}`)
+  if (stage.repetitions > 1) {
+    items.push(`${stage.repetitions}x Wiederholung`)
+    if (stage.pauseDuration > 0) items.push(`Pause: ${stage.pauseDuration}s`)
+  }
+  const signals = []
+  if (stage.soundAtStart) signals.push('Start')
+  if (stage.soundAtEnd) signals.push('Ende')
+  if (signals.length) items.push(`Signal: ${signals.join(' & ')}`)
+  if (stage.pauseAfter) items.push('RO startet weiter')
+  return items
 }
 
 // Disziplin laden wenn sie sich ändert
