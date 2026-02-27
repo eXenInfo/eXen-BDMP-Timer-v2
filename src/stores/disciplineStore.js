@@ -22,7 +22,9 @@ export const useDisciplineStore = defineStore('disciplines', () => {
   // EPP ist immer verfügbar, wird nicht in disciplines gespeichert
   const eppDiscipline = EPP_DISCIPLINE
 
-  const disciplineNames = computed(() => Object.keys(disciplines.value))
+  const disciplineNames = computed(() =>
+    Object.keys(disciplines.value).sort((a, b) => a.localeCompare(b, 'de'))
+  )
 
   const activeDiscipline = computed(() => {
     if (!activeDisciplineName.value) return null
