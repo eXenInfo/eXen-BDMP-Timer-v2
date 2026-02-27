@@ -1,11 +1,11 @@
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useTimerStore } from '../stores/timerStore.js'
 import { useAudio } from './useAudio.js'
 import { useSettingsStore } from '../stores/settingsStore.js'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 
 async function vibrate() {
-  try { await Haptics.impact({ style: ImpactStyle.Medium }) } catch {}
+  try { await Haptics.impact({ style: ImpactStyle.Medium }) } catch (_e) { /* not available outside native */ }
 }
 
 export function useTimer() {

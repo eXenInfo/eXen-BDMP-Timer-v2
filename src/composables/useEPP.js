@@ -5,7 +5,7 @@ import { useSettingsStore } from '../stores/settingsStore.js'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 
 async function vibrate() {
-  try { await Haptics.impact({ style: ImpactStyle.Medium }) } catch {}
+  try { await Haptics.impact({ style: ImpactStyle.Medium }) } catch (_e) { /* not available outside native */ }
 }
 
 export function useEPP() {

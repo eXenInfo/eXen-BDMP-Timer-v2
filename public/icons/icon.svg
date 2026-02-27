@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background (full bleed, dark — works for maskable cropping to any shape) -->
+  <rect width="512" height="512" fill="#111827"/>
+
+  <!-- Crown stem (connects button to watch body) -->
+  <rect x="232" y="94" width="48" height="52" rx="8" fill="#f59e0b"/>
+
+  <!-- Crown top-button (start/stop) -->
+  <rect x="196" y="68" width="120" height="40" rx="20" fill="#f59e0b"/>
+
+  <!-- Stopwatch outer ring -->
+  <circle cx="256" cy="288" r="172" fill="#111827" stroke="#f59e0b" stroke-width="20"/>
+
+  <!-- Inner face -->
+  <circle cx="256" cy="288" r="144" fill="#1f2937"/>
+
+  <!-- Major tick at 12 o'clock -->
+  <line x1="256" y1="152" x2="256" y2="186" stroke="#f59e0b" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Minor ticks at 3, 6, 9 -->
+  <line x1="420" y1="288" x2="392" y2="288" stroke="#f59e0b" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="424" x2="256" y2="396" stroke="#f59e0b" stroke-width="8" stroke-linecap="round"/>
+  <line x1="92"  y1="288" x2="120" y2="288" stroke="#f59e0b" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Minute hand (pointing to ~1 o'clock — "starting position") -->
+  <line x1="256" y1="288" x2="318" y2="184" stroke="#f59e0b" stroke-width="14" stroke-linecap="round"/>
+
+  <!-- Center pivot dot -->
+  <circle cx="256" cy="288" r="14" fill="#f59e0b"/>
+</svg>
