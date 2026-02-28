@@ -127,12 +127,14 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '../stores/settingsStore.js'
 import { useDisciplineStore } from '../stores/disciplineStore.js'
 import { useAudio } from '../composables/useAudio.js'
 
 const { t } = useI18n()
+const router = useRouter()
 const settingsStore = useSettingsStore()
 const disciplineStore = useDisciplineStore()
 
@@ -156,7 +158,7 @@ function doReset() {
 
 function resetOnboarding() {
   settingsStore.resetOnboarding()
-  showToast(t('settings.toastOnboarding'))
+  // App.vue watch reagiert und navigiert automatisch zu /home
 }
 
 function showToast(msg) {

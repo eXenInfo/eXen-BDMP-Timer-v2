@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+/* ══════════════════════════════════════════════════════════════════
+   eXen CD/CI — Farb-Overrides
+   Primary   #155f5b  (dunkles Teal)
+   Secondary #30922b  (Waldgrün)     → ersetzt Tailwind green-600/700
+   Tertiary  #78b638  (Olivgrün)     → ersetzt Tailwind amber-500
+   ══════════════════════════════════════════════════════════════════ */
+@theme {
+  /* Amber → eXen Olivgrün */
+  --color-amber-200: #d4f08a;
+  --color-amber-300: #b3dc5c;
+  --color-amber-400: #96cc3e;
+  --color-amber-500: #78b638;
+  --color-amber-600: #609230;
+  --color-amber-700: #4c7126;
+  --color-amber-800: #375219;
+  --color-amber-900: #22360f;
+  --color-amber-950: #111b08;
+
+  /* Green → eXen Waldgrün */
+  --color-green-400: #55cc50;
+  --color-green-500: #3db038;
+  --color-green-600: #30922b;
+  --color-green-700: #267023;
+  --color-green-800: #1c521a;
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
 }
