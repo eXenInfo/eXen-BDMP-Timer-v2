@@ -3,6 +3,8 @@
     <RouterView />
     <!-- BottomNav nur außerhalb der HomeView anzeigen -->
     <BottomNav v-if="!isHome" />
+    <!-- Globaler PWA Update-Toast (zeigt sich automatisch bei neuer Version) -->
+    <PWAUpdateToast />
   </div>
 </template>
 
@@ -11,6 +13,7 @@ import { computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useSettingsStore } from './stores/settingsStore.js'
 import BottomNav from './components/ui/BottomNav.vue'
+import PWAUpdateToast from './components/ui/PWAUpdateToast.vue'
 
 const router        = useRouter()
 const route         = useRoute()

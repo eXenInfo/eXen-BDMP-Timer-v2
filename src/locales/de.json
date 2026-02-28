@@ -62,13 +62,13 @@
     "roStop": "RO-STOP"
   },
   "eppStations": {
-    "st1":  "10 Schuss (2×5 mit Magazinwechsel). FIXE ZEIT — läuft automatisch. Startsignal 2 Töne, Warnsignal bei 2 Sek. Restzeit.",
-    "st2":  "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
-    "st3":  "10 Schuss (5 links, 5 rechts am Pfosten). RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
-    "st4":  "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
+    "st1": "10 Schuss (2×5 mit Magazinwechsel). FIXE ZEIT — läuft automatisch. Startsignal 2 Töne, Warnsignal bei 2 Sek. Restzeit.",
+    "st2": "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
+    "st3": "10 Schuss (5 links, 5 rechts am Pfosten). RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
+    "st4": "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
     "st5a": "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
     "st5b": "10 Schuss. FIXE ZEIT — läuft automatisch. Startsignal 2 Töne, Warnsignal bei 2 Sek. Restzeit.",
-    "st6":  "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten. GESAMTZEIT läuft bis zuletzt."
+    "st6": "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten. GESAMTZEIT läuft bis zuletzt."
   },
   "phases": {
     "stations": "Stationen",
@@ -163,7 +163,8 @@
     "cancel": "Abbrechen",
     "reset": "Zurücksetzen",
     "toastReset": "Standard-Disziplinen zurückgesetzt",
-    "toastOnboarding": "Tutorial wird beim nächsten Start angezeigt"
+    "toastOnboarding": "Tutorial wird beim nächsten Start angezeigt",
+    "installSection": "Installation"
   },
   "help": {
     "title": "Hilfe",
@@ -194,5 +195,15 @@
     "faq4a": "Ja. Die App wird als PWA installiert und funktioniert vollständig offline — auch ohne Internetzugang auf dem Schießstand.",
     "faq5q": "Kann ich den Timer unterbrechen?",
     "faq5a": "Bei normalen Disziplinen: \"Unterbrechen\" drücken. Bei EPP: Nur bei offenen Stationen (RO-gestoppt) über \"Störung / Pause\" — dieser stoppt auch die Gesamtzeit."
+  },
+  "pwa": {
+    "updateAvailable": "Neue Version verfügbar",
+    "reload": "Aktualisieren",
+    "dismiss": "Später",
+    "installTitle": "Als App installieren",
+    "installDesc": "Für den besten Schießstand-Einsatz direkt auf dem Homescreen speichern.",
+    "installBtn": "Installieren",
+    "iosHint": "Tippe auf Teilen → „Zum Home-Bildschirm hinzufügen“",
+    "alreadyInstalled": "App bereits installiert ✓"
   }
 }

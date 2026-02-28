@@ -58,13 +58,43 @@
       </div>
 
       <!-- ── CTA: Zur App ───────────────────────────────────────────── -->
-      <button
-        @click="enter"
-        class="w-full max-w-xs py-5 rounded-2xl font-black text-xl text-white shadow-lg transition-transform active:scale-95"
-        style="background-color: #30922b"
-      >
-        {{ t('home.cta') }} →
-      </button>
+      <div class="w-full max-w-xs space-y-3">
+        <button
+          @click="enter"
+          class="w-full py-5 rounded-2xl font-black text-xl text-white shadow-lg transition-transform active:scale-95"
+          style="background-color: #30922b"
+        >
+          {{ t('home.cta') }} →
+        </button>
+
+        <!-- Install-Banner: Chrome/Edge/Android -->
+        <button
+          v-if="isInstallable"
+          @click="install"
+          class="w-full py-3 rounded-2xl font-bold text-sm text-white border border-green-800 transition-transform active:scale-95 flex items-center justify-center gap-2"
+          style="background-color: rgba(48,146,43,0.15)"
+        >
+          <span>📲</span>
+          <span>{{ t('pwa.installBtn') }}</span>
+        </button>
+
+        <!-- Install-Hinweis: iOS / Safari -->
+        <div
+          v-else-if="isIOS && !isInstalled"
+          class="w-full px-4 py-3 rounded-2xl text-xs text-gray-400 text-center border border-gray-700"
+        >
+          {{ t('pwa.iosHint') }}
+        </div>
+
+        <!-- Bereits installiert -->
+        <div
+          v-else-if="isInstalled"
+          class="text-center text-xs font-medium"
+          style="color: #78b638"
+        >
+          {{ t('pwa.alreadyInstalled') }}
+        </div>
+      </div>
 
     </div>
 
@@ -82,10 +112,12 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '../stores/settingsStore.js'
+import { usePWAInstall } from '../composables/usePWAInstall.js'
 
 const { t } = useI18n()
 const router        = useRouter()
 const settingsStore = useSettingsStore()
+const { isInstallable, isInstalled, isIOS, install } = usePWAInstall()
 
 const features = computed(() => [
   { key: 'f1', icon: '🎯', text: t('home.feature1') },

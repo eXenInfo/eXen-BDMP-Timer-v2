@@ -86,6 +86,48 @@
       </div>
     </section>
 
+    <!-- Installation -->
+    <section class="mb-6">
+      <div class="text-xs uppercase tracking-widest text-gray-500 mb-3">{{ t('settings.installSection') }}</div>
+      <div class="bg-gray-800 rounded-xl overflow-hidden">
+
+        <!-- Chrome/Edge/Android: nativer Install-Prompt -->
+        <button
+          v-if="isInstallable"
+          @click="install"
+          class="w-full text-left px-4 py-4 flex items-center gap-3 hover:bg-gray-700 transition-colors"
+        >
+          <span class="text-xl">📲</span>
+          <div>
+            <div class="text-sm font-medium text-white">{{ t('pwa.installTitle') }}</div>
+            <div class="text-xs text-gray-500">{{ t('pwa.installDesc') }}</div>
+          </div>
+        </button>
+
+        <!-- iOS: manuelle Anleitung -->
+        <div
+          v-else-if="isIOS && !isInstalled"
+          class="px-4 py-4 flex items-start gap-3"
+        >
+          <span class="text-xl shrink-0">📲</span>
+          <div>
+            <div class="text-sm font-medium text-white">{{ t('pwa.installTitle') }}</div>
+            <div class="text-xs text-gray-500 mt-0.5">{{ t('pwa.iosHint') }}</div>
+          </div>
+        </div>
+
+        <!-- Bereits installiert (oder Desktop ohne Prompt) -->
+        <div
+          v-else
+          class="px-4 py-4 flex items-center gap-3"
+        >
+          <span class="text-xl">✅</span>
+          <div class="text-sm font-medium text-white">{{ t('pwa.alreadyInstalled') }}</div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- Info -->
     <section>
       <div class="text-xs uppercase tracking-widest text-gray-500 mb-3">{{ t('settings.infoSection') }}</div>
@@ -132,11 +174,13 @@ import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '../stores/settingsStore.js'
 import { useDisciplineStore } from '../stores/disciplineStore.js'
 import { useAudio } from '../composables/useAudio.js'
+import { usePWAInstall } from '../composables/usePWAInstall.js'
 
 const { t } = useI18n()
 const router = useRouter()
 const settingsStore = useSettingsStore()
 const disciplineStore = useDisciplineStore()
+const { isInstallable, isInstalled, isIOS, install } = usePWAInstall()
 
 const showResetConfirm = ref(false)
 const toast = ref('')

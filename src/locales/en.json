@@ -163,7 +163,8 @@
     "cancel": "Cancel",
     "reset": "Reset",
     "toastReset": "Default disciplines reset",
-    "toastOnboarding": "Tutorial will be shown on next start"
+    "toastOnboarding": "Tutorial will be shown on next start",
+    "installSection": "Installation"
   },
   "help": {
     "title": "Help",
@@ -194,5 +195,15 @@
     "faq4a": "Yes. The app is installed as a PWA and works fully offline — even without internet access at the shooting range.",
     "faq5q": "Can I pause the timer?",
     "faq5a": "For normal disciplines: press \"Pause\". For EPP: only at open stations (RO-stopped) via \"Malfunction / Pause\" — this also stops the total time."
+  },
+  "pwa": {
+    "updateAvailable": "New version available",
+    "reload": "Reload",
+    "dismiss": "Later",
+    "installTitle": "Install as App",
+    "installDesc": "Save to your home screen for the best experience at the range.",
+    "installBtn": "Install",
+    "iosHint": "Tap Share → “Add to Home Screen”",
+    "alreadyInstalled": "App already installed ✓"
   }
 }
