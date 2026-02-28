@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen pb-20 bg-gray-900">
+  <div class="flex flex-col min-h-screen pb-20 bg-gray-900 overflow-y-auto">
 
     <!-- Kein Disziplin gewählt -->
     <div v-if="!discipline" class="flex-1 flex flex-col items-center justify-center gap-4 px-6 text-center">
@@ -24,7 +24,7 @@
 
       <!-- EPP-Ansicht -->
       <template v-if="isEpp">
-        <div class="px-4 flex-1">
+        <div class="px-4">
           <EPPTimer
             :phase="eppComposable.currentPhase.value"
             :current-index="timerStore.currentStageIndex"
@@ -181,6 +181,7 @@ import { useEPP } from '../composables/useEPP.js'
 import { useAudio } from '../composables/useAudio.js'
 import { useSettingsStore } from '../stores/settingsStore.js'
 import TimerDisplay from '../components/timer/TimerDisplay.vue'
+import TimerControls from '../components/timer/TimerControls.vue'
 import PhaseProgress from '../components/timer/PhaseProgress.vue'
 import EPPTimer from '../components/timer/EPPTimer.vue'
 

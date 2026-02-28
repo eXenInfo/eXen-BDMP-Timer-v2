@@ -292,39 +292,39 @@ export const EPP_DISCIPLINE = {
   prepTime: 3,
   phases: [
     {
-      station: "Station 1", distanz: "7 m", anschlag: "Stehend",
+      station: "Station 1", distanz: "7 m", anschlag: "Stehend frei",
       zeitLimit: 15, pausable: false, warnSignal: 13, stoppSignalDauer: 2,
-      beschreibung: "2x5 Schuss, Magazinwechsel. Zeit ist fix."
+      beschreibung: "10 Schuss (2×5 mit Magazinwechsel). FIXE ZEIT — läuft automatisch. Startsignal 2 Töne, Warnsignal bei 2 Sek. Restzeit."
     },
     {
-      station: "Station 2", distanz: "30 m", anschlag: "Liegend",
+      station: "Station 2", distanz: "30 m", anschlag: "Liegend frei",
       zeitLimit: 0, pausable: true,
-      beschreibung: "Zeit wird durch RO gestoppt."
+      beschreibung: "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten."
     },
     {
       station: "Station 3", distanz: "25 m", anschlag: "Stehend am Pfosten",
       zeitLimit: 0, pausable: true,
-      beschreibung: "Zeit wird durch RO gestoppt."
+      beschreibung: "10 Schuss (5 links, 5 rechts am Pfosten). RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten."
     },
     {
-      station: "Station 4", distanz: "20 m", anschlag: "Sitzend",
+      station: "Station 4", distanz: "20 m", anschlag: "Sitzend frei",
       zeitLimit: 0, pausable: true,
-      beschreibung: "Zeit wird durch RO gestoppt."
+      beschreibung: "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten."
     },
     {
-      station: "Station 5a", distanz: "15 m", anschlag: "Kniend",
+      station: "Station 5a", distanz: "15 m", anschlag: "Kniend frei",
       zeitLimit: 0, pausable: true,
-      beschreibung: "Zeit wird durch RO gestoppt."
+      beschreibung: "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten."
     },
     {
-      station: "Station 5b", distanz: "15 m", anschlag: "Stehend",
+      station: "Station 5b", distanz: "15 m", anschlag: "Stehend frei",
       zeitLimit: 10, pausable: false, warnSignal: 8, stoppSignalDauer: 2,
-      beschreibung: "Zeit ist fix."
+      beschreibung: "10 Schuss. FIXE ZEIT — läuft automatisch. Startsignal 2 Töne, Warnsignal bei 2 Sek. Restzeit."
     },
     {
-      station: "Station 6", distanz: "10 m", anschlag: "Stehend",
+      station: "Station 6", distanz: "10 m", anschlag: "Stehend frei",
       zeitLimit: 0, pausable: true,
-      beschreibung: "Zeit wird durch RO gestoppt."
+      beschreibung: "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten. GESAMTZEIT läuft bis zuletzt."
     }
   ]
 }

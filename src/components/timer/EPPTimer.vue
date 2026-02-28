@@ -17,21 +17,19 @@
 
     <!-- Aktuelle Station Info -->
     <div v-if="phase" class="w-full bg-gray-800 rounded-xl px-4 py-3">
-      <div class="text-amber-400 font-bold text-lg">{{ phase.station }}</div>
-      <div class="text-gray-300 text-sm mt-1">
-        {{ phase.anschlag }} · {{ phase.distanz }}
-      </div>
-      <div class="text-gray-500 text-xs mt-1">{{ phase.beschreibung }}</div>
-
-      <!-- Fix vs. Offen Badge -->
-      <div class="mt-2">
+      <div class="flex items-start justify-between gap-2">
+        <div class="text-amber-400 font-bold text-lg">{{ phase.station }}</div>
         <span
-          class="text-xs px-2 py-0.5 rounded-full font-medium"
-          :class="phase.zeitLimit > 0 ? 'bg-blue-900 text-blue-300' : 'bg-amber-900 text-amber-300'"
+          class="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 mt-1"
+          :class="phase.zeitLimit > 0 ? 'bg-blue-900/80 text-blue-300' : 'bg-amber-900/80 text-amber-300'"
         >
-          {{ phase.zeitLimit > 0 ? 'Fixe Zeit' : 'RO-gestoppt' }}
+          {{ phase.zeitLimit > 0 ? 'FIXE ZEIT' : 'RO-STOP' }}
         </span>
       </div>
+      <div class="text-gray-200 text-sm mt-0.5 font-medium">
+        {{ phase.anschlag }} · {{ phase.distanz }}
+      </div>
+      <div class="text-gray-400 text-xs mt-2 leading-relaxed">{{ phase.beschreibung }}</div>
     </div>
 
     <!-- Stations-Timer -->
