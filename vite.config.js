@@ -15,7 +15,7 @@ export default defineConfig({
         name: 'eXen-BDMP-Timer',
         short_name: 'eXenTimer',
         description: 'Ein anpassbarer Timer für dynamische Schießdisziplinen.',
-        theme_color: '#111827',
+        theme_color: '#155f5b',
         background_color: '#111827',
         display: 'standalone',
         orientation: 'portrait',

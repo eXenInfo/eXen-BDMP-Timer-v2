@@ -75,7 +75,7 @@ const ringColor = computed(() => {
     case 'prep':
     case 'epp_prep':          return '#3b82f6'  // blue-500
     case 'running':
-    case 'epp_running_fixed': return '#30922b'  // green-500
+    case 'epp_running_fixed': return '#1d7a74'  // eXen Brand-Teal
     case 'epp_running_open':  return '#78b638'  // amber-500
     case 'paused':            return '#f97316'  // orange-500
     case 'rep_pause':         return '#eab308'  // yellow-500

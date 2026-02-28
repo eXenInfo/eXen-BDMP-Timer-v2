@@ -2,7 +2,7 @@
   <div class="min-h-screen flex flex-col bg-gray-900 select-none overflow-hidden">
 
     <!-- eXen Markenstreifen oben -->
-    <div class="h-1 w-full flex-shrink-0" style="background: linear-gradient(90deg, #155f5b 0%, #30922b 50%, #78b638 100%)"></div>
+    <div class="h-1 w-full flex-shrink-0" style="background: linear-gradient(90deg, #155f5b 0%, #1d7a74 50%, #78b638 100%)"></div>
 
     <!-- Hauptinhalt -->
     <div class="flex-1 flex flex-col items-center justify-center px-8 gap-8 py-10 min-h-0">
@@ -43,7 +43,7 @@
           @click="settingsStore.setLocale('de')"
           class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-colors"
           :class="settingsStore.locale === 'de' ? 'text-white' : 'text-gray-500'"
-          :style="settingsStore.locale === 'de' ? 'background-color: #30922b' : ''"
+          :style="settingsStore.locale === 'de' ? 'background-color: #1d7a74' : ''"
         >
           🇩🇪 Deutsch
         </button>
@@ -51,7 +51,7 @@
           @click="settingsStore.setLocale('en')"
           class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-colors"
           :class="settingsStore.locale === 'en' ? 'text-white' : 'text-gray-500'"
-          :style="settingsStore.locale === 'en' ? 'background-color: #30922b' : ''"
+          :style="settingsStore.locale === 'en' ? 'background-color: #1d7a74' : ''"
         >
           🇬🇧 English
         </button>
@@ -62,7 +62,7 @@
         <button
           @click="enter"
           class="w-full py-5 rounded-2xl font-black text-xl text-white shadow-lg transition-transform active:scale-95"
-          style="background-color: #30922b"
+          style="background-color: #1d7a74"
         >
           {{ t('home.cta') }} →
         </button>

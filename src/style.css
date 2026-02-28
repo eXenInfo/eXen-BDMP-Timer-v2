@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════════
-   eXen CD/CI — Farb-Overrides
-   Primary   #155f5b  (dunkles Teal)
-   Secondary #30922b  (Waldgrün)     → ersetzt Tailwind green-600/700
-   Tertiary  #78b638  (Olivgrün)     → ersetzt Tailwind amber-500
+   eXen CD/CI — Farb-Overrides (aus Logo extrahiert)
+   Deep Teal   #155f5b  → Hintergrund, Gradients
+   Brand Teal  #1d7a74  → Zahnrad / "eXen"-Text im Logo (primäre Aktionsfarbe)
+   Leaf Green  #78b638  → Blatt-Akzent (sekundäre Akzentfarbe)
    ══════════════════════════════════════════════════════════════════ */
 @theme {
-  /* Amber → eXen Olivgrün */
+  /* Amber → eXen Leaf-Grün (Blatt-Akzent) */
   --color-amber-200: #d4f08a;
   --color-amber-300: #b3dc5c;
   --color-amber-400: #96cc3e;
@@ -18,12 +18,14 @@
   --color-amber-900: #22360f;
   --color-amber-950: #111b08;
 
-  /* Green → eXen Waldgrün */
-  --color-green-400: #55cc50;
-  --color-green-500: #3db038;
-  --color-green-600: #30922b;
-  --color-green-700: #267023;
-  --color-green-800: #1c521a;
+  /* Green → eXen Brand-Teal (Zahnrad-Farbe aus Logo) */
+  --color-green-300: #40c4bc;
+  --color-green-400: #2dada6;
+  --color-green-500: #249690;
+  --color-green-600: #1d7a74;
+  --color-green-700: #166460;
+  --color-green-800: #0f4d49;
+  --color-green-900: #083330;
 }
 
 * {
