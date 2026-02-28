@@ -40,13 +40,16 @@
 
     <!-- Wiederholung -->
     <div v-if="repetition && totalReps > 1" class="text-gray-500 text-sm">
-      Durchgang {{ repetition }} / {{ totalReps }}
+      {{ t('timer.round', { n: repetition, total: totalReps }) }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   seconds: { type: Number, default: 0 },
@@ -118,15 +121,15 @@ const labelColor = computed(() => {
 
 const phaseLabel = computed(() => {
   switch (props.state) {
-    case 'idle':              return 'Bereit'
+    case 'idle':              return t('timer.status.ready')
     case 'prep':
-    case 'epp_prep':          return 'Vorbereitung'
+    case 'epp_prep':          return t('timer.status.prep')
     case 'running':
-    case 'epp_running_fixed': return 'Läuft'
-    case 'epp_running_open':  return props.countUp ? 'Aktiv' : 'Läuft'
-    case 'rep_pause':         return 'Pause'
-    case 'epp_paused':        return 'Störung / Pause'
-    case 'finished':          return 'Beendet'
+    case 'epp_running_fixed': return t('timer.status.running')
+    case 'epp_running_open':  return props.countUp ? t('timer.status.active') : t('timer.status.running')
+    case 'rep_pause':         return t('timer.status.paused')
+    case 'epp_paused':        return t('timer.status.paused_epp')
+    case 'finished':          return t('timer.status.finished')
     default:                  return ''
   }
 })

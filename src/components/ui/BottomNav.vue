@@ -22,31 +22,36 @@
 </template>
 
 <script setup>
-const items = [
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+const items = computed(() => [
   {
     to: '/timer',
-    label: 'Timer',
+    label: t('nav.timer'),
     paths: ['M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
   },
   {
     to: '/disciplines',
-    label: 'Disziplinen',
+    label: t('nav.disciplines'),
     paths: ['M3.75 12h16.5m-16.5 5.25h16.5m-16.5-10.5h16.5'],
   },
   {
     to: '/settings',
-    label: 'Einstellungen',
+    label: t('nav.settings'),
     paths: ['M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75'],
   },
   {
     to: '/help',
-    label: 'Hilfe',
+    label: t('nav.help'),
     paths: [
       'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
       'M12 17.25h.008v.008H12v-.008Z',
     ],
   },
-]
+])
 </script>
 
 <style scoped>

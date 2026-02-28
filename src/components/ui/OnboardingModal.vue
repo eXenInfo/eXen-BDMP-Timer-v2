@@ -25,13 +25,13 @@
             @click="step--"
             class="flex-1 bg-gray-700 text-gray-300 font-bold py-3 rounded-xl"
           >
-            Zurück
+            {{ t('onboarding.back') }}
           </button>
           <button
             @click="next"
             class="flex-1 bg-amber-500 text-white font-bold py-3 rounded-xl"
           >
-            {{ isLast ? 'Los gehts!' : 'Weiter' }}
+            {{ isLast ? t('onboarding.start') : t('onboarding.next') }}
           </button>
         </div>
       </div>
@@ -41,30 +41,32 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const emit = defineEmits(['done'])
 
-const steps = [
+const steps = computed(() => [
   {
     icon: '📋',
-    title: 'Disziplin wählen',
-    text: 'Wähle unter "Disziplinen" eine vorhandene Disziplin oder erstelle deine eigene.'
+    title: t('onboarding.step1Title'),
+    text: t('onboarding.step1Text')
   },
   {
     icon: '⏱️',
-    title: 'Timer starten',
-    text: 'Drücke "Start" auf dem Timer-Bildschirm. Der Timer führt dich automatisch durch alle Phasen.'
+    title: t('onboarding.step2Title'),
+    text: t('onboarding.step2Text')
   },
   {
     icon: '🔊',
-    title: 'Audiosignale',
-    text: 'Akustische Signale zeigen Start und Ende jeder Phase an. Nutze einen externen Lautsprecher für den besten Klang.'
+    title: t('onboarding.step3Title'),
+    text: t('onboarding.step3Text')
   }
-]
+])
 
 const step = ref(0)
-const currentStep = computed(() => steps[step.value])
-const isLast = computed(() => step.value === steps.length - 1)
+const currentStep = computed(() => steps.value[step.value])
+const isLast = computed(() => step.value === steps.value.length - 1)
 
 function next() {
   if (isLast.value) emit('done')

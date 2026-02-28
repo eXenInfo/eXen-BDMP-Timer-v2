@@ -2,19 +2,19 @@
   <div class="bg-gray-800 rounded-xl p-4 space-y-4">
     <!-- Phasenname -->
     <div>
-      <label class="text-xs text-gray-400 uppercase tracking-wider">Bezeichnung</label>
+      <label class="text-xs text-gray-400 uppercase tracking-wider">{{ t('phaseEditor.nameLabel') }}</label>
       <textarea
         v-model="local.name"
         rows="2"
         class="w-full mt-1 bg-gray-700 rounded-lg px-3 py-2 text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-400"
-        placeholder="z.B. 5 Schuss, 25 Meter, stehend"
+        :placeholder="t('phaseEditor.namePlaceholder')"
       />
     </div>
 
     <!-- Vorbereitungszeit & Dauer -->
     <div class="grid grid-cols-2 gap-3">
       <div>
-        <label class="text-xs text-gray-400 uppercase tracking-wider">Vorlaufzeit</label>
+        <label class="text-xs text-gray-400 uppercase tracking-wider">{{ t('phaseEditor.prepTime') }}</label>
         <div class="flex items-center gap-2 mt-1">
           <input
             type="number" min="0" max="60"
@@ -25,7 +25,7 @@
         </div>
       </div>
       <div>
-        <label class="text-xs text-gray-400 uppercase tracking-wider">Dauer</label>
+        <label class="text-xs text-gray-400 uppercase tracking-wider">{{ t('phaseEditor.duration') }}</label>
         <div class="flex items-center gap-2 mt-1">
           <input
             type="number" min="1" max="3600"
@@ -41,7 +41,7 @@
     <!-- Wiederholungen & Pause -->
     <div class="grid grid-cols-2 gap-3">
       <div>
-        <label class="text-xs text-gray-400 uppercase tracking-wider">Wiederholungen</label>
+        <label class="text-xs text-gray-400 uppercase tracking-wider">{{ t('phaseEditor.repetitions') }}</label>
         <input
           type="number" min="1" max="99"
           v-model.number="local.repetitions"
@@ -49,7 +49,7 @@
         />
       </div>
       <div>
-        <label class="text-xs text-gray-400 uppercase tracking-wider">Pause zw. Wdh.</label>
+        <label class="text-xs text-gray-400 uppercase tracking-wider">{{ t('phaseEditor.pauseBetween') }}</label>
         <div class="flex items-center gap-2 mt-1">
           <input
             type="number" min="0" max="300"
@@ -65,27 +65,27 @@
     <div class="grid grid-cols-2 gap-3">
       <label class="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" v-model="local.soundAtStart" class="accent-amber-400" />
-        <span class="text-sm text-gray-300">Signal bei Start</span>
+        <span class="text-sm text-gray-300">{{ t('phaseEditor.signalAtStart') }}</span>
       </label>
       <label class="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" v-model="local.soundAtEnd" class="accent-amber-400" />
-        <span class="text-sm text-gray-300">Signal bei Ende</span>
+        <span class="text-sm text-gray-300">{{ t('phaseEditor.signalAtEnd') }}</span>
       </label>
     </div>
 
     <!-- Pause nach Phase -->
     <label class="flex items-center gap-2 cursor-pointer">
       <input type="checkbox" v-model="local.pauseAfter" class="accent-amber-400" />
-      <span class="text-sm text-gray-300">Manuelle Pause nach dieser Phase</span>
+      <span class="text-sm text-gray-300">{{ t('phaseEditor.manualPauseAfter') }}</span>
     </label>
 
     <!-- Buttons -->
     <div class="flex gap-2 pt-2">
       <button @click="$emit('save', local)" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded-lg text-sm transition-colors">
-        Speichern
+        {{ t('phaseEditor.save') }}
       </button>
       <button @click="$emit('cancel')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-2 rounded-lg text-sm transition-colors">
-        Abbrechen
+        {{ t('phaseEditor.cancel') }}
       </button>
     </div>
   </div>
@@ -93,6 +93,9 @@
 
 <script setup>
 import { reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   phase: {

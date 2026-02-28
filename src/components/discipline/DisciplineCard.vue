@@ -31,7 +31,7 @@
         {{ name }}
       </div>
       <div class="text-xs text-gray-500 mt-0.5">
-        {{ isEpp ? '7 Stationen · EPP' : `${stageCount} ${stageCount === 1 ? 'Match' : 'Matches'}` }}
+        {{ isEpp ? t('disciplineCard.eppSubtitle') : `${stageCount} ${stageCount === 1 ? t('disciplineCard.matchSingular') : t('disciplineCard.matchPlural')}` }}
       </div>
     </div>
 
@@ -53,6 +53,10 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 defineProps({
   name: { type: String, required: true },
   stageCount: { type: Number, default: 0 },

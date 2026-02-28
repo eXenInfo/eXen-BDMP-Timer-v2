@@ -15,7 +15,7 @@
       @click="$emit('pause')"
       class="w-full py-4 px-6 rounded-xl font-bold text-lg text-white transition-all duration-150 active:scale-95 shadow-md bg-yellow-600 active:bg-yellow-700"
     >
-      Unterbrechen
+      {{ t('timer.pause_btn') }}
     </button>
 
     <!-- EPP: Nächste Station (nur open-state) -->
@@ -34,7 +34,7 @@
       class="w-full py-4 px-6 rounded-xl font-bold text-lg text-white transition-all duration-150 active:scale-95 shadow-md"
       :class="isPaused ? 'bg-green-600 active:bg-green-700' : 'bg-yellow-600 active:bg-yellow-700'"
     >
-      {{ isPaused ? 'Fortsetzen' : 'Störung / Pause' }}
+      {{ isPaused ? t('timer.resume') : t('timer.interrupt') }}
     </button>
 
     <!-- Reset -->
@@ -43,13 +43,16 @@
       @click="$emit('reset')"
       class="w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-150 active:scale-95 shadow-md bg-gray-700 active:bg-gray-600 text-gray-300"
     >
-      Zurücksetzen
+      {{ t('timer.reset') }}
     </button>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   state: { type: String, default: 'idle' },
@@ -80,12 +83,12 @@ const showReset = computed(() =>
 )
 
 const startLabel = computed(() => {
-  if (props.state === 'finished') return 'Neu starten'
-  if (props.isEpp) return 'Achtung... (Start)'
-  return 'Start'
+  if (props.state === 'finished') return t('timer.restart')
+  if (props.isEpp) return t('timer.startStation')
+  return t('timer.start')
 })
 
 const eppNextLabel = computed(() =>
-  props.isLastStation ? 'Match beenden' : 'Station beenden'
+  props.isLastStation ? t('timer.endMatch') : t('timer.endStation')
 )
 </script>

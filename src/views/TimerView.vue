@@ -4,12 +4,12 @@
     <!-- Kein Disziplin gewählt -->
     <div v-if="!discipline" class="flex-1 flex flex-col items-center justify-center gap-4 px-6 text-center">
       <div class="text-6xl">⏱️</div>
-      <h2 class="text-xl font-bold text-white">Keine Disziplin gewählt</h2>
-      <p class="text-gray-400 text-sm">Wähle zunächst eine Disziplin unter "Disziplinen".</p>
+      <h2 class="text-xl font-bold text-white">{{ t('timer.noDiscipline') }}</h2>
+      <p class="text-gray-400 text-sm">{{ t('timer.noDisciplineHint') }}</p>
       <RouterLink to="/disciplines"
         class="mt-2 bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-3 rounded-xl transition-colors"
       >
-        Zur Disziplinauswahl
+        {{ t('timer.goToDisciplines') }}
       </RouterLink>
     </div>
 
@@ -18,7 +18,7 @@
 
       <!-- Header: Disziplinname -->
       <div class="px-4 pt-6 pb-2">
-        <div class="text-xs uppercase tracking-widest text-gray-500 mb-1">Aktive Disziplin</div>
+        <div class="text-xs uppercase tracking-widest text-gray-500 mb-1">{{ t('timer.activeDiscipline') }}</div>
         <h1 class="text-lg font-bold text-amber-400 leading-tight">{{ disciplineStore.activeDisciplineName }}</h1>
       </div>
 
@@ -78,7 +78,7 @@
               {{ firstLine(timer.currentStage.value.name) }}
             </div>
             <div v-if="!isSingleMode && timer.nextStage.value" class="text-xs text-gray-500 mt-1">
-              Nächstes: {{ firstLine(timer.nextStage.value.name) }}
+              {{ t('timer.nextStage', { name: firstLine(timer.nextStage.value.name) }) }}
             </div>
           </div>
         </div>
@@ -116,7 +116,7 @@
               @click="handleStart"
               class="w-full py-4 px-6 rounded-xl font-bold text-lg text-white bg-green-600 active:bg-green-700 transition-all active:scale-95 shadow-md"
             >
-              Match starten
+              {{ t('timer.matchStart') }}
             </button>
 
             <!-- Zurücksetzen (nur wenn nicht am Anfang) -->
@@ -125,7 +125,7 @@
               @click="selectedMatchIndex = 0"
               class="w-full py-3 px-6 rounded-xl font-medium text-sm text-gray-400 bg-gray-800 active:bg-gray-700 transition-colors"
             >
-              Zum ersten Match
+              {{ t('timer.firstMatch') }}
             </button>
           </div>
 
@@ -136,7 +136,7 @@
               @click="timer.pause()"
               class="w-full py-4 px-6 rounded-xl font-bold text-lg text-white bg-yellow-600 active:bg-yellow-700 transition-all active:scale-95 shadow-md"
             >
-              Unterbrechen
+              {{ t('timer.pause_btn') }}
             </button>
 
             <button
@@ -144,14 +144,14 @@
               @click="handleRestart"
               class="w-full py-4 px-6 rounded-xl font-bold text-lg text-white bg-green-600 active:bg-green-700 transition-all active:scale-95 shadow-md"
             >
-              Nochmal
+              {{ t('timer.again') }}
             </button>
 
             <button
               @click="handleReset"
               class="w-full py-3 px-6 rounded-xl font-medium text-sm text-gray-400 bg-gray-800 active:bg-gray-700 transition-colors"
             >
-              Zurücksetzen
+              {{ t('timer.reset') }}
             </button>
           </div>
         </div>
@@ -174,6 +174,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useDisciplineStore } from '../stores/disciplineStore.js'
 import { useTimerStore } from '../stores/timerStore.js'
 import { useTimer } from '../composables/useTimer.js'
@@ -185,6 +186,7 @@ import TimerControls from '../components/timer/TimerControls.vue'
 import PhaseProgress from '../components/timer/PhaseProgress.vue'
 import EPPTimer from '../components/timer/EPPTimer.vue'
 
+const { t } = useI18n()
 const disciplineStore = useDisciplineStore()
 const timerStore = useTimerStore()
 const settingsStore = useSettingsStore()
@@ -225,17 +227,17 @@ function stageNameLines(stage) {
 function stageInfoItems(stage) {
   if (!stage) return []
   const items = []
-  if (stage.prepTime > 0) items.push(`Vorbereitung: ${stage.prepTime}s`)
-  items.push(`Zeitlimit: ${fmtSeconds(stage.duration)}`)
+  if (stage.prepTime > 0) items.push(t('timer.prepTime', { sec: stage.prepTime }))
+  items.push(t('timer.timeLimit', { time: fmtSeconds(stage.duration) }))
   if (stage.repetitions > 1) {
-    items.push(`${stage.repetitions}x Wiederholung`)
-    if (stage.pauseDuration > 0) items.push(`Pause: ${stage.pauseDuration}s`)
+    items.push(t('timer.repetition', { n: stage.repetitions }))
+    if (stage.pauseDuration > 0) items.push(t('timer.pause', { sec: stage.pauseDuration }))
   }
   const signals = []
-  if (stage.soundAtStart) signals.push('Start')
-  if (stage.soundAtEnd) signals.push('Ende')
-  if (signals.length) items.push(`Signal: ${signals.join(' & ')}`)
-  if (stage.pauseAfter) items.push('RO startet weiter')
+  if (stage.soundAtStart) signals.push(t('timer.signalStart'))
+  if (stage.soundAtEnd) signals.push(t('timer.signalEnd'))
+  if (signals.length) items.push(t('timer.signal', { signals: signals.join(' & ') }))
+  if (stage.pauseAfter) items.push(t('timer.roStart'))
   return items
 }
 

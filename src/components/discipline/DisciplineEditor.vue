@@ -2,20 +2,20 @@
   <div class="space-y-4">
     <!-- Disziplinname -->
     <div>
-      <label class="text-xs text-gray-400 uppercase tracking-wider">Disziplinname</label>
+      <label class="text-xs text-gray-400 uppercase tracking-wider">{{ t('editor.nameLabel') }}</label>
       <input
         v-model="name"
         type="text"
         class="w-full mt-1 bg-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-amber-400"
-        placeholder="z.B. Mein Trainingsplan"
+        :placeholder="t('editor.namePlaceholder')"
       />
     </div>
 
     <!-- Phasenliste -->
     <div>
       <div class="flex items-center justify-between mb-2">
-        <label class="text-xs text-gray-400 uppercase tracking-wider">Phasen ({{ stages.length }})</label>
-        <button @click="addPhase" class="text-amber-400 text-sm hover:text-amber-300">+ Phase hinzufügen</button>
+        <label class="text-xs text-gray-400 uppercase tracking-wider">{{ t('editor.phases', { n: stages.length }) }}</label>
+        <button @click="addPhase" class="text-amber-400 text-sm hover:text-amber-300">{{ t('editor.addPhase') }}</button>
       </div>
 
       <div class="space-y-2">
@@ -27,7 +27,7 @@
           >
             <span class="text-gray-600 text-sm w-5 text-center">{{ i + 1 }}</span>
             <div class="flex-1 min-w-0">
-              <div class="text-sm font-medium text-white truncate">{{ stage.name || 'Neue Phase' }}</div>
+              <div class="text-sm font-medium text-white truncate">{{ stage.name || t('editor.newPhase') }}</div>
               <div class="text-xs text-gray-500">{{ stageMeta(stage) }}</div>
             </div>
             <div class="flex gap-1">
@@ -48,7 +48,7 @@
         </div>
 
         <div v-if="stages.length === 0" class="text-gray-600 text-sm text-center py-4">
-          Noch keine Phasen — füge die erste hinzu.
+          {{ t('editor.noPhases') }}
         </div>
       </div>
     </div>
@@ -60,10 +60,10 @@
         :disabled="!name.trim() || stages.length === 0"
         class="flex-1 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors"
       >
-        Disziplin speichern
+        {{ t('editor.save') }}
       </button>
       <button @click="$emit('cancel')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-3 rounded-xl transition-colors">
-        Abbrechen
+        {{ t('editor.cancel') }}
       </button>
     </div>
   </div>
@@ -71,7 +71,10 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
 import PhaseEditor from './PhaseEditor.vue'
+
+const { t } = useI18n()
 
 const props = defineProps({
   initialName: { type: String, default: '' },
@@ -132,7 +135,7 @@ function fmtSeconds(s) {
 function stageMeta(s) {
   const parts = [fmtSeconds(s.duration)]
   if (s.repetitions > 1) parts.push(`${s.repetitions}×`)
-  if (s.prepTime) parts.push(`Vorlauf ${s.prepTime}s`)
+  if (s.prepTime) parts.push(`${t('editor.prepShort')} ${s.prepTime}s`)
   return parts.join(' · ')
 }
 </script>

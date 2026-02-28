@@ -2,10 +2,10 @@
   <div class="w-full">
     <div class="flex items-center justify-between mb-2">
       <h3 class="text-xs uppercase tracking-widest text-gray-500">
-        {{ isEpp ? 'Stationen' : 'Matches' }}
+        {{ isEpp ? t('phases.stations') : t('phases.matches') }}
       </h3>
       <span v-if="!isEpp && selectedIndex !== null" class="text-xs text-amber-400">
-        Match {{ selectedIndex + 1 }} gewählt
+        {{ t('phases.matchSelected', { n: selectedIndex + 1 }) }}
       </span>
     </div>
 
@@ -47,6 +47,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   stages: { type: Array, default: () => [] },

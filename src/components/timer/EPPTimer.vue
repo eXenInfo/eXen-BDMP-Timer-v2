@@ -4,13 +4,13 @@
     <!-- Gesamtzeit (Master Timer) -->
     <div class="w-full bg-gray-800 rounded-xl px-4 py-3 flex justify-between items-center">
       <div>
-        <div class="text-xs uppercase tracking-widest text-gray-500">EPP Gesamtzeit</div>
+        <div class="text-xs uppercase tracking-widest text-gray-500">{{ t('epp.totalTime') }}</div>
         <div class="timer-display text-2xl font-bold" :class="gesamtzeitColor">
           {{ formattedGesamtzeit }}
         </div>
       </div>
       <div class="text-right">
-        <div class="text-xs text-gray-500">Station</div>
+        <div class="text-xs text-gray-500">{{ t('epp.station') }}</div>
         <div class="text-xl font-bold text-white">{{ currentIndex + 1 }} / {{ totalStations }}</div>
       </div>
     </div>
@@ -23,7 +23,7 @@
           class="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 mt-1"
           :class="phase.zeitLimit > 0 ? 'bg-blue-900/80 text-blue-300' : 'bg-amber-900/80 text-amber-300'"
         >
-          {{ phase.zeitLimit > 0 ? 'FIXE ZEIT' : 'RO-STOP' }}
+          {{ phase.zeitLimit > 0 ? t('epp.fixedTime') : t('epp.roStop') }}
         </span>
       </div>
       <div class="text-gray-200 text-sm mt-0.5 font-medium">
@@ -47,7 +47,10 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import TimerDisplay from './TimerDisplay.vue'
+
+const { t } = useI18n()
 
 const props = defineProps({
   phase: { type: Object, default: null },
