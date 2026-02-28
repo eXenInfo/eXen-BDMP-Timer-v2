@@ -1,12 +1,13 @@
 {
   "home": {
     "tagline": "Präzise Zeitmessung für den Schießstand",
-    "feature1": "BDMP & Police Pistol Disziplinen",
+    "feature1": "Alle dynamischen BDMP Disziplinen",
     "feature2": "EPP-Modus mit automatischer Gesamtzeit",
     "feature3": "Alle Matches nacheinander (RO-Modus)",
-    "feature4": "Audiosignale & Haptisches Feedback",
-    "feature5": "Offline-fähig — auch auf dem Schießstand",
-    "cta": "Zur App"
+    "feature4": "Zeitkontrolle (Schützen-Modus)",
+    "feature5": "Audiosignale & Haptisches Feedback",
+    "cta": "Zur App",
+    "feature6": "Offline-fähig — auch auf dem Schießstand"
   },
   "nav": {
     "timer": "Timer",
@@ -152,7 +153,7 @@
     "resetDefaultsHint": "Eigene Disziplinen bleiben erhalten",
     "onboardingSection": "Startseite",
     "resetOnboarding": "Startseite erneut anzeigen",
-    "resetOnboardingHint": "Zur Startseite mit eXen-Branding wechseln",
+    "resetOnboardingHint": "Zur Startseite wechseln",
     "languageSection": "Sprache / Language",
     "infoSection": "App-Info",
     "version": "Version",

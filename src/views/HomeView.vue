@@ -123,8 +123,9 @@ const features = computed(() => [
   { key: 'f1', icon: '🎯', text: t('home.feature1') },
   { key: 'f2', icon: '📻', text: t('home.feature2') },
   { key: 'f3', icon: '🔁', text: t('home.feature3') },
-  { key: 'f4', icon: '🔊', text: t('home.feature4') },
-  { key: 'f5', icon: '📶', text: t('home.feature5') },
+  { key: 'f4', icon: '⏱️', text: t('home.feature4') },
+  { key: 'f5', icon: '🔊', text: t('home.feature5') },
+  { key: 'f6', icon: '📶', text: t('home.feature6') },
 ])
 
 function enter() {

@@ -1,12 +1,13 @@
 {
   "home": {
     "tagline": "Precise timing for the shooting range",
-    "feature1": "BDMP & Police Pistol disciplines",
+    "feature1": "All dynamic BDMP disciplines",
     "feature2": "EPP mode with automatic total time",
     "feature3": "Run all matches sequentially (RO mode)",
-    "feature4": "Audio signals & haptic feedback",
-    "feature5": "Works offline — even at the range",
-    "cta": "Open App"
+    "feature4": "Time control (shooter mode)",
+    "feature5": "Audio signals & haptic feedback",
+    "cta": "Open App",
+    "feature6": "Works offline — even at the range"
   },
   "nav": {
     "timer": "Timer",
@@ -152,7 +153,7 @@
     "resetDefaultsHint": "Your own disciplines will be kept",
     "onboardingSection": "Start page",
     "resetOnboarding": "Show start page again",
-    "resetOnboardingHint": "Navigate to the branded eXen start page",
+    "resetOnboardingHint": "Navigate to the start page",
     "languageSection": "Language / Sprache",
     "infoSection": "App info",
     "version": "Version",
