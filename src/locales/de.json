@@ -24,12 +24,16 @@
       "prep": "Vorbereitung",
       "running": "Läuft",
       "active": "Aktiv",
-      "paused": "Pause",
+      "paused": "Pausiert",
       "paused_epp": "Störung / Pause",
       "finished": "Beendet"
     },
     "round": "Durchgang {n} / {total}",
-    "matchStart": "Match starten",
+    "matchStart": "Nur dieses Match",
+    "startAll": "🔁 Alle Matches starten",
+    "continueNext": "▶ Weiter",
+    "abortAll": "Abbrechen",
+    "roWaiting": "RO-Pause — Nächstes Match:",
     "firstMatch": "Zum ersten Match",
     "pause_btn": "Unterbrechen",
     "resume": "Fortsetzen",
@@ -47,6 +51,15 @@
     "station": "Station",
     "fixedTime": "FIXE ZEIT",
     "roStop": "RO-STOP"
+  },
+  "eppStations": {
+    "st1":  "10 Schuss (2×5 mit Magazinwechsel). FIXE ZEIT — läuft automatisch. Startsignal 2 Töne, Warnsignal bei 2 Sek. Restzeit.",
+    "st2":  "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
+    "st3":  "10 Schuss (5 links, 5 rechts am Pfosten). RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
+    "st4":  "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
+    "st5a": "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten.",
+    "st5b": "10 Schuss. FIXE ZEIT — läuft automatisch. Startsignal 2 Töne, Warnsignal bei 2 Sek. Restzeit.",
+    "st6":  "10 Schuss. RO STOPPT die Zeit nach letztem Schuss. Bei Störung: Timer anhalten. GESAMTZEIT läuft bis zuletzt."
   },
   "phases": {
     "stations": "Stationen",

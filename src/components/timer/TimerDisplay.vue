@@ -77,6 +77,7 @@ const ringColor = computed(() => {
     case 'running':
     case 'epp_running_fixed': return '#22c55e'  // green-500
     case 'epp_running_open':  return '#f59e0b'  // amber-500
+    case 'paused':            return '#f97316'  // orange-500
     case 'rep_pause':         return '#eab308'  // yellow-500
     case 'epp_paused':        return '#78350f'  // amber-900
     case 'finished':          return '#4b5563'  // gray-600
@@ -98,6 +99,7 @@ const timeColor = computed(() => {
     case 'running':
     case 'epp_running_fixed': return 'text-green-400'
     case 'epp_running_open':  return 'text-amber-400'
+    case 'paused':            return 'text-orange-400'
     case 'rep_pause':         return 'text-yellow-400'
     case 'epp_paused':        return 'text-yellow-500'
     case 'finished':          return 'text-gray-500'
@@ -112,6 +114,7 @@ const labelColor = computed(() => {
     case 'running':
     case 'epp_running_fixed': return 'text-green-400'
     case 'epp_running_open':  return 'text-amber-400'
+    case 'paused':            return 'text-orange-400'
     case 'rep_pause':         return 'text-yellow-400'
     case 'epp_paused':        return 'text-yellow-500'
     case 'finished':          return 'text-gray-500'
@@ -127,6 +130,7 @@ const phaseLabel = computed(() => {
     case 'running':
     case 'epp_running_fixed': return t('timer.status.running')
     case 'epp_running_open':  return props.countUp ? t('timer.status.active') : t('timer.status.running')
+    case 'paused':            return t('timer.status.paused')
     case 'rep_pause':         return t('timer.status.paused')
     case 'epp_paused':        return t('timer.status.paused_epp')
     case 'finished':          return t('timer.status.finished')

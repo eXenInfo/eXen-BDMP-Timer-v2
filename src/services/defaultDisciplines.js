@@ -293,7 +293,7 @@ export const EPP_DISCIPLINE = {
   phases: [
     {
       station: "Station 1", distanz: "7 m", anschlag: "Stehend frei",
-      zeitLimit: 15, pausable: false, warnSignal: 13, stoppSignalDauer: 2,
+      zeitLimit: 15, pausable: false, warnAtSecondsLeft: 2, stoppSignalDauer: 2,
       beschreibung: "10 Schuss (2×5 mit Magazinwechsel). FIXE ZEIT — läuft automatisch. Startsignal 2 Töne, Warnsignal bei 2 Sek. Restzeit."
     },
     {
@@ -318,7 +318,7 @@ export const EPP_DISCIPLINE = {
     },
     {
       station: "Station 5b", distanz: "15 m", anschlag: "Stehend frei",
-      zeitLimit: 10, pausable: false, warnSignal: 8, stoppSignalDauer: 2,
+      zeitLimit: 10, pausable: false, warnAtSecondsLeft: 2, stoppSignalDauer: 2,
       beschreibung: "10 Schuss. FIXE ZEIT — läuft automatisch. Startsignal 2 Töne, Warnsignal bei 2 Sek. Restzeit."
     },
     {

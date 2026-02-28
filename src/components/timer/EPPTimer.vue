@@ -29,7 +29,8 @@
       <div class="text-gray-200 text-sm mt-0.5 font-medium">
         {{ phase.anschlag }} · {{ phase.distanz }}
       </div>
-      <div class="text-gray-400 text-xs mt-2 leading-relaxed">{{ phase.beschreibung }}</div>
+      <!-- Stationsbeschreibung aus Locale (übersetzt) -->
+      <div class="text-gray-400 text-xs mt-2 leading-relaxed">{{ stationDesc }}</div>
     </div>
 
     <!-- Stations-Timer -->
@@ -53,12 +54,20 @@ import TimerDisplay from './TimerDisplay.vue'
 const { t } = useI18n()
 
 const props = defineProps({
-  phase: { type: Object, default: null },
-  currentIndex: { type: Number, default: 0 },
-  totalStations: { type: Number, default: 7 },
-  timeLeft: { type: Number, default: 0 },
-  eppGesamtzeit: { type: Number, default: 330 },
-  state: { type: String, default: 'idle' }
+  phase:          { type: Object, default: null },
+  currentIndex:   { type: Number, default: 0 },
+  totalStations:  { type: Number, default: 7 },
+  timeLeft:       { type: Number, default: 0 },
+  eppGesamtzeit:  { type: Number, default: 330 },
+  state:          { type: String, default: 'idle' }
+})
+
+// Mapping Index → Locale-Key für Stationsbeschreibungen
+const STATION_KEYS = ['st1', 'st2', 'st3', 'st4', 'st5a', 'st5b', 'st6']
+
+const stationDesc = computed(() => {
+  const key = STATION_KEYS[props.currentIndex]
+  return key ? t(`eppStations.${key}`) : ''
 })
 
 function pad(n) { return String(n).padStart(2, '0') }

@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useTimerStore } from '../stores/timerStore.js'
 import { useAudio } from './useAudio.js'
 import { useSettingsStore } from '../stores/settingsStore.js'
@@ -9,15 +9,18 @@ async function vibrate() {
 }
 
 export function useEPP() {
-  const timerStore = useTimerStore()
+  const timerStore    = useTimerStore()
   const settingsStore = useSettingsStore()
   const { playSignal, playWarningSignal } = useAudio(computed(() => settingsStore.volume))
 
   const phases = ref([])
-  let stationInterval = null
+  let stationInterval   = null
   let gesamtzeitInterval = null
 
-  // Aktuell aktive Phase
+  // Zeitpunkt des letzten Gesamtzeit-Starts und zugehöriger Startwert
+  let _gesamtzeitStartTime  = 0
+  let _gesamtzeitStartValue = 330
+
   const currentPhase = computed(() => phases.value[timerStore.currentStageIndex] ?? null)
 
   function load(eppDiscipline) {
@@ -33,13 +36,17 @@ export function useEPP() {
   function _startPrep() {
     timerStore.setState('epp_prep')
     timerStore.setTimeLeft(3)
+    const startTime = Date.now()
+    const totalMs   = 3000
     stationInterval = setInterval(() => {
-      timerStore.setTimeLeft(timerStore.timeLeft - 1)
-      if (timerStore.timeLeft <= 0) {
+      const elapsed   = Date.now() - startTime
+      const remaining = Math.max(0, Math.ceil((totalMs - elapsed) / 1000))
+      timerStore.setTimeLeft(remaining)
+      if (elapsed >= totalMs) {
         _clearStationInterval()
         _startStation()
       }
-    }, 1000)
+    }, 100)
   }
 
   function _startStation() {
@@ -50,38 +57,55 @@ export function useEPP() {
     vibrate()
 
     if (phase.zeitLimit > 0) {
-      // Fixe Zeit: zählt runter, auto-weiter
+      // ── Fixe Station: zählt runter, läuft automatisch ──────────────────
       timerStore.setState('epp_running_fixed')
       timerStore.setTimeLeft(phase.zeitLimit)
       _startGesamtzeitInterval()
+
+      const startTime = Date.now()
+      const totalMs   = phase.zeitLimit * 1000
+      // warnAtSecondsLeft = Sekunden Restzeit bei denen das Warnsignal ertönt
+      let warnPlayed  = false
+
       stationInterval = setInterval(() => {
-        timerStore.setTimeLeft(timerStore.timeLeft - 1)
-        // Warnsignal
-        if (phase.warnSignal && timerStore.timeLeft === phase.zeitLimit - phase.warnSignal) {
+        const elapsed   = Date.now() - startTime
+        const remaining = Math.max(0, Math.ceil((totalMs - elapsed) / 1000))
+        timerStore.setTimeLeft(remaining)
+
+        // Warnsignal genau bei konfigurierter Restzeit (einmalig)
+        if (!warnPlayed && phase.warnAtSecondsLeft && remaining <= phase.warnAtSecondsLeft && remaining > 0) {
+          warnPlayed = true
           playWarningSignal()
         }
-        if (timerStore.timeLeft <= 0) {
+
+        if (elapsed >= totalMs) {
           nextStation(true)
         }
-      }, 1000)
+      }, 100)
+
     } else {
-      // Offene Zeit: zählt hoch, manuell weiter
+      // ── Offene Station: zählt hoch, RO stoppt manuell ──────────────────
       timerStore.setState('epp_running_open')
       timerStore.setTimeLeft(0)
       _startGesamtzeitInterval()
+
+      const stationStart = Date.now()
       stationInterval = setInterval(() => {
-        timerStore.setTimeLeft(timerStore.timeLeft + 1)
-      }, 1000)
+        timerStore.setTimeLeft(Math.floor((Date.now() - stationStart) / 1000))
+      }, 100)
     }
   }
 
   function _startGesamtzeitInterval() {
     if (gesamtzeitInterval) return
+    _gesamtzeitStartValue = timerStore.eppGesamtzeit
+    _gesamtzeitStartTime  = Date.now()
+
     gesamtzeitInterval = setInterval(() => {
-      if (timerStore.eppGesamtzeit > 0) {
-        timerStore.setEppGesamtzeit(timerStore.eppGesamtzeit - 1)
-      }
-    }, 1000)
+      const elapsed   = Math.floor((Date.now() - _gesamtzeitStartTime) / 1000)
+      const remaining = Math.max(0, _gesamtzeitStartValue - elapsed)
+      timerStore.setEppGesamtzeit(remaining)
+    }, 100)
   }
 
   function _clearStationInterval() {
@@ -116,11 +140,14 @@ export function useEPP() {
       _clearGesamtzeitInterval()
       timerStore.setState('epp_paused')
     } else if (timerStore.state === 'epp_paused') {
+      // Gesamtzeit: neue Basis ab aktuellem Wert
       timerStore.setState('epp_running_open')
       _startGesamtzeitInterval()
+      const stationBase = timerStore.timeLeft
+      const stationStart = Date.now()
       stationInterval = setInterval(() => {
-        timerStore.setTimeLeft(timerStore.timeLeft + 1)
-      }, 1000)
+        timerStore.setTimeLeft(stationBase + Math.floor((Date.now() - stationStart) / 1000))
+      }, 100)
     }
   }
 
@@ -137,6 +164,12 @@ export function useEPP() {
     playSignal(2)
     vibrate()
   }
+
+  // Cleanup bei Unmount — verhindert Geister-Intervalle bei Tab-Wechsel
+  onUnmounted(() => {
+    _clearStationInterval()
+    _clearGesamtzeitInterval()
+  })
 
   return {
     phases, currentPhase,
