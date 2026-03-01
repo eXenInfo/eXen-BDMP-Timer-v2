@@ -86,7 +86,8 @@ export function useEPP() {
         if (elapsed >= totalMs) {
           _clearStationInterval()
           timerStore.setTimeLeft(0)
-          _advanceToNext()   // Gesamtzeit läuft weiter!
+          _advanceToNext()             // UI sofort auf nächste Station setzen
+          playSignal(2)                // Stoppsignal asynchron: 2 Töne = Zeit abgelaufen
         }
       }, 100)
 

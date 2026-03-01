@@ -9,9 +9,10 @@ async function loadTone() {
   // Immer das Tone-Modul zurückgeben (aus Cache nach erstem Import)
   const Tone = await import('tone')
   if (!toneLoaded) {
+    // Square-Wave: schneidender, auf Schießstand auch ohne Kopfhörer gut hörbar
     synth = new Tone.Synth({
-      oscillator: { type: 'sine' },
-      envelope: { attack: 0.01, decay: 0.1, sustain: 0.9, release: 0.3 }
+      oscillator: { type: 'square' },
+      envelope: { attack: 0.005, decay: 0.05, sustain: 1, release: 0.05 }
     }).toDestination()
     toneLoaded = true
   }
@@ -39,32 +40,34 @@ export function useAudio(volumeRef) {
   }
 
   /**
-   * Spielt `count` kurze Töne (je 0.15 s) mit 400 ms Abstand.
-   * count = 1 → ein Ton  (offene Station, Phase-Start/-Ende)
-   * count = 2 → zwei Töne (fixe Station, EPP-Finish)
+   * Spielt `count` Töne (je 0.4 s @ 880 Hz) mit 350 ms Pause dazwischen.
+   * count = 1 → ein Ton  (offene Station, Phase-Start)
+   * count = 2 → zwei Töne (fixe Station-Start, Station-Ende, EPP-Finish)
    */
   async function playSignal(count = 1) {
     await ensureReady()
     if (!synth) return
     _setVolume()
     for (let i = 0; i < Math.max(1, count); i++) {
-      synth.triggerAttackRelease('880', 0.15)
+      synth.triggerAttackRelease('A5', 0.4)   // 880 Hz, 0.4 s — wie Original-App
       if (i < count - 1) {
-        await new Promise(resolve => setTimeout(resolve, 400))
+        await new Promise(resolve => setTimeout(resolve, 750))
       }
     }
   }
 
   /**
-   * Warnsignal: zwei kurze Töne bei niedrigerer Frequenz.
-   * Signalisiert "wenige Sekunden verbleiben" (EPP 2 s Restzeit).
+   * Warnsignal: drei kurze Töne bei niedrigerer Frequenz (440 Hz / A4).
+   * Signalisiert "wenige Sekunden verbleiben" (EPP: 2 s Restzeit).
+   * Dreifaches Piepen klar vom normalen Startsignal unterscheidbar.
    */
   async function playWarningSignal() {
     await ensureReady()
     if (!synth) return
     _setVolume()
-    synth.triggerAttackRelease('660', 0.2)
-    setTimeout(() => synth.triggerAttackRelease('660', 0.2), 350)
+    synth.triggerAttackRelease('A4', 0.2)
+    setTimeout(() => synth.triggerAttackRelease('A4', 0.2), 350)
+    setTimeout(() => synth.triggerAttackRelease('A4', 0.2), 700)
   }
 
   return { playSignal, playWarningSignal, ensureReady, audioReady }
