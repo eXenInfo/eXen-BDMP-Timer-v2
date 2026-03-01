@@ -28,6 +28,7 @@
         :is-epp="true"
         :is-default="true"
         @select="select(disciplineStore.eppDiscipline.name)"
+        @menu="showEppMenu = true"
       />
     </div>
 
@@ -155,6 +156,48 @@
       </div>
     </Teleport>
 
+    <!-- EPP Kontextmenü -->
+    <Teleport to="body">
+      <div v-if="showEppMenu" class="fixed inset-0 bg-black/60 z-50 flex items-end" @click="showEppMenu = false">
+        <div class="bg-gray-800 w-full rounded-t-2xl p-4 space-y-2" @click.stop>
+          <div class="text-white font-bold mb-3 truncate">{{ disciplineStore.eppDiscipline.name }}</div>
+
+          <button
+            @click="openEppEditor"
+            class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-gray-600 text-white flex items-center gap-3"
+          >
+            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/>
+            </svg>
+            <span>{{ t('epp.editor.menuEdit') }}</span>
+          </button>
+
+          <button @click="showEppMenu = false" class="w-full text-center px-4 py-3 rounded-xl bg-gray-700/50 text-gray-400">
+            {{ t('disciplines.cancel') }}
+          </button>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- EPP Editor Modal -->
+    <Teleport to="body">
+      <div v-if="showEppEditor" class="fixed inset-0 bg-black/80 z-50 flex items-end">
+        <div class="bg-gray-900 w-full max-h-[92vh] overflow-y-auto rounded-t-2xl p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-white">{{ t('epp.editor.title') }}</h2>
+            <button @click="showEppEditor = false" class="text-gray-500 hover:text-white text-2xl leading-none">×</button>
+          </div>
+          <EPPEditor
+            :key="eppEditorKey"
+            :phases="disciplineStore.eppPhases"
+            @save="saveEpp"
+            @reset="resetEpp"
+            @cancel="showEppEditor = false"
+          />
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Toast -->
     <Teleport to="body">
       <div
@@ -176,6 +219,7 @@ import { exportDisciplines, importDisciplines } from '../services/importExport.j
 import { DEFAULT_DISCIPLINES } from '../services/defaultDisciplines.js'
 import DisciplineCard from '../components/discipline/DisciplineCard.vue'
 import DisciplineEditor from '../components/discipline/DisciplineEditor.vue'
+import EPPEditor from '../components/discipline/EPPEditor.vue'
 
 const { t } = useI18n()
 const disciplineStore = useDisciplineStore()
@@ -192,6 +236,11 @@ const importError = ref('')
 const toast = ref('')
 // Schlüssel um DisciplineEditor bei Moduswechsel neu zu initialisieren
 const editorKey = ref(0)
+
+// EPP Editor
+const showEppMenu = ref(false)
+const showEppEditor = ref(false)
+const eppEditorKey = ref(0)
 
 const filteredNames = computed(() => {
   const q = search.value.toLowerCase()
@@ -292,6 +341,24 @@ function doImport() {
   } catch (e) {
     importError.value = t('disciplines.importError', { msg: e.message })
   }
+}
+
+function openEppEditor() {
+  showEppMenu.value = false
+  eppEditorKey.value++
+  showEppEditor.value = true
+}
+
+function saveEpp(phases) {
+  disciplineStore.saveEppPhases(phases)
+  showEppEditor.value = false
+  showToast(t('disciplines.toastSaved'))
+}
+
+function resetEpp() {
+  disciplineStore.resetEppPhases()
+  eppEditorKey.value++
+  showToast(t('epp.editor.resetDone'))
 }
 
 function showToast(msg) {

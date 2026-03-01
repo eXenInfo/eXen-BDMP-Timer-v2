@@ -63,7 +63,23 @@
     "totalTime": "EPP Total Time",
     "station": "Station",
     "fixedTime": "FIXED TIME",
-    "roStop": "RO-STOP"
+    "roStop": "RO-STOP",
+    "editor": {
+      "title": "Edit EPP stations",
+      "menuEdit": "Edit station texts",
+      "anschlag": "Position",
+      "distanz": "Distance",
+      "beschreibung": "Commands / Description",
+      "timings": "Timing settings",
+      "zeitLimit": "Time limit (0 = open)",
+      "warnAt": "Warning signal at … s",
+      "signalCount": "Start signal tones",
+      "tones": "tones",
+      "pausable": "Malfunction possible",
+      "save": "Save",
+      "reset": "Reset to defaults",
+      "resetDone": "EPP stations reset"
+    }
   },
   "phases": {
     "stations": "Stations",

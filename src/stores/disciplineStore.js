@@ -19,8 +19,11 @@ export const useDisciplineStore = defineStore('disciplines', () => {
   const disciplines = ref(initialDisciplines)
   const activeDisciplineName = ref(loadFromStorage('ACTIVE_DISCIPLINE', null))
 
-  // EPP ist immer verfügbar, wird nicht in disciplines gespeichert
-  const eppDiscipline = EPP_DISCIPLINE
+  // EPP-Phasen sind editierbar und werden in localStorage gespeichert
+  const _storedEppPhases = loadFromStorage('EPP_PHASES', null)
+  const eppPhases = ref(_storedEppPhases ?? EPP_DISCIPLINE.phases.map(p => ({ ...p })))
+
+  const eppDiscipline = computed(() => ({ ...EPP_DISCIPLINE, phases: eppPhases.value }))
 
   const disciplineNames = computed(() =>
     Object.keys(disciplines.value).sort((a, b) => a.localeCompare(b, 'de'))
@@ -28,7 +31,7 @@ export const useDisciplineStore = defineStore('disciplines', () => {
 
   const activeDiscipline = computed(() => {
     if (!activeDisciplineName.value) return null
-    if (activeDisciplineName.value === eppDiscipline.name) return eppDiscipline
+    if (activeDisciplineName.value === EPP_DISCIPLINE.name) return eppDiscipline.value
     return disciplines.value[activeDisciplineName.value] ?? null
   })
 
@@ -76,14 +79,25 @@ export const useDisciplineStore = defineStore('disciplines', () => {
     _persist()
   }
 
+  function saveEppPhases(phases) {
+    eppPhases.value = phases.map(p => ({ ...p }))
+    saveToStorage('EPP_PHASES', eppPhases.value)
+  }
+
+  function resetEppPhases() {
+    eppPhases.value = EPP_DISCIPLINE.phases.map(p => ({ ...p }))
+    saveToStorage('EPP_PHASES', null)
+  }
+
   function _persist() {
     saveToStorage('DISCIPLINES', disciplines.value)
   }
 
   return {
     disciplines, activeDisciplineName, activeDiscipline,
-    eppDiscipline, disciplineNames, isEppActive,
+    eppDiscipline, eppPhases, disciplineNames, isEppActive,
     setActive, saveDiscipline, deleteDiscipline,
-    renameDiscipline, importDisciplines, resetToDefaults
+    renameDiscipline, importDisciplines, resetToDefaults,
+    saveEppPhases, resetEppPhases
   }
 })
