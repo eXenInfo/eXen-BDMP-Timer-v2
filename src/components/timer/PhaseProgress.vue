@@ -48,8 +48,10 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { usePhaseText } from '../../composables/usePhaseText.js'
 
 const { t } = useI18n()
+const { phaseText } = usePhaseText()
 
 const props = defineProps({
   stages: { type: Array, default: () => [] },
@@ -71,9 +73,9 @@ function fmtSeconds(s) {
 }
 
 function stageName(stage) {
-  if (stage.station) return `${stage.station} — ${stage.anschlag}`
-  // Erste Zeile des Namens (mehrzeilige Namen kürzen)
-  return (stage.name || 'Phase').split('\n')[0]
+  if (stage.station) return `${stage.station} — ${phaseText(stage.anschlag)}`
+  // Erste Zeile des übersetzten Namens (mehrzeilige Namen kürzen)
+  return phaseText(stage.name || 'Phase').split('\n')[0]
 }
 
 function stageMeta(stage) {

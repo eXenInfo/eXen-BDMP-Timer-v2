@@ -33,12 +33,12 @@
 
       <!-- Anschlag + Distanz -->
       <div class="text-gray-300 text-sm font-medium">
-        {{ phase.anschlag }} · {{ phase.distanz }}
+        {{ phaseText(phase.anschlag) }} · {{ phase.distanz }}
       </div>
 
-      <!-- Beschreibung direkt aus den Disziplindaten (immer Deutsch, kein i18n) -->
+      <!-- Beschreibung (übersetzbar via Phasentexte) -->
       <div class="text-gray-400 text-xs leading-relaxed border-t border-gray-700 pt-2">
-        {{ phase.beschreibung }}
+        {{ phaseText(phase.beschreibung) }}
       </div>
     </div>
 
@@ -59,8 +59,10 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TimerDisplay from './TimerDisplay.vue'
+import { usePhaseText } from '../../composables/usePhaseText.js'
 
 const { t } = useI18n()
+const { phaseText } = usePhaseText()
 
 const props = defineProps({
   phase:          { type: Object, default: null },

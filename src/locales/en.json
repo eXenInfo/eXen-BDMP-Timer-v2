@@ -207,6 +207,21 @@
     "faq5q": "Can I pause the timer?",
     "faq5a": "For normal disciplines: press \"Pause\". For EPP: only at open stations (RO-stopped) via \"Malfunction / Pause\" — this also stops the total time."
   },
+  "translations": {
+    "title": "Translate Phase Texts",
+    "navButton": "Translations",
+    "navHint": "German / English",
+    "search": "Search...",
+    "colDe": "German",
+    "colEn": "English",
+    "empty": "No phase texts found.",
+    "noResults": "No results.",
+    "enPlaceholder": "English translation...",
+    "resetAll": "Reset all translations",
+    "resetConfirmTitle": "Reset all translations?",
+    "resetConfirmText": "All entered translations will be deleted.",
+    "toastReset": "Translations reset"
+  },
   "pwa": {
     "updateAvailable": "New version available",
     "reload": "Reload",

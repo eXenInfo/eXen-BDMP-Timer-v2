@@ -207,6 +207,21 @@
     "faq5q": "Kann ich den Timer unterbrechen?",
     "faq5a": "Bei normalen Disziplinen: \"Unterbrechen\" drücken. Bei EPP: Nur bei offenen Stationen (RO-gestoppt) über \"Störung / Pause\" — dieser stoppt auch die Gesamtzeit."
   },
+  "translations": {
+    "title": "Phasentexte übersetzen",
+    "navButton": "Übersetzungen",
+    "navHint": "Deutsch / Englisch",
+    "search": "Suchen...",
+    "colDe": "Deutsch",
+    "colEn": "Englisch",
+    "empty": "Keine Phasentexte gefunden.",
+    "noResults": "Keine Treffer.",
+    "enPlaceholder": "Englische Übersetzung...",
+    "resetAll": "Alle Übersetzungen zurücksetzen",
+    "resetConfirmTitle": "Alle Übersetzungen löschen?",
+    "resetConfirmText": "Alle eingetragenen Übersetzungen werden gelöscht.",
+    "toastReset": "Übersetzungen zurückgesetzt"
+  },
   "pwa": {
     "updateAvailable": "Neue Version verfügbar",
     "reload": "Aktualisieren",

@@ -52,6 +52,26 @@
       </div>
     </section>
 
+    <!-- Übersetzungen -->
+    <section class="mb-6">
+      <div class="text-xs uppercase tracking-widest text-gray-500 mb-3">{{ t('translations.navButton') }}</div>
+      <div class="bg-gray-800 rounded-xl overflow-hidden">
+        <button
+          @click="router.push('/translations')"
+          class="w-full text-left px-4 py-4 flex items-center gap-3 hover:bg-gray-700 transition-colors"
+        >
+          <span class="text-xl">🌐</span>
+          <div>
+            <div class="text-sm font-medium text-white">{{ t('translations.title') }}</div>
+            <div class="text-xs text-gray-500">{{ t('translations.navHint') }}</div>
+          </div>
+          <svg class="w-4 h-4 text-gray-600 ml-auto flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
     <!-- Disziplinen -->
     <section class="mb-6">
       <div class="text-xs uppercase tracking-widest text-gray-500 mb-3">{{ t('settings.disciplinesSection') }}</div>

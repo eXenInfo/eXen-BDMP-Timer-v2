@@ -264,8 +264,10 @@ import TimerDisplay from '../components/timer/TimerDisplay.vue'
 import TimerControls from '../components/timer/TimerControls.vue'
 import PhaseProgress from '../components/timer/PhaseProgress.vue'
 import EPPTimer from '../components/timer/EPPTimer.vue'
+import { usePhaseText } from '../composables/usePhaseText.js'
 
 const { t } = useI18n()
+const { phaseText } = usePhaseText()
 const disciplineStore = useDisciplineStore()
 const timerStore      = useTimerStore()
 const settingsStore   = useSettingsStore()
@@ -325,11 +327,11 @@ function fmtSeconds(s) {
 }
 
 function firstLine(name) {
-  return (name ?? '').split('\n')[0]
+  return phaseText(name ?? '').split('\n')[0]
 }
 
 function stageNameLines(stage) {
-  return (stage?.name ?? '').split('\n').map(l => l.trim()).filter(l => l)
+  return phaseText(stage?.name ?? '').split('\n').map(l => l.trim()).filter(l => l)
 }
 
 function stageInfoItems(stage) {

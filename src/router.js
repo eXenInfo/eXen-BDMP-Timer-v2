@@ -5,8 +5,9 @@ const routes = [
   { path: '/home',        component: () => import('./views/HomeView.vue') },
   { path: '/timer',       component: () => import('./views/TimerView.vue') },
   { path: '/disciplines', component: () => import('./views/DisciplinesView.vue') },
-  { path: '/settings',    component: () => import('./views/SettingsView.vue') },
-  { path: '/help',        component: () => import('./views/HelpView.vue') }
+  { path: '/settings',      component: () => import('./views/SettingsView.vue') },
+  { path: '/translations',  component: () => import('./views/TranslationsView.vue') },
+  { path: '/help',          component: () => import('./views/HelpView.vue') }
 ]
 
 export default createRouter({
