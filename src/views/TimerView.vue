@@ -41,6 +41,7 @@
           <TimerControls
             :state="timerStore.state"
             :is-epp="true"
+            :is-first-station="timerStore.currentStageIndex === 0"
             :is-pausable="eppComposable.currentPhase.value?.pausable"
             :is-last-station="timerStore.currentStageIndex >= eppComposable.phases.value.length - 1"
             @start="handleEppStart"

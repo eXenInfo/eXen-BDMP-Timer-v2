@@ -46,7 +46,7 @@
     "roWaiting": "RO pause — Next match:",
     "firstMatch": "Go to first match",
     "pause_btn": "Pause",
-    "resume": "Resume",
+    "resume": "Continue",
     "interrupt": "Malfunction / Pause",
     "reset": "Reset",
     "again": "Again",
@@ -54,22 +54,16 @@
     "startStation": "Attention... (Start)",
     "start": "Start",
     "endStation": "End station",
-    "endMatch": "End match"
+    "endMatch": "End match",
+    "startEpp": "Start EPP",
+    "startNextStation": "Start next station",
+    "abort": "Abort"
   },
   "epp": {
     "totalTime": "EPP Total Time",
     "station": "Station",
     "fixedTime": "FIXED TIME",
     "roStop": "RO-STOP"
-  },
-  "eppStations": {
-    "st1": "10 shots (2×5 with magazine change). FIXED TIME — runs automatically. Start signal 2 tones, warning signal at 2 sec. remaining.",
-    "st2": "10 shots. RO STOPS time after last shot. In case of malfunction: pause timer.",
-    "st3": "10 shots (5 left, 5 right at post). RO STOPS time after last shot. In case of malfunction: pause timer.",
-    "st4": "10 shots. RO STOPS time after last shot. In case of malfunction: pause timer.",
-    "st5a": "10 shots. RO STOPS time after last shot. In case of malfunction: pause timer.",
-    "st5b": "10 shots. FIXED TIME — runs automatically. Start signal 2 tones, warning signal at 2 sec. remaining.",
-    "st6": "10 shots. RO STOPS time after last shot. In case of malfunction: pause timer. TOTAL TIME runs until the end."
   },
   "phases": {
     "stations": "Stations",

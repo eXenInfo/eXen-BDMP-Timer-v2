@@ -38,20 +38,33 @@ export function useAudio(volumeRef) {
     synth.volume.value = 20 * Math.log10(Math.max(0.001, vol))
   }
 
-  async function playSignal(durationSeconds = 1) {
+  /**
+   * Spielt `count` kurze Töne (je 0.15 s) mit 400 ms Abstand.
+   * count = 1 → ein Ton  (offene Station, Phase-Start/-Ende)
+   * count = 2 → zwei Töne (fixe Station, EPP-Finish)
+   */
+  async function playSignal(count = 1) {
     await ensureReady()
     if (!synth) return
     _setVolume()
-    synth.triggerAttackRelease('880', durationSeconds)
+    for (let i = 0; i < Math.max(1, count); i++) {
+      synth.triggerAttackRelease('880', 0.15)
+      if (i < count - 1) {
+        await new Promise(resolve => setTimeout(resolve, 400))
+      }
+    }
   }
 
+  /**
+   * Warnsignal: zwei kurze Töne bei niedrigerer Frequenz.
+   * Signalisiert "wenige Sekunden verbleiben" (EPP 2 s Restzeit).
+   */
   async function playWarningSignal() {
     await ensureReady()
     if (!synth) return
     _setVolume()
-    // Doppelton als Warnung
-    synth.triggerAttackRelease('660', 0.3)
-    setTimeout(() => synth.triggerAttackRelease('660', 0.3), 400)
+    synth.triggerAttackRelease('660', 0.2)
+    setTimeout(() => synth.triggerAttackRelease('660', 0.2), 350)
   }
 
   return { playSignal, playWarningSignal, ensureReady, audioReady }
