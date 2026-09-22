@@ -130,6 +130,10 @@ export const READINESS = {
     ruleRef: 'C.7.6',
     text: 'Die Waffe wird waagerecht zum Boden gehalten. Die Ellenbogen liegen am Körper an, Ober- und Unterarm bilden einen Winkel von 90 Grad. Die Mündung zielt auf die Scheibe.',
   },
+  ppZweiGemischt: {
+    ruleRef: 'C.6B',
+    text: 'Station A: Die Waffe wird mit ausgestreckten Armen auf 45 Grad abgesenkt, die Mündung zielt auf den Boden. Stationen B und C: Die Waffe ist geholstert, halbautomatische Pistolen unterladen.',
+  },
   geholstert: {
     ruleRef: 'C.8.7',
     text: 'Der Schütze steht aufrecht, die geladene Waffe im Holster; halbautomatische Pistolen unterladen. Arme und Hände hängen zwanglos herab und berühren weder Waffe noch Holster, bis sich die Scheiben herdrehen oder ein anderes Startsignal gegeben wird. Eine abweichende Handposition zum Starten eines Timers am Arm oder Pfosten ist zulässig.',
@@ -141,6 +145,62 @@ export const READINESS = {
  * Namen, weil die Sammlung Varianten wie „(A-B-OS)“ oder „(LAR)“ führt.
  */
 export const DISCIPLINE_RULES = [
+  /*
+   * Die Reihenfolge entscheidet: findDisciplineRules nimmt den ersten
+   * Treffer. Die Sonderfassungen der Police Pistol 1 stehen deshalb vor
+   * der allgemeinen Regel, sonst würde „Police Pistol 1 (SM)“ als PP1
+   * gelesen und bekäme den falschen Ablauf.
+   */
+  {
+    match: /^Police Pistol 1 \(SM\)|^Super Magnum|^SM\b/i,
+    ruleRef: 'C.6C', commandSet: 'policePistol', readiness: 'abgesenkt45',
+    varianten: [{ klasse: 'kurzwaffe', ruleRef: 'C.6C', label: 'Super Magnum' }],
+    ammo: '30 Patronen, mindestens 1200 Joule', target: 'PP-1-Scheibe',
+    ablauf: [
+      '25 m: 2 × 5 Schüsse in 2 Minuten einschließlich eines eventuellen Nachladens.',
+      '15 m: 2 × 5 Schüsse in Intervallen. Die Scheibe zeigt sich fünfmal für je 3 Sekunden, dabei jeweils 1 Schuss.',
+      '10 m: 2 × 5 Schüsse in Intervallen. Die Scheibe zeigt sich fünfmal für je 2 Sekunden, dabei jeweils 1 Schuss.',
+    ],
+    hinweise: [
+      'Die Geschossenergie muss bei einer E2-Messung mindestens 1200 Joule erreichen.',
+      'Die Sammlung führt die Disziplin als „Police Pistol 1 (SM)“; der Ablauf ist der der Super Magnum nach C.6C, nicht der der Police Pistol 1.',
+    ],
+  },
+  {
+    match: /^Police Pistol 1 \(LAR\)/i,
+    ruleRef: null, commandSet: 'policePistol', readiness: null,
+    varianten: [{ klasse: 'langwaffe', ruleRef: null, label: 'Police Pistol 1 (LAR)' }],
+    ammo: '30 Patronen', target: 'PP-1-Scheibe',
+    ablauf: [
+      '25 m: 12 Schüsse in 2 Minuten einschließlich eines eventuellen Nachladens.',
+      '15 m: 2 × 6 Schüsse in Intervallen. Die Scheibe zeigt sich sechsmal für je 2 Sekunden, dabei jeweils 1 Schuss. Danach Nachladen und erneuter Durchgang.',
+      '10 m: 3 × 2 Schüsse in Intervallen. Die Scheibe zeigt sich dreimal für je 3 Sekunden, dabei jeweils 2 Schüsse.',
+    ],
+    hinweise: [
+      'Langwaffenfassung mit Unterhebelrepetierer. Weicht von der Kurzwaffen-PP1 auf 10 m ab: 3 statt 2 Sekunden je Intervall. Deshalb ein eigener Satz.',
+    ],
+  },
+  {
+    match: /^Police Pistol 1 \(30M1 ?[–-] ?SpCb\)|^Police Pistol 1 \(SpCb\)/i,
+    ruleRef: null, commandSet: 'policePistol', readiness: null,
+    varianten: [{ klasse: 'langwaffe', ruleRef: null, label: 'Police Pistol 1 (Sports Carbine)' }],
+    ammo: '30 Patronen', target: 'PP-1-Scheibe',
+    ablauf: [
+      '25 m: 12 Schüsse in 2 Minuten einschließlich eines eventuellen Nachladens.',
+      '15 m: 2 × 6 Schüsse in Intervallen. Die Scheibe zeigt sich sechsmal für je 3 Sekunden, dabei jeweils 1 Schuss. Danach Nachladen und erneuter Durchgang.',
+      '10 m: 3 × 2 Schüsse in Intervallen. Die Scheibe zeigt sich dreimal für je 3 Sekunden, dabei jeweils 2 Schüsse.',
+    ],
+    hinweise: [
+      'Langwaffenfassung mit Sports Carbine. Weicht von der Kurzwaffen-PP1 auf 15 m und 10 m ab: 3 statt 2 Sekunden je Intervall. Deshalb ein eigener Satz.',
+    ],
+  },
+  {
+    match: /^Zeitkontrolle/i,
+    ruleRef: null, commandSet: null, readiness: null, ohneAnsage: true,
+    ammo: null, target: null,
+    ablauf: [],
+    hinweise: ['Hilfsmittel zum Training, keine Wettkampfdisziplin: eine reine Uhr über 90 und 165 Sekunden. Deshalb ohne Kommandofolge und ohne Ansage.'],
+  },
   {
     match: /^Police Pistol 1\b/i, ruleRef: 'C.6A', commandSet: 'policePistol', readiness: 'abgesenkt45',
     varianten: [{ klasse: 'kurzwaffe', ruleRef: 'C.6A', label: 'Police Pistol 1' }],
@@ -153,7 +213,7 @@ export const DISCIPLINE_RULES = [
     hinweise: ['Probeschüsse sind nicht erlaubt (C.6.6).', 'Stellung stehend frei, beidhändiges Halten ist erlaubt (C.6.5).'],
   },
   {
-    match: /^Police Pistol 2\b/i, ruleRef: 'C.6B', commandSet: 'policePistol', readiness: 'gemischt',
+    match: /^Police Pistol 2\b/i, ruleRef: 'C.6B', commandSet: 'policePistol', readiness: 'ppZweiGemischt',
     varianten: [{ klasse: 'kurzwaffe', ruleRef: 'C.6B', label: 'Police Pistol 2' }],
     ammo: '60 Patronen, dazu 6 Probeschüsse', target: 'PP-1-Scheibe',
     ablauf: [
@@ -205,23 +265,26 @@ export const DISCIPLINE_RULES = [
     match: /^NPA Service Pistole? \(SpCb\)/i, ruleRef: 'C.7C', commandSet: 'policePistol', readiness: 'npaWaagerecht',
     ammo: '24 Patronen Großkaliber', target: 'eine oder zwei NPA-Service-Pistol-Scheiben',
     ablauf: [
-      '20 m: 6 Schüsse in 15 Sekunden.',
-      '15 m: 6 Schüsse in 10 Sekunden.',
-      '10 m: 6 Schüsse in Intervallen. Die Scheibe zeigt sich dreimal für je 2 Sekunden, dabei jeweils 2 Schüsse.',
-      '7 m: 6 Schüsse in 8 Sekunden, einhändiger Anschlag.',
+      '25 m: 6 Schüsse in 15 Sekunden.',
+      '20 m: 6 Schüsse in 10 Sekunden.',
+      '15 m: 3 × 2 Schüsse in Intervallen. Die Scheibe zeigt sich dreimal für je 3 Sekunden, dabei jeweils 2 Schüsse.',
+      '10 m: 6 Schüsse in 8 Sekunden.',
     ],
-    hinweise: ['Bei zwei Scheiben: Station 1 und 3 auf die linke, Station 2 und 4 auf die rechte Scheibe.'],
+    hinweise: [
+      'Bei zwei Scheiben: Station 1 und 3 auf die linke, Station 2 und 4 auf die rechte Scheibe.',
+      'Weicht von der Kurzwaffenfassung nach C.7 nur auf Station 4 ab: 8 statt 6 Sekunden.',
+    ],
   },
   {
     match: /^NPA Service Pistole? \(LAR\)/i, ruleRef: 'C.7C', commandSet: 'policePistol', readiness: 'npaWaagerecht',
     ammo: '24 Patronen Großkaliber', target: 'eine oder zwei NPA-Service-Pistol-Scheiben',
     ablauf: [
-      '20 m: 6 Schüsse in 15 Sekunden.',
-      '15 m: 6 Schüsse in 10 Sekunden.',
-      '10 m: 6 Schüsse in Intervallen. Die Scheibe zeigt sich dreimal für je 2 Sekunden, dabei jeweils 2 Schüsse.',
-      '7 m: 6 Schüsse in 8 Sekunden, einhändiger Anschlag.',
+      '25 m: 6 Schüsse in 15 Sekunden.',
+      '20 m: 6 Schüsse in 10 Sekunden.',
+      '15 m: 3 × 2 Schüsse in Intervallen. Die Scheibe zeigt sich dreimal für je 3 Sekunden, dabei jeweils 2 Schüsse.',
+      '10 m: 6 Schüsse in 8 Sekunden.',
     ],
-    hinweise: [],
+    hinweise: ['Weicht von der Kurzwaffenfassung nach C.7 nur auf Station 4 ab: 8 statt 6 Sekunden.'],
   },
   {
     match: /^BDMP 1500/i, ruleRef: 'C.8.2', commandSet: 'ppc1500', readiness: 'geholstert',
@@ -292,16 +355,6 @@ export const DISCIPLINE_RULES = [
       'Die Beobachtung der Wertungsschüsse durch den Schützen ist nicht erlaubt; Fremdbeobachtung und Coaching sind unzulässig.',
       'Es gibt keine anerkannten Waffen- oder Munitionsfehler.',
     ],
-  },
-  {
-    match: /^Super Magnum|^SM\b/i, ruleRef: 'C.6C', commandSet: 'policePistol', readiness: 'abgesenkt45',
-    ammo: '30 Patronen, mindestens 1200 Joule', target: 'PP-1-Scheibe',
-    ablauf: [
-      '25 m: 2 × 5 Schüsse in 2 Minuten einschließlich eines eventuellen Nachladens.',
-      '15 m: 2 × 5 Schüsse in Intervallen. Die Scheibe zeigt sich fünfmal für je 3 Sekunden, dabei jeweils 1 Schuss.',
-      '10 m: 2 × 5 Schüsse in Intervallen. Die Scheibe zeigt sich fünfmal für je 2 Sekunden, dabei jeweils 1 Schuss.',
-    ],
-    hinweise: ['Die Geschossenergie muss bei einer E2-Messung mindestens 1200 Joule erreichen.'],
   },
   {
     match: /^Sports Carbine PP ?2|^Police Pistol 2 \(SpCb\)/i,
@@ -397,6 +450,7 @@ export function enrichDiscipline(disziplin) {
     ablauf:     regeln?.ablauf ?? [],
     hinweise:   regeln?.hinweise ?? [],
     abweichung: regeln?.abweichung ?? null,
+    ohneAnsage: disziplin.ohneAnsage ?? regeln?.ohneAnsage ?? false,
     varianten:  disziplin.varianten ?? regeln?.varianten ?? [],
     phases:     mitStellungen(disziplin.phases),
   }
@@ -470,7 +524,7 @@ export const GENERATED_DISCIPLINES = [
       dks('Match 1 — 15 m', '2 × 6 Schüsse stehend frei, nur double action.', 20),
       dks('Match 2 — 25 m', '6 Schüsse kniend frei\n6 Schüsse stehend, linke Hand, Pfosten links\n6 Schüsse stehend, rechte Hand, Pfosten rechts', 90),
       dks('Match 3 — 25 m, 1. Durchgang', '2 × 6 Schüsse stehend frei, nur double action.', 35),
-      dks('Match 3 — 25 m, 2. Durchgang', '2 × 6 Schüsse stehend frei, Wiederholung.', 35),
+      dks('Match 3 — 25 m, 2. Durchgang', '2 × 6 Schüsse stehend frei.', 35),
       dks('Match 4 — 25 m', '6 Schüsse sitzend\n6 Schüsse kniend frei\n6 Schüsse stehend, linke Hand, Pfosten links\n6 Schüsse stehend, rechte Hand, Pfosten rechts', 165),
       dks('Match 5 — 25 m, 1. Durchgang', '6 Schüsse stehend frei, nur double action.', 12),
       dks('Match 5 — 25 m, 2. Durchgang', '6 Schüsse stehend frei, nur double action.', 12, true),

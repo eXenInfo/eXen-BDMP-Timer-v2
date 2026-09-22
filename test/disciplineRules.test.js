@@ -71,8 +71,7 @@ describe('Zuordnung der Regelwerke', () => {
       .filter(d => d.kind === 'sequence')
       .filter(d => !findDisciplineRules(d.name))
       .map(d => d.name)
-    // Die Zeitkontrolle ist keine Wettkampfdisziplin und braucht keins.
-    expect(ohne).toEqual(['Zeitkontrolle Schütze'])
+    expect(ohne).toEqual([])
   })
 
   it('1020 und 1500 bekommen die PPC-Kommandos, PP1 die Police-Pistol-Kommandos', () => {
