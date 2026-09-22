@@ -1,0 +1,138 @@
+/**
+ * Verbindliches Bedien-System.
+ *
+ * Feste Regeln statt Einzelfallentscheidungen, damit sich auf dem Stand
+ * nichts verwechseln lässt:
+ *
+ *   .k-haupt      Hauptaktion. Volle Breite, mindestens 5,5rem hoch, grün.
+ *                 Genau eine je Bildschirm.
+ *   .k-zweit      Nebenaktion. Mindestens 3,5rem, Umriss, nie grün.
+ *   .k-nav        Navigation. Volle Breite, mindestens 3,5rem, immer mit Wort,
+ *                 nie nur mit Pfeil.
+ *   .k-gefahr     Zerstörend. Rot umrandet, immer mit Rückfrage, nie in
+ *                 gleicher Größe direkt neben der Hauptaktion.
+ *
+ * Kleinstmaß für jede Trefferfläche: 3rem. Zwischen Knöpfen gegensätzlicher
+ * Wirkung mindestens 0,75rem Abstand.
+ */
+
+:root {
+  --f-grund: #0b0d10;
+  --f-flaeche: #15191f;
+  --f-flaeche-hoch: #1c222a;
+  --f-rand: #2c333d;
+  --f-text: #f2f5f8;
+  --f-gedaempft: #9aa6b4;
+  --f-akzent: #f59e0b;
+  --f-gruen: #16a34a;
+  --f-rot: #dc2626;
+  --r-klein: 0.6rem;
+  --r-mittel: 0.85rem;
+  --r-gross: 1rem;
+}
+
+.k-haupt,
+.k-zweit,
+.k-nav,
+.k-gefahr {
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: var(--r-mittel);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  text-align: center;
+  line-height: 1.25;
+  transition: filter 100ms linear;
+}
+.k-haupt:active, .k-zweit:active, .k-nav:active, .k-gefahr:active { filter: brightness(0.88); }
+.k-haupt:disabled, .k-zweit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.k-haupt {
+  width: 100%;
+  min-height: 5.5rem;
+  border: none;
+  border-radius: var(--r-gross);
+  background: var(--f-gruen);
+  color: #fff;
+  font-size: 1.55rem;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+}
+.k-haupt.warnton { background: var(--f-akzent); color: #1a1205; }
+.k-haupt.neutral { background: #374151; }
+
+.k-zweit {
+  min-height: 3.5rem;
+  padding: 0.6rem 1rem;
+  background: var(--f-flaeche);
+  color: var(--f-text);
+  border: 1px solid var(--f-rand);
+  font-size: 1.05rem;
+}
+.k-zweit.betont { border-color: var(--f-akzent); color: var(--f-akzent); }
+
+.k-nav {
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.6rem 1rem;
+  background: var(--f-flaeche-hoch);
+  color: var(--f-text);
+  border: 1px solid var(--f-rand);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.k-gefahr {
+  min-height: 3.5rem;
+  padding: 0.6rem 1rem;
+  background: transparent;
+  color: #f87171;
+  border: 1px solid #7f1d1d;
+  font-size: 1.05rem;
+}
+
+/** Zweitzeile in einem Knopf: sagt, was die Aktion bewirkt. */
+.k-unter { font-size: 0.8rem; font-weight: 400; opacity: 0.85; }
+
+/** Knopfreihen. Gegensätzliche Wirkungen bekommen mehr Luft. */
+.k-reihe { display: flex; gap: 0.75rem; }
+.k-reihe > * { flex: 1; }
+.k-spalte { display: flex; flex-direction: column; gap: 0.75rem; }
+
+/* Eingabefelder — großzügig, weil sie oft mit klammen Fingern bedient werden */
+.e-feld {
+  width: 100%;
+  min-height: 3.25rem;
+  background: var(--f-flaeche);
+  color: var(--f-text);
+  border: 1px solid var(--f-rand);
+  border-radius: var(--r-klein);
+  padding: 0.6rem 0.8rem;
+  font-size: 1.05rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.e-feld:focus { outline: 2px solid var(--f-akzent); outline-offset: 1px; }
+textarea.e-feld { min-height: 5.5rem; line-height: 1.5; resize: vertical; }
+.e-marke {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--f-gedaempft);
+  margin-bottom: 0.3rem;
+}
+.e-gruppe { margin-bottom: 1rem; }
+.e-paar { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+/* Schalter */
+.e-schalter {
+  display: flex; align-items: center; gap: 0.75rem;
+  min-height: 3.25rem; padding: 0.5rem 0.8rem;
+  background: var(--f-flaeche); border: 1px solid var(--f-rand);
+  border-radius: var(--r-klein); cursor: pointer; font-size: 1rem;
+}
+.e-schalter input { width: 1.4rem; height: 1.4rem; accent-color: var(--f-akzent); }
