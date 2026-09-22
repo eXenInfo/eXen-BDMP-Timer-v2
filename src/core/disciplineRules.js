@@ -242,8 +242,29 @@ export const DISCIPLINE_RULES = [
       'Probeschüsse liegen im Ermessen des Veranstalters.',
       'Die Beobachtung der Wertungsschüsse durch den Schützen ist nicht erlaubt; Fremdbeobachtung und Coaching sind unzulässig.',
       'Es gibt keine anerkannten Waffen- oder Munitionsfehler.',
+      'Die Kleinkaliber-Variante DKS 1 – 1020 (C.15A) hat denselben Ablauf; dort wird Match 1 auf 10 m geschossen, die Scheibenentfernungen sind wahlweise 10 m, 15 m oder 25 m. Die Kommandos laufen ebenfalls nach C.8.5.',
     ],
-    abweichung: 'Die Sportordnung nennt für Match 1 die Distanzen 7 m und 15 m. In der mitgelieferten Disziplinendatei steht 10 m und 15 m — bitte gegen die aktuelle Ausschreibung prüfen.',
+  },
+  {
+    match: /^DKS 1\s*[–-]\s*1020|^DKS 1020|Dynamisches Kleinkaliberschie(ß|ss)en 1 1020/i,
+    ruleRef: 'C.15A', commandSet: 'ppc1500', readiness: 'geholstert',
+    ammo: 'Kleinkaliber .22 lr', target: 'mindestens eine BDMP-1500-Scheibe je Schütze und Match',
+    ablauf: [
+      'Match 1: 10 m — 20 Sekunden — nur double action — 2 × 6 Schüsse stehend frei. Danach 15 m, 20 Sekunden, 2 × 6 Schüsse stehend frei.',
+      'Match 2: 25 m — 90 Sekunden — nur double action — 6 kniend frei, 6 stehend linke Hand Pfosten links, 6 stehend rechte Hand Pfosten rechts.',
+      'Match 3: 25 m — 35 Sekunden — nur double action — 2 × 6 Schüsse stehend frei, danach Wiederholung.',
+      'Match 4: 25 m — 165 Sekunden — nur double action — 6 sitzend, 6 kniend frei, 6 stehend linke Hand Pfosten links, 6 stehend rechte Hand Pfosten rechts.',
+      'Match 5: 25 m — 12 Sekunden — nur double action — 6 Schüsse stehend frei, danach ein zweiter Durchgang mit 6 Schüssen stehend frei.',
+    ],
+    hinweise: [
+      'Kleinkaliber-Fassung der 1020, durchgeführt in Anlehnung an die Regeln der NASRPC Ireland.',
+      'Scheibenentfernung wahlweise 10 m, 15 m oder 25 m mit den Toleranzen nach C.15A.5.',
+      'Double Action gilt nicht beim Gebrauch von Selbstladepistolen.',
+      'Die Reihenfolge der Matches und Stationen ist einzuhalten.',
+      'Stellungen und Fertigstellung nach C.8.4 beziehungsweise C.8.7.',
+      'Die Beobachtung der Wertungsschüsse durch den Schützen ist nicht erlaubt; Fremdbeobachtung und Coaching sind unzulässig.',
+      'Es gibt keine anerkannten Waffen- oder Munitionsfehler.',
+    ],
   },
   {
     match: /^Super Magnum|^SM\b/i, ruleRef: 'C.6C', commandSet: 'policePistol', readiness: 'abgesenkt45',
@@ -314,3 +335,43 @@ export function enrichDiscipline(disziplin) {
     }),
   }
 }
+
+
+/**
+ * Disziplinen, die sich vollständig aus der Sportordnung ergeben und in der
+ * gepflegten Disziplinendatei nicht enthalten sind.
+ *
+ * DKS 1 – 1020 ist die Kleinkaliber-Fassung der 1020 (C.15A). Der Ablauf ist
+ * derselbe, Match 1 wird jedoch auf 10 m geschossen.
+ */
+const dks = (name, beschreibung, sekunden, letzte = false) => ({
+  name,
+  description: beschreibung,
+  roCommands: [],
+  distance: (name.match(/(\d+)\s*m/) ?? [])[0] ?? null,
+  prepMs: 3000,
+  durationMs: sekunden * 1000,
+  repetitions: 1,
+  repPauseMs: 0,
+  soundAtStart: true,
+  soundAtEnd: true,
+  waitAfter: !letzte,
+})
+
+export const GENERATED_DISCIPLINES = [
+  {
+    id: 'dks-1-1020',
+    name: 'DKS 1 – 1020 (Kleinkaliber)',
+    kind: 'sequence',
+    phases: [
+      dks('Match 1 — 10 m', '2 × 6 Schüsse stehend frei, nur double action.', 20),
+      dks('Match 1 — 15 m', '2 × 6 Schüsse stehend frei, nur double action.', 20),
+      dks('Match 2 — 25 m', '6 Schüsse kniend frei\n6 Schüsse stehend, linke Hand, Pfosten links\n6 Schüsse stehend, rechte Hand, Pfosten rechts', 90),
+      dks('Match 3 — 25 m, 1. Durchgang', '2 × 6 Schüsse stehend frei, nur double action.', 35),
+      dks('Match 3 — 25 m, 2. Durchgang', '2 × 6 Schüsse stehend frei, Wiederholung.', 35),
+      dks('Match 4 — 25 m', '6 Schüsse sitzend\n6 Schüsse kniend frei\n6 Schüsse stehend, linke Hand, Pfosten links\n6 Schüsse stehend, rechte Hand, Pfosten rechts', 165),
+      dks('Match 5 — 25 m, 1. Durchgang', '6 Schüsse stehend frei, nur double action.', 12),
+      dks('Match 5 — 25 m, 2. Durchgang', '6 Schüsse stehend frei, nur double action.', 12, true),
+    ],
+  },
+]

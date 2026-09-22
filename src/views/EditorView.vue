@@ -8,11 +8,13 @@
  * wird und niemand mehr weiß, was original war.
  */
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   satz: { type: Object, required: true },
 })
 const emit = defineEmits(['sichern', 'schliessen'])
+const { t } = useI18n()
 
 const arbeit = ref(structuredClone(props.satz))
 const geaendert = ref(false)
@@ -62,7 +64,7 @@ function phaseLoeschen(i) {
 }
 function phaseNeu() {
   disziplin.value.phases.push({
-    name: 'Neue Phase', description: '', roCommands: [],
+    name: t('v3.editor.neuePhase'), description: '', roCommands: [],
     prepMs: 3000, durationMs: 10000, repetitions: 1, repPauseMs: 0,
     soundAtStart: true, soundAtEnd: true, waitAfter: false,
   })
@@ -76,7 +78,7 @@ const regelAbweichung = computed(() => {
   const p = phase.value
   if (p.timeLimitMs > 0 && p.stopSignalAtMs != null &&
       p.stopSignalAtMs + p.stopSignalDurationMs !== p.timeLimitMs) {
-    return 'Das zweite Signal endet nicht mit der Schießzeit. C.17.14 verlangt, dass sein Ende die Wertungsgrenze markiert.'
+    return t('v3.editor.regelWarnung')
   }
   return null
 })
@@ -87,14 +89,14 @@ const regelAbweichung = computed(() => {
 
     <!-- Ebene 1: Disziplinen -->
     <template v-if="ebene === 'disziplinen'">
-      <button class="k-nav" @click="emit('schliessen')">Zurück zur Disziplinwahl</button>
+      <button class="k-nav" @click="emit('schliessen')">{{ t('v3.editor.zurueckZurWahl') }}</button>
 
       <header class="titel">
         <h2>{{ arbeit.name }}</h2>
         <p v-if="arbeit.readonly" class="schutz">
-          Mitgelieferter Satz — schreibgeschützt. Für eigene Ansagen zuerst eine Kopie anlegen.
+          {{ t('v3.editor.schutzHinweis') }}
         </p>
-        <p v-else class="unterzeile">{{ arbeit.disciplines.length }} Disziplinen · Fassung {{ arbeit.version }}</p>
+        <p v-else class="unterzeile">{{ arbeit.disciplines.length }} {{ t('v3.allgemein.disziplinen') }} · {{ t('v3.allgemein.fassung') }} {{ arbeit.version }}</p>
       </header>
 
       <button
@@ -102,26 +104,26 @@ const regelAbweichung = computed(() => {
         class="zeile" @click="oeffneDisziplin(i)">
         <span class="zeile-haupt">{{ d.name }}</span>
         <span class="zeile-neben">
-          {{ d.phases.length }} {{ d.kind === 'epp' ? 'Stationen' : 'Phasen' }}
+          {{ d.phases.length }} {{ d.kind === 'epp' ? t('v3.allgemein.stationen') : t('v3.allgemein.phasen') }}
           <template v-if="d.kind === 'epp'"> · C.17</template>
         </span>
       </button>
 
       <div class="k-spalte abstand" v-if="!arbeit.readonly">
         <button class="k-haupt" :disabled="!geaendert" @click="sichern">
-          Satz sichern
-          <span class="k-unter">{{ geaendert ? 'Es gibt ungesicherte Änderungen' : 'Keine Änderungen offen' }}</span>
+          {{ t('v3.editor.satzSichern') }}
+          <span class="k-unter">{{ geaendert ? t('v3.allgemein.offeneAenderungen') : t('v3.allgemein.keineAenderungen') }}</span>
         </button>
       </div>
     </template>
 
     <!-- Ebene 2: Phasen einer Disziplin -->
     <template v-else-if="ebene === 'phasen'">
-      <button class="k-nav" @click="ebene = 'disziplinen'">Zurück zu den Disziplinen</button>
+      <button class="k-nav" @click="ebene = 'disziplinen'">{{ t('v3.editor.zurueckZuDisziplinen') }}</button>
 
       <header class="titel">
         <h2>{{ disziplin.name }}</h2>
-        <p class="unterzeile">{{ istEpp ? 'Stationen nach C.17' : 'Phasen des Ablaufs' }}</p>
+        <p class="unterzeile">{{ istEpp ? t('v3.editor.stationenNachC17') : t('v3.editor.phasenDesAblaufs') }}</p>
       </header>
 
       <div v-for="(p, i) in disziplin.phases" :key="i" class="karte">
@@ -142,60 +144,60 @@ const regelAbweichung = computed(() => {
         </button>
 
         <div class="karten-werkzeug" v-if="!arbeit.readonly">
-          <button class="k-zweit schmal" :disabled="i === 0" @click="phaseVerschieben(i, -1)">Hoch</button>
-          <button class="k-zweit schmal" :disabled="i === disziplin.phases.length - 1" @click="phaseVerschieben(i, 1)">Runter</button>
-          <button class="k-zweit schmal" @click="phaseDoppeln(i)">Doppeln</button>
-          <button class="k-gefahr schmal" @click="loeschFrage = i">Löschen</button>
+          <button class="k-zweit schmal" :disabled="i === 0" @click="phaseVerschieben(i, -1)">{{ t('v3.editor.hoch') }}</button>
+          <button class="k-zweit schmal" :disabled="i === disziplin.phases.length - 1" @click="phaseVerschieben(i, 1)">{{ t('v3.editor.runter') }}</button>
+          <button class="k-zweit schmal" @click="phaseDoppeln(i)">{{ t('v3.editor.doppeln') }}</button>
+          <button class="k-gefahr schmal" @click="loeschFrage = i">{{ t('v3.bib.loeschen') }}</button>
         </div>
 
         <div v-if="loeschFrage === i" class="rueckfrage">
-          <p>„{{ p.station ?? p.name }}“ wirklich löschen? Das lässt sich nicht rückgängig machen.</p>
+          <p>{{ t('v3.editor.loeschFrage', { name: p.station ?? p.name }) }}</p>
           <div class="k-reihe">
-            <button class="k-zweit" @click="loeschFrage = null">Behalten</button>
-            <button class="k-gefahr" @click="phaseLoeschen(i)">Endgültig löschen</button>
+            <button class="k-zweit" @click="loeschFrage = null">{{ t('v3.allgemein.behalten') }}</button>
+            <button class="k-gefahr" @click="phaseLoeschen(i)">{{ t('v3.allgemein.endgueltigLoeschen') }}</button>
           </div>
         </div>
       </div>
 
       <div class="k-spalte abstand" v-if="!arbeit.readonly">
-        <button class="k-zweit" @click="phaseNeu">Phase hinzufügen</button>
+        <button class="k-zweit" @click="phaseNeu">{{ t('v3.editor.phaseHinzufuegen') }}</button>
         <button class="k-haupt" :disabled="!geaendert" @click="sichern">
-          Satz sichern
-          <span class="k-unter">{{ geaendert ? 'Es gibt ungesicherte Änderungen' : 'Keine Änderungen offen' }}</span>
+          {{ t('v3.editor.satzSichern') }}
+          <span class="k-unter">{{ geaendert ? t('v3.allgemein.offeneAenderungen') : t('v3.allgemein.keineAenderungen') }}</span>
         </button>
       </div>
     </template>
 
     <!-- Ebene 3: eine Phase -->
     <template v-else>
-      <button class="k-nav" @click="ebene = 'phasen'">Zurück zu {{ disziplin.name }}</button>
+      <button class="k-nav" @click="ebene = 'phasen'">{{ t('v3.editor.zurueckZu', { name: disziplin.name }) }}</button>
 
       <header class="titel">
         <h2>{{ phase.station ?? phase.name }}</h2>
-        <p class="unterzeile" v-if="phase.ruleRef">Regelgrundlage {{ phase.ruleRef }}</p>
+        <p class="unterzeile" v-if="phase.ruleRef">{{ t('v3.editor.regelgrundlage', { regel: phase.ruleRef }) }}</p>
       </header>
 
       <fieldset class="block" :disabled="arbeit.readonly">
         <div class="e-gruppe">
-          <label class="e-marke" for="f-name">Überschrift</label>
+          <label class="e-marke" for="f-name">{{ t('v3.editor.ueberschrift') }}</label>
           <input id="f-name" class="e-feld" :value="phase.station ?? phase.name"
                  @input="e => { istEpp ? phase.station = e.target.value : phase.name = e.target.value; merken() }" />
         </div>
 
         <div class="e-gruppe">
-          <label class="e-marke" for="f-besch">Beschreibung für den Schützen</label>
+          <label class="e-marke" for="f-besch">{{ t('v3.editor.beschreibung') }}</label>
           <textarea id="f-besch" class="e-feld" rows="3"
                     :value="istEpp ? (phase.notes ?? []).join('\n') : phase.description"
                     @input="e => { istEpp ? phase.notes = e.target.value.split('\n') : phase.description = e.target.value; merken() }"></textarea>
         </div>
 
         <div class="e-gruppe">
-          <span class="e-marke">Ansagen der Aufsicht</span>
+          <span class="e-marke">{{ t('v3.editor.ansagen') }}</span>
           <div v-for="(a, i) in (phase.roCommands ?? [])" :key="i" class="ansage-zeile">
             <input class="e-feld" :value="a" @input="e => ansageAendern(i, e.target.value)" />
-            <button class="k-gefahr schmal" @click="ansageWeg(i)">Weg</button>
+            <button class="k-gefahr schmal" @click="ansageWeg(i)">{{ t('v3.allgemein.weg') }}</button>
           </div>
-          <button class="k-zweit" @click="ansageHinzu">Ansage hinzufügen</button>
+          <button class="k-zweit" @click="ansageHinzu">{{ t('v3.editor.ansageHinzufuegen') }}</button>
         </div>
       </fieldset>
 
@@ -203,34 +205,34 @@ const regelAbweichung = computed(() => {
         <template v-if="istEpp">
           <div class="e-paar">
             <div class="e-gruppe">
-              <label class="e-marke">Distanz</label>
+              <label class="e-marke">{{ t('v3.editor.distanz') }}</label>
               <input class="e-feld" :value="phase.distance" @input="e => { phase.distance = e.target.value; merken() }" />
             </div>
             <div class="e-gruppe">
-              <label class="e-marke">Anschlag</label>
+              <label class="e-marke">{{ t('v3.editor.anschlag') }}</label>
               <input class="e-feld" :value="phase.position" @input="e => { phase.position = e.target.value; merken() }" />
             </div>
           </div>
           <div class="e-paar">
             <div class="e-gruppe">
-              <label class="e-marke">Zeitlimit in Sekunden (0 = offen)</label>
+              <label class="e-marke">{{ t('v3.editor.zeitlimit') }}</label>
               <input class="e-feld" type="number" min="0" :value="sekunden(phase.timeLimitMs)"
                      @input="e => setSekunden('timeLimitMs', e.target.value)" />
             </div>
             <div class="e-gruppe">
-              <label class="e-marke">Schusszahl</label>
+              <label class="e-marke">{{ t('v3.editor.schusszahl') }}</label>
               <input class="e-feld" type="number" min="0" :value="phase.shots"
                      @input="e => { phase.shots = Number(e.target.value) || 0; merken() }" />
             </div>
           </div>
           <div class="e-paar" v-if="phase.timeLimitMs > 0">
             <div class="e-gruppe">
-              <label class="e-marke">Zweites Signal beginnt bei Sekunde</label>
+              <label class="e-marke">{{ t('v3.editor.signalBeginn') }}</label>
               <input class="e-feld" type="number" min="0" :value="sekunden(phase.stopSignalAtMs)"
                      @input="e => setSekunden('stopSignalAtMs', e.target.value)" />
             </div>
             <div class="e-gruppe">
-              <label class="e-marke">Dauer des Signals in Sekunden</label>
+              <label class="e-marke">{{ t('v3.editor.signalDauer') }}</label>
               <input class="e-feld" type="number" min="0" :value="sekunden(phase.stopSignalDurationMs)"
                      @input="e => setSekunden('stopSignalDurationMs', e.target.value)" />
             </div>
@@ -241,24 +243,24 @@ const regelAbweichung = computed(() => {
         <template v-else>
           <div class="e-paar">
             <div class="e-gruppe">
-              <label class="e-marke">Vorlauf in Sekunden</label>
+              <label class="e-marke">{{ t('v3.editor.vorlauf') }}</label>
               <input class="e-feld" type="number" min="0" :value="sekunden(phase.prepMs)"
                      @input="e => setSekunden('prepMs', e.target.value)" />
             </div>
             <div class="e-gruppe">
-              <label class="e-marke">Schießzeit in Sekunden</label>
+              <label class="e-marke">{{ t('v3.editor.schiesszeit') }}</label>
               <input class="e-feld" type="number" min="0" :value="sekunden(phase.durationMs)"
                      @input="e => setSekunden('durationMs', e.target.value)" />
             </div>
           </div>
           <div class="e-paar">
             <div class="e-gruppe">
-              <label class="e-marke">Durchgänge</label>
+              <label class="e-marke">{{ t('v3.editor.durchgaenge') }}</label>
               <input class="e-feld" type="number" min="1" :value="phase.repetitions"
                      @input="e => { phase.repetitions = Math.max(1, Number(e.target.value) || 1); merken() }" />
             </div>
             <div class="e-gruppe">
-              <label class="e-marke">Pause dazwischen in Sekunden</label>
+              <label class="e-marke">{{ t('v3.editor.pauseDazwischen') }}</label>
               <input class="e-feld" type="number" min="0" :value="sekunden(phase.repPauseMs)"
                      @input="e => setSekunden('repPauseMs', e.target.value)" />
             </div>
@@ -266,15 +268,15 @@ const regelAbweichung = computed(() => {
           <div class="k-spalte">
             <label class="e-schalter">
               <input type="checkbox" :checked="phase.soundAtStart" @change="e => { phase.soundAtStart = e.target.checked; merken() }" />
-              Startsignal am Beginn der Schießzeit
+              {{ t('v3.editor.startsignalAn') }}
             </label>
             <label class="e-schalter">
               <input type="checkbox" :checked="phase.soundAtEnd" @change="e => { phase.soundAtEnd = e.target.checked; merken() }" />
-              Endsignal am Ablauf der Schießzeit
+              {{ t('v3.editor.endsignalAn') }}
             </label>
             <label class="e-schalter">
               <input type="checkbox" :checked="phase.waitAfter" @change="e => { phase.waitAfter = e.target.checked; merken() }" />
-              Danach auf die Aufsicht warten
+              {{ t('v3.editor.danachWarten') }}
             </label>
           </div>
         </template>
@@ -282,8 +284,8 @@ const regelAbweichung = computed(() => {
 
       <div class="k-spalte abstand" v-if="!arbeit.readonly">
         <button class="k-haupt" :disabled="!geaendert" @click="sichern">
-          Satz sichern
-          <span class="k-unter">{{ geaendert ? 'Es gibt ungesicherte Änderungen' : 'Keine Änderungen offen' }}</span>
+          {{ t('v3.editor.satzSichern') }}
+          <span class="k-unter">{{ geaendert ? t('v3.allgemein.offeneAenderungen') : t('v3.allgemein.keineAenderungen') }}</span>
         </button>
       </div>
     </template>

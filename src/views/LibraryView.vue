@@ -6,6 +6,7 @@
  * der Nutzer ändert, lebt in eigenen Sätzen daneben.
  */
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { duplicateSet, exportSet, exportSetLegacy, importSet, mergeSet, fetchSet } from '../core/library.js'
 
 const props = defineProps({
@@ -13,6 +14,7 @@ const props = defineProps({
   activeId: { type: String, required: true },
 })
 const emit = defineEmits(['aktivieren', 'sichern', 'loeschen', 'bearbeiten', 'schliessen'])
+const { t } = useI18n()
 
 const ansicht = ref('liste')     // liste | ausgeben | einlesen | nachladen
 const arbeitsSatz = ref(null)
@@ -30,7 +32,7 @@ const aktiverSatz = computed(() => props.sets.find(s => s.id === props.activeId)
 function kopieAnlegen(satz) {
   const kopie = duplicateSet(satz, `${satz.name} — eigene Fassung`)
   emit('sichern', kopie)
-  meldung.value = `„${kopie.name}“ angelegt. Sie ist jetzt bearbeitbar.`
+  meldung.value = t('v3.bib.angelegt', { name: kopie.name })
   fehler.value = null
 }
 
@@ -47,10 +49,10 @@ function ausgabeUmschalten(art) {
 async function inZwischenablage() {
   try {
     await navigator.clipboard.writeText(ausgabeText.value)
-    meldung.value = 'In die Zwischenablage kopiert.'
+    meldung.value = t('v3.bib.kopiert')
     fehler.value = null
   } catch {
-    fehler.value = 'Die Zwischenablage ist hier gesperrt. Text unten markieren und selbst kopieren.'
+    fehler.value = t('v3.bib.zwischenablageGesperrt')
   }
 }
 function alsDateiSichern() {
@@ -60,10 +62,10 @@ function alsDateiSichern() {
     const a = document.createElement('a')
     a.href = url; a.download = name; a.click()
     URL.revokeObjectURL(url)
-    meldung.value = `Als ${name} gesichert.`
+    meldung.value = name
     fehler.value = null
   } catch {
-    fehler.value = 'Das Sichern als Datei ist hier gesperrt. Nimm die Zwischenablage.'
+    fehler.value = t('v3.bib.dateiGesperrt')
   }
 }
 
@@ -71,7 +73,7 @@ function einlesen() {
   try {
     const satz = importSet(eingabeText.value, 'Eingelesener Satz')
     emit('sichern', satz)
-    meldung.value = `„${satz.name}“ mit ${satz.disciplines.length} Disziplinen eingelesen.`
+    meldung.value = t('v3.bib.eingelesen', { name: satz.name, anzahl: satz.disciplines.length })
     fehler.value = null
     eingabeText.value = ''
     ansicht.value = 'liste'
@@ -85,7 +87,7 @@ async function nachladen() {
   fehler.value = null; meldung.value = null
   const ziel = aktiverSatz.value
   if (!ziel || ziel.readonly) {
-    fehler.value = 'Nachladen geht nur in einen eigenen Satz. Lege zuerst eine Kopie an.'
+    fehler.value = t('v3.bib.nurEigener')
     return
   }
   try {
@@ -96,7 +98,7 @@ async function nachladen() {
       neu.length ? `${neu.length} neu: ${neu.join(', ')}` : null,
       aktualisiert.length ? `${aktualisiert.length} aufgefrischt` : null,
       behalten.length ? `${behalten.length} unverändert gelassen` : null,
-    ].filter(Boolean).join(' · ') || 'Nichts zu tun, alles war bereits vorhanden.'
+    ].filter(Boolean).join(' · ') || t('v3.bib.nichtsZuTun')
     ansicht.value = 'liste'
   } catch (e) {
     fehler.value = e.message
@@ -107,7 +109,7 @@ async function nachladen() {
 <template>
   <div class="bibliothek">
     <button class="k-nav" @click="ansicht === 'liste' ? emit('schliessen') : (ansicht = 'liste')">
-      {{ ansicht === 'liste' ? 'Zurück zur Disziplinwahl' : 'Zurück zur Satzliste' }}
+      {{ ansicht === 'liste' ? t('v3.bib.zurueckZurWahl') : t('v3.bib.zurueckZurListe') }}
     </button>
 
     <p v-if="meldung" class="meldung gut">{{ meldung }}</p>
@@ -116,8 +118,8 @@ async function nachladen() {
     <!-- Liste der Sätze -->
     <template v-if="ansicht === 'liste'">
       <header class="titel">
-        <h2>Sätze</h2>
-        <p class="unterzeile">Ein Satz bündelt Disziplinen samt Ansagen und Beschreibungen.</p>
+        <h2>{{ t('v3.bib.titel') }}</h2>
+        <p class="unterzeile">{{ t('v3.bib.untertitel') }}</p>
       </header>
 
       <div v-for="s in sets" :key="s.id" class="karte" :class="{ aktiv: s.id === activeId }">
@@ -125,65 +127,65 @@ async function nachladen() {
           <div>
             <strong class="satz-name">{{ s.name }}</strong>
             <span class="satz-neben">
-              {{ s.disciplines.length }} Disziplinen · Fassung {{ s.version }}
-              <template v-if="s.readonly"> · schreibgeschützt</template>
+              {{ s.disciplines.length }} {{ t('v3.allgemein.disziplinen') }} · {{ t('v3.allgemein.fassung') }} {{ s.version }}
+              <template v-if="s.readonly"> · {{ t('v3.allgemein.schreibgeschuetzt') }}</template>
             </span>
           </div>
-          <span v-if="s.id === activeId" class="marke">in Benutzung</span>
+          <span v-if="s.id === activeId" class="marke">{{ t('v3.allgemein.inBenutzung') }}</span>
         </div>
 
         <div class="k-spalte">
           <button v-if="s.id !== activeId" class="k-zweit betont" @click="emit('aktivieren', s.id)">
-            Diesen Satz benutzen
+            {{ t('v3.bib.diesenBenutzen') }}
           </button>
           <div class="k-reihe">
             <button class="k-zweit" @click="emit('bearbeiten', s.id)">
-              {{ s.readonly ? 'Ansehen' : 'Bearbeiten' }}
+              {{ s.readonly ? t('v3.allgemein.ansehen') : t('v3.allgemein.bearbeiten') }}
             </button>
-            <button class="k-zweit" @click="kopieAnlegen(s)">Kopie anlegen</button>
+            <button class="k-zweit" @click="kopieAnlegen(s)">{{ t('v3.bib.kopieAnlegen') }}</button>
           </div>
           <div class="k-reihe">
-            <button class="k-zweit" @click="ausgeben(s)">Ausgeben</button>
-            <button v-if="!s.readonly" class="k-gefahr" @click="loeschFrage = s.id">Löschen</button>
+            <button class="k-zweit" @click="ausgeben(s)">{{ t('v3.bib.ausgeben') }}</button>
+            <button v-if="!s.readonly" class="k-gefahr" @click="loeschFrage = s.id">{{ t('v3.bib.loeschen') }}</button>
           </div>
         </div>
 
         <div v-if="loeschFrage === s.id" class="rueckfrage">
-          <p>„{{ s.name }}“ mit allen Änderungen löschen? Das lässt sich nicht rückgängig machen.</p>
+          <p>{{ t('v3.bib.loeschFrage', { name: s.name }) }}</p>
           <div class="k-reihe">
-            <button class="k-zweit" @click="loeschFrage = null">Behalten</button>
-            <button class="k-gefahr" @click="emit('loeschen', s.id); loeschFrage = null">Endgültig löschen</button>
+            <button class="k-zweit" @click="loeschFrage = null">{{ t('v3.allgemein.behalten') }}</button>
+            <button class="k-gefahr" @click="emit('loeschen', s.id); loeschFrage = null">{{ t('v3.allgemein.endgueltigLoeschen') }}</button>
           </div>
         </div>
       </div>
 
       <div class="k-spalte abstand">
-        <button class="k-zweit" @click="ansicht = 'einlesen'">Satz einlesen</button>
-        <button class="k-zweit" @click="ansicht = 'nachladen'">Neue Disziplinen nachladen</button>
+        <button class="k-zweit" @click="ansicht = 'einlesen'">{{ t('v3.bib.satzEinlesen') }}</button>
+        <button class="k-zweit" @click="ansicht = 'nachladen'">{{ t('v3.bib.nachladen') }}</button>
       </div>
     </template>
 
     <!-- Ausgeben -->
     <template v-else-if="ansicht === 'ausgeben'">
       <header class="titel">
-        <h2>{{ arbeitsSatz.name }} ausgeben</h2>
+        <h2>{{ t('v3.bib.ausgebenTitel', { name: arbeitsSatz.name }) }}</h2>
       </header>
       <div class="k-reihe">
         <button class="k-zweit" :class="{ betont: ausgabeArt === 'eigen' }" @click="ausgabeUmschalten('eigen')">
-          Vollständig
-          <span class="k-unter">mit allen Texten</span>
+          {{ t('v3.bib.vollstaendig') }}
+          <span class="k-unter">{{ t('v3.bib.vollstaendigUnter') }}</span>
         </button>
         <button class="k-zweit" :class="{ betont: ausgabeArt === 'alt' }" @click="ausgabeUmschalten('alt')">
-          Altformat
-          <span class="k-unter">für den alten Timer</span>
+          {{ t('v3.bib.altformat') }}
+          <span class="k-unter">{{ t('v3.bib.altformatUnter') }}</span>
         </button>
       </div>
       <div class="k-spalte">
         <button class="k-haupt" @click="inZwischenablage">
-          In die Zwischenablage
-          <span class="k-unter">zum Weitergeben oder Sichern</span>
+          {{ t('v3.bib.zwischenablage') }}
+          <span class="k-unter">{{ t('v3.bib.zwischenablageUnter') }}</span>
         </button>
-        <button class="k-zweit" @click="alsDateiSichern">Als Datei sichern</button>
+        <button class="k-zweit" @click="alsDateiSichern">{{ t('v3.bib.alsDatei') }}</button>
       </div>
       <textarea class="e-feld ausgabe" readonly :value="ausgabeText"></textarea>
     </template>
@@ -191,47 +193,44 @@ async function nachladen() {
     <!-- Einlesen -->
     <template v-else-if="ansicht === 'einlesen'">
       <header class="titel">
-        <h2>Satz einlesen</h2>
-        <p class="unterzeile">
-          Nimmt das vollständige Format ebenso an wie die Sammlung aus dem alten Timer.
-        </p>
+        <h2>{{ t('v3.bib.einlesenTitel') }}</h2>
+        <p class="unterzeile">{{ t('v3.bib.einlesenUnter') }}</p>
       </header>
-      <textarea class="e-feld eingabe" v-model="eingabeText" placeholder="JSON hier einfügen"></textarea>
+      <textarea class="e-feld eingabe" v-model="eingabeText" :placeholder="t('v3.bib.einlesenPlatzhalter')"></textarea>
       <button class="k-haupt" :disabled="!eingabeText.trim()" @click="einlesen">
-        Einlesen
-        <span class="k-unter">legt einen neuen Satz an, vorhandene bleiben unberührt</span>
+        {{ t('v3.bib.einlesenKnopf') }}
+        <span class="k-unter">{{ t('v3.bib.einlesenKnopfUnter') }}</span>
       </button>
     </template>
 
     <!-- Nachladen -->
     <template v-else>
       <header class="titel">
-        <h2>Neue Disziplinen nachladen</h2>
-        <p class="unterzeile">
-          Holt eine Sammlung und ergänzt damit den Satz, der gerade in Benutzung ist:
+        <h2>{{ t('v3.bib.nachladenTitel') }}</h2>
+        <p class="unterzeile">{{ t('v3.bib.nachladenUnter') }}
           <strong>{{ aktiverSatz?.name }}</strong>
         </p>
       </header>
 
       <div class="e-gruppe">
-        <label class="e-marke" for="url">Quelle</label>
+        <label class="e-marke" for="url">{{ t('v3.bib.quelle') }}</label>
         <input id="url" class="e-feld" v-model="nachladeUrl" />
       </div>
 
       <div class="k-spalte">
         <button class="k-zweit" :class="{ betont: nachladeStrategie === 'nurNeue' }" @click="nachladeStrategie = 'nurNeue'">
-          Nur neue aufnehmen
-          <span class="k-unter">eigene Änderungen bleiben unangetastet</span>
+          {{ t('v3.bib.nurNeue') }}
+          <span class="k-unter">{{ t('v3.bib.nurNeueUnter') }}</span>
         </button>
         <button class="k-zweit" :class="{ betont: nachladeStrategie === 'auffrischen' }" @click="nachladeStrategie = 'auffrischen'">
-          Auch bekannte auffrischen
-          <span class="k-unter">überschreibt eigene Änderungen an bekannten Disziplinen</span>
+          {{ t('v3.bib.auffrischen') }}
+          <span class="k-unter">{{ t('v3.bib.auffrischenUnter') }}</span>
         </button>
       </div>
 
       <button class="k-haupt abstand" @click="nachladen">
-        Jetzt nachladen
-        <span class="k-unter">{{ nachladeStrategie === 'nurNeue' ? 'ergänzt nur, was fehlt' : 'ersetzt bekannte Disziplinen' }}</span>
+        {{ t('v3.bib.jetztNachladen') }}
+        <span class="k-unter">{{ nachladeStrategie === 'nurNeue' ? t('v3.bib.ergaenztNur') : t('v3.bib.ersetztBekannte') }}</span>
       </button>
     </template>
   </div>

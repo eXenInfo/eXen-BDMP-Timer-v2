@@ -82,8 +82,10 @@ describe('Zuordnung der Regelwerke', () => {
     expect(findDisciplineRules('NPA Service Pistol (30M1)').commandSet).toBe('policePistol')
   })
 
-  it('die Abweichung bei BDMP 1020 ist vermerkt, nicht stillschweigend geändert', () => {
-    expect(findDisciplineRules('BDMP 1020').abweichung).toMatch(/7 m und 15 m/)
+  it('die Kleinkaliber-Fassung DKS 1 – 1020 hat ein eigenes Regelwerk', () => {
+    const dks = findDisciplineRules('DKS 1 – 1020 (Kleinkaliber)')
+    expect(dks.ruleRef).toBe('C.15A')
+    expect(dks).not.toBe(findDisciplineRules('BDMP 1020'))
   })
 })
 

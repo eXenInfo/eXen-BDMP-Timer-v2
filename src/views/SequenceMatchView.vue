@@ -6,10 +6,13 @@
  * Der Unterschied liegt im Ablauf — hier gibt es Vorläufe, Wiederholungen mit
  * Pausen dazwischen und Haltepunkte, an denen der RO weitergibt.
  */
+import { useI18n } from 'vue-i18n'
 import { computed, onMounted, ref, watch } from 'vue'
 import { createSequenceEngine, SeqState, SeqEvent } from '../core/sequenceEngine.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
+
+const { t } = useI18n()
 
 const props = defineProps({
   /** Angereicherte Disziplin: Phasen, Kommandofolge, Stellungen, Regeltexte. */
@@ -59,13 +62,13 @@ const anzeige = computed(() => {
 })
 
 const beschriftung = computed(() => ({
-  [SeqState.IDLE]:         'Bereit',
-  [SeqState.PREP]:         'Achtung — Startsignal folgt',
-  [SeqState.RUNNING]:      'Schießzeit läuft',
-  [SeqState.REP_PAUSE]:    'Pause zwischen den Durchgängen',
-  [SeqState.WAITING_NEXT]: 'Wartet auf die Aufsicht',
-  [SeqState.PAUSED]:       'Angehalten',
-  [SeqState.FINISHED]:     'Ablauf beendet',
+  [SeqState.IDLE]:         t('v3.seq.bereit'),
+  [SeqState.PREP]:         t('v3.seq.achtung'),
+  [SeqState.RUNNING]:      t('v3.seq.schiesszeit'),
+  [SeqState.REP_PAUSE]:    t('v3.seq.pauseDazwischen'),
+  [SeqState.WAITING_NEXT]: t('v3.seq.wartetAufAufsicht'),
+  [SeqState.PAUSED]:       t('v3.seq.angehalten'),
+  [SeqState.FINISHED]:     t('v3.seq.beendet'),
 }[zustand.value] ?? ''))
 
 const laeuft = computed(() =>
@@ -74,17 +77,17 @@ const laeuft = computed(() =>
 const hauptaktion = computed(() => {
   switch (zustand.value) {
     case SeqState.IDLE:
-      return { text: 'Starten', unter: phase.value?.name ?? '', fn: starten, klasse: 'gruen' }
+      return { text: t('v3.seq.starten'), unter: phase.value?.name ?? '', fn: starten, klasse: 'gruen' }
     case SeqState.WAITING_NEXT:
-      return { text: 'Weiter', unter: phase.value?.name ?? '', fn: weiter, klasse: 'gruen' }
+      return { text: t('v3.seq.weiter'), unter: phase.value?.name ?? '', fn: weiter, klasse: 'gruen' }
     case SeqState.PAUSED:
-      return { text: 'Fortsetzen', unter: `noch ${sek(s.value?.remainingMs)} s`, fn: fortsetzen, klasse: 'gruen' }
+      return { text: t('v3.seq.fortsetzen'), unter: t('v3.seq.nochSekunden', { s: sek(s.value?.remainingMs) }), fn: fortsetzen, klasse: 'gruen' }
     case SeqState.RUNNING:
     case SeqState.PREP:
     case SeqState.REP_PAUSE:
-      return { text: 'Anhalten', unter: 'Zeit stoppt sofort', fn: anhalten, klasse: 'gelb' }
+      return { text: t('v3.seq.anhalten'), unter: t('v3.seq.zeitStopptSofort'), fn: anhalten, klasse: 'gelb' }
     case SeqState.FINISHED:
-      return { text: 'Neuer Durchgang', unter: name.value, fn: zuruecksetzen, klasse: 'grau' }
+      return { text: t('v3.seq.neuerDurchgang'), unter: name.value, fn: zuruecksetzen, klasse: 'grau' }
     default: return null
   }
 })
@@ -107,11 +110,11 @@ const wiederholungen = computed(() => {
   <div class="schirm">
     <header class="kopf">
       <div class="kopf-block">
-        <span class="kopf-marke">Disziplin</span>
+        <span class="kopf-marke">{{ t('v3.seq.disziplin') }}</span>
         <strong class="kopf-wert klein">{{ name }}</strong>
       </div>
       <div class="kopf-block rechts">
-        <span class="kopf-marke">Phase</span>
+        <span class="kopf-marke">{{ t('v3.seq.phase') }}</span>
         <strong class="kopf-wert">{{ (s?.index ?? 0) + 1 }}<span class="von">/{{ phases.length }}</span></strong>
       </div>
     </header>
@@ -126,17 +129,17 @@ const wiederholungen = computed(() => {
       <div class="uhr" :class="{ gross: zustand === 'prep' || (s?.remainingMs ?? 0) < 60000 }">{{ anzeige }}</div>
       <p class="uhr-marke">{{ beschriftung }}</p>
 
-      <p v-if="wiederholungen" class="wdh">Durchgang {{ wiederholungen }}</p>
+      <p v-if="wiederholungen" class="wdh">{{ t('v3.seq.durchgang') }} {{ wiederholungen }}</p>
       <p v-if="phase?.repetitions > 1 && zustand === 'idle'" class="wdh-plan">
-        {{ phase.repetitions }} × {{ Math.round(phase.durationMs / 1000) }} s<span
-          v-if="phase.repPauseMs"> mit {{ Math.round(phase.repPauseMs / 1000) }} s Pause</span>
+        {{ t('v3.seq.durchgangPlan', { anzahl: phase.repetitions, dauer: Math.round(phase.durationMs / 1000) }) }}<span
+          v-if="phase.repPauseMs">{{ t('v3.seq.mitPause', { pause: Math.round(phase.repPauseMs / 1000) }) }}</span>
       </p>
     </main>
 
     <!-- Kommandofolge vor der Serie -->
     <section v-if="zustand === 'idle' || zustand === 'waitingNext'" class="kommandos">
       <p class="kommando-marke" v-if="befehle">
-        Kommandofolge {{ befehle.ruleRef }}
+        {{ t('v3.seq.kommandofolge', { regel: befehle.ruleRef }) }}
       </p>
       <ol class="kommando-liste" v-if="befehle">
         <li v-for="(k, i) in [...befehle.vorher, ...befehle.start]" :key="i">
@@ -150,7 +153,7 @@ const wiederholungen = computed(() => {
 
     <!-- Kommandofolge nach der Serie -->
     <section v-else-if="zustand === 'finished' && befehle" class="kommandos nachher">
-      <p class="kommando-marke">Nach der Serie — {{ befehle.ruleRef }}</p>
+      <p class="kommando-marke">{{ t('v3.seq.nachSerie', { regel: befehle.ruleRef }) }}</p>
       <ol class="kommando-liste">
         <li v-for="(k, i) in befehle.nachher" :key="i">
           <span class="kommando">„{{ k.de }}“</span>
@@ -161,7 +164,7 @@ const wiederholungen = computed(() => {
 
     <!-- Abbruchkommando, solange geschossen wird -->
     <section v-else-if="laeuft && befehle?.abbruch?.length" class="kommandos abbruch">
-      <p class="kommando-marke">Abbruch</p>
+      <p class="kommando-marke">{{ t('v3.seq.abbruch') }}</p>
       <p class="kommando">„{{ befehle.abbruch[0].de }}“ <span class="kommando-en">{{ befehle.abbruch[0].en }}</span></p>
       <p class="kommando-hinweis">{{ befehle.abbruch[0].hinweis }}</p>
     </section>
@@ -169,17 +172,18 @@ const wiederholungen = computed(() => {
     <!-- Stellungen, Fertigstellung, Ablauf und Hinweise -->
     <section v-if="!laeuft" class="hinweise">
       <button class="k-nav" @click="hinweiseOffen = !hinweiseOffen">
-        {{ hinweiseOffen ? 'Regeltexte ausblenden' : 'Stellungen, Fertigstellung und Regeltexte' }}
+        {{ hinweiseOffen ? t('v3.seq.regeltexteVerbergen') : t('v3.seq.regeltexteZeigen') }}
         <span class="regel" v-if="disziplin.ruleRef">{{ disziplin.ruleRef }}</span>
       </button>
 
       <div v-if="hinweiseOffen" class="hinweis-liste">
+        <p v-if="$i18n.locale !== 'de'" class="sprachhinweis">{{ t('v3.allgemein.nurDeutsch') }}</p>
         <template v-if="disziplin.abweichung">
           <p class="warnung">{{ disziplin.abweichung }}</p>
         </template>
 
         <template v-if="phase?.positions?.length">
-          <p class="hinweis-titel">Stellungen dieser Phase</p>
+          <p class="hinweis-titel">{{ t('v3.seq.stellungenDieserPhase') }}</p>
           <div v-for="st in phase.positions" :key="st.name" class="stellung">
             <strong>{{ st.name }} <span class="regel">{{ st.ruleRef }}</span></strong>
             <p>{{ st.text }}</p>
@@ -187,33 +191,33 @@ const wiederholungen = computed(() => {
         </template>
 
         <template v-if="phase?.positionChangeNotes?.length">
-          <p class="hinweis-titel">Beim Stellungswechsel</p>
+          <p class="hinweis-titel">{{ t('v3.seq.beimStellungswechsel') }}</p>
           <ul><li v-for="(n, i) in phase.positionChangeNotes" :key="i">{{ n }}</li></ul>
         </template>
 
         <template v-if="disziplin.readiness">
-          <p class="hinweis-titel">Fertigstellung <span class="regel">{{ disziplin.readiness.ruleRef }}</span></p>
+          <p class="hinweis-titel">{{ t('v3.seq.fertigstellung') }} <span class="regel">{{ disziplin.readiness.ruleRef }}</span></p>
           <p class="fliess">{{ disziplin.readiness.text }}</p>
         </template>
 
         <template v-if="disziplin.ablauf?.length">
-          <p class="hinweis-titel">Ablauf laut Sportordnung</p>
+          <p class="hinweis-titel">{{ t('v3.seq.ablaufLautSpo') }}</p>
           <ul><li v-for="(a, i) in disziplin.ablauf" :key="i">{{ a }}</li></ul>
         </template>
 
         <template v-if="disziplin.hinweise?.length">
-          <p class="hinweis-titel">Weitere Regeln</p>
+          <p class="hinweis-titel">{{ t('v3.seq.weitereRegeln') }}</p>
           <ul><li v-for="(h, i) in disziplin.hinweise" :key="i">{{ h }}</li></ul>
         </template>
 
         <template v-if="befehle?.hinweise?.length">
-          <p class="hinweis-titel">Zum Entladen und Vorzeigen</p>
+          <p class="hinweis-titel">{{ t('v3.seq.entladenVorzeigen') }}</p>
           <ul><li v-for="(h, i) in befehle.hinweise" :key="i">{{ h }}</li></ul>
         </template>
 
         <p class="quelle" v-if="disziplin.ammo || disziplin.target">
-          <template v-if="disziplin.ammo">Munition: {{ disziplin.ammo }}. </template>
-          <template v-if="disziplin.target">Scheibe: {{ disziplin.target }}.</template>
+          <template v-if="disziplin.ammo">{{ t('v3.seq.munition') }}: {{ disziplin.ammo }}. </template>
+          <template v-if="disziplin.target">{{ t('v3.seq.scheibe') }}: {{ disziplin.target }}.</template>
         </p>
       </div>
     </section>
@@ -225,7 +229,7 @@ const wiederholungen = computed(() => {
       </button>
 
       <div class="neben" v-if="laeuft || zustand === 'paused'">
-        <button class="klein" @click="zuruecksetzen">Abbrechen</button>
+        <button class="klein" @click="zuruecksetzen">{{ t('v3.allgemein.abbrechen') }}</button>
       </div>
 
       <nav class="phasen" v-if="!laeuft">
@@ -290,6 +294,7 @@ const wiederholungen = computed(() => {
 .stellung strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
 .stellung p { margin: 0; font-size: 0.86rem; line-height: 1.5; color: #d7dee6; }
 .warnung { margin: 0 0 0.8rem; padding: 0.6rem 0.8rem; background: #3b1d05; border: 1px solid #7c4a08; border-radius: 0.5rem; color: var(--akzent); font-size: 0.86rem; line-height: 1.5; }
+.sprachhinweis { margin: 0 0 0.8rem; padding: 0.55rem 0.75rem; background: var(--flaeche); border: 1px dashed var(--rand); border-radius: 0.5rem; color: var(--gedaempft); font-size: 0.8rem; line-height: 1.5; }
 .quelle { margin: 0.8rem 0 0; font-size: 0.8rem; color: var(--gedaempft); line-height: 1.5; }
 
 .fuss { display: flex; flex-direction: column; gap: 0.5rem; }

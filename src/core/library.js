@@ -15,7 +15,7 @@
  */
 
 import { convertLegacyCollection, toLegacyPhase } from './legacyImport.js'
-import { enrichDiscipline } from './disciplineRules.js'
+import { enrichDiscipline, GENERATED_DISCIPLINES } from './disciplineRules.js'
 import { EPP_PHASES, EPP_TOTAL_TIME_MS } from './eppRules.js'
 
 export const SPEICHER_SCHLUESSEL = 'bdmp.bibliothek.v1'
@@ -33,6 +33,10 @@ export function createBuiltinSet(legacyCollection) {
   const disciplines = convertLegacyCollection(legacyCollection).map(d => enrichDiscipline({
     id: slug(d.name), name: d.name, kind: d.kind, phases: d.phases,
   }))
+  for (const g of GENERATED_DISCIPLINES) {
+    if (!disciplines.some(d => d.name === g.name)) disciplines.push(enrichDiscipline(structuredClone(g)))
+  }
+  disciplines.sort((a, b) => a.name.localeCompare(b.name, 'de'))
   disciplines.unshift({
     id: 'epp',
     name: 'Europäischer Präzisions Parcours (EPP)',

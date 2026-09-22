@@ -6,11 +6,14 @@
  * Aktion. Alles Weitere ist kleiner und nachgeordnet. Restzeit und
  * Störungszähler bleiben dauerhaft sichtbar, weil beide wertungsrelevant sind.
  */
+import { useI18n } from 'vue-i18n'
 import { computed, onMounted, ref } from 'vue'
 import { createEppEngine, EppState, EppEvent } from '../core/eppEngine.js'
 import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_GENERAL_NOTES } from '../core/eppRules.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
+
+const { t } = useI18n()
 
 const props = defineProps({
   phases:      { type: Array,  default: () => EPP_PHASES },
@@ -81,13 +84,13 @@ const grosseZahl = computed(() => {
 })
 
 const zahlBeschriftung = computed(() => ({
-  [EppState.PREP]:          'Achtung — Startsignal folgt',
-  [EppState.RUNNING_FIXED]: 'Sekunden verbleibend',
-  [EppState.RUNNING_OPEN]:  'Stationszeit läuft',
-  [EppState.MALFUNCTION]:   'Störung — Zeit steht',
-  [EppState.FINISHED]:      'Restzeit für die Auswertekarte',
-  [EppState.EXCLUDED]:      'Ausschluss nach der zweiten Störung',
-}[zustand.value] ?? 'Bereit'))
+  [EppState.PREP]:          t('v3.epp.achtung'),
+  [EppState.RUNNING_FIXED]: t('v3.epp.sekundenVerbleibend'),
+  [EppState.RUNNING_OPEN]:  t('v3.epp.stationLaeuft'),
+  [EppState.MALFUNCTION]:   t('v3.epp.stoerungZeitSteht'),
+  [EppState.FINISHED]:      t('v3.epp.restzeitKarte'),
+  [EppState.EXCLUDED]:      t('v3.epp.ausschluss'),
+}[zustand.value] ?? t('v3.epp.bereit')))
 
 const istOffen = computed(() => zustand.value === EppState.RUNNING_OPEN)
 const istFest  = computed(() => zustand.value === EppState.RUNNING_FIXED)
@@ -97,16 +100,17 @@ const laeuft   = computed(() => istOffen.value || istFest.value)
 const hauptaktion = computed(() => {
   switch (zustand.value) {
     case EppState.IDLE:
-      return { text: `${phase.value?.station ?? 'Station'} starten`, unter: 'Startsignal auslösen', fn: starten, klasse: 'gruen' }
+      return { text: t('v3.epp.stationStarten', { station: phase.value?.station ?? t('v3.epp.station') }),
+               unter: t('v3.epp.startsignalAusloesen'), fn: starten, klasse: 'gruen' }
     case EppState.RUNNING_OPEN:
-      return { text: 'Station beenden', unter: 'nach dem Holstern der geladenen Waffe', fn: beenden, klasse: 'gruen' }
+      return { text: t('v3.epp.stationBeenden'), unter: t('v3.epp.nachHolstern'), fn: beenden, klasse: 'gruen' }
     case EppState.RUNNING_FIXED:
-      return { text: 'Störung', unter: 'Zeit sofort anhalten', fn: stoerung, klasse: 'gelb' }
+      return { text: t('v3.epp.stoerung'), unter: t('v3.epp.zeitAnhalten'), fn: stoerung, klasse: 'gelb' }
     case EppState.MALFUNCTION:
-      return { text: 'Weiter', unter: 'Zeit läuft mit dem nächsten Schuss', fn: weiter, klasse: 'gruen' }
+      return { text: t('v3.epp.weiter'), unter: t('v3.epp.zeitLaeuftWeiter'), fn: weiter, klasse: 'gruen' }
     case EppState.FINISHED:
     case EppState.EXCLUDED:
-      return { text: 'Neuer Durchgang', unter: 'Parcours zurücksetzen', fn: zuruecksetzen, klasse: 'grau' }
+      return { text: t('v3.epp.neuerDurchgang'), unter: t('v3.epp.parcoursZuruecksetzen'), fn: zuruecksetzen, klasse: 'grau' }
     default:
       return null
   }
@@ -135,15 +139,15 @@ const restknapp  = computed(() => {
     <!-- Kopfzeile: dauerhaft sichtbare, wertungsrelevante Werte -->
     <header class="kopf">
       <div class="kopf-block">
-        <span class="kopf-marke">Restzeit gesamt</span>
+        <span class="kopf-marke">{{ t('v3.epp.restzeitGesamt') }}</span>
         <strong class="kopf-wert" :class="{ knapp: restknapp }">{{ mmss(s?.totalRemainingMs) }}</strong>
       </div>
       <div class="kopf-block mitte">
-        <span class="kopf-marke">Station</span>
+        <span class="kopf-marke">{{ t('v3.epp.station') }}</span>
         <strong class="kopf-wert">{{ (s?.stationIndex ?? 0) + 1 }}<span class="von">/{{ phases.length }}</span></strong>
       </div>
       <div class="kopf-block rechts">
-        <span class="kopf-marke">Störungen</span>
+        <span class="kopf-marke">{{ t('v3.epp.stoerungen') }}</span>
         <strong class="kopf-wert">
           <span class="punkt" :class="{ an: stoerungen >= 1 }"></span>
           <span class="punkt" :class="{ an: stoerungen >= 2 }"></span>
@@ -153,8 +157,8 @@ const restknapp  = computed(() => {
 
     <!-- Restzeitansage vor Station 6, C.17.8 -->
     <div v-if="phase?.announceRemainingBeforeStart && zustand === 'idle'" class="ansage">
-      <span class="ansage-marke">Vor dem Startsignal ansagen</span>
-      <strong class="ansage-wert">Restzeit {{ mmss(s?.totalRemainingMs) }}</strong>
+      <span class="ansage-marke">{{ t('v3.epp.ansagen') }}</span>
+      <strong class="ansage-wert">{{ t('v3.epp.restzeit') }} {{ mmss(s?.totalRemainingMs) }}</strong>
     </div>
 
     <!-- Station und Uhr -->
@@ -165,15 +169,14 @@ const restknapp  = computed(() => {
         <span v-if="phase?.position"> · {{ phase.position }}</span>
       </p>
       <p class="schuss-zeile" v-if="phase?.shots">
-        {{ phase.shots }} Schuss<span v-if="phase.shotsNote"> — {{ phase.shotsNote }}</span>
+        {{ phase.shots }} {{ t('v3.epp.schuss') }}<span v-if="phase.shotsNote"> — {{ phase.shotsNote }}</span>
       </p>
 
       <div class="uhr" :class="{ gross: zustand === 'prep' || istFest }">{{ grosseZahl }}</div>
       <p class="uhr-marke">{{ zahlBeschriftung }}</p>
 
       <p v-if="istFest && phase?.stopSignalAtMs != null" class="signal-hinweis">
-        Zweites Signal bei {{ phase.stopSignalAtMs / 1000 }} s, Dauer {{ phase.stopSignalDurationMs / 1000 }} s —
-        Schüsse nach dessen Ende zählen nicht.
+        {{ t('v3.epp.signalHinweis', { beginn: phase.stopSignalAtMs / 1000, dauer: phase.stopSignalDurationMs / 1000 }) }}
       </p>
     </main>
 
@@ -185,7 +188,7 @@ const restknapp  = computed(() => {
     <!-- Ablauf und Hinweise -->
     <section v-if="phase && (phase.notes?.length || phase.afterStation?.length)" class="hinweise">
       <button class="hinweis-schalter" @click="hinweiseOffen = !hinweiseOffen">
-        {{ hinweiseOffen ? 'Hinweise ausblenden' : 'Ablauf und Hinweise' }}
+        {{ hinweiseOffen ? t('v3.epp.hinweiseVerbergen') : t('v3.epp.hinweiseZeigen') }}
         <span class="regel">{{ phase.ruleRef }}</span>
       </button>
       <div v-if="hinweiseOffen" class="hinweis-liste">
@@ -193,12 +196,12 @@ const restknapp  = computed(() => {
           <li v-for="(n, i) in phase.notes" :key="'n' + i">{{ n }}</li>
         </ul>
         <template v-if="phase.afterStation?.length">
-          <p class="hinweis-titel">Nach der Station</p>
+          <p class="hinweis-titel">{{ t('v3.epp.nachStation') }}</p>
           <ul>
             <li v-for="(n, i) in phase.afterStation" :key="'a' + i">{{ n }}</li>
           </ul>
         </template>
-        <p class="hinweis-titel">Immer gültig</p>
+        <p class="hinweis-titel">{{ t('v3.epp.immerGueltig') }}</p>
         <ul>
           <li v-for="(n, i) in EPP_GENERAL_NOTES" :key="'g' + i">{{ n }}</li>
         </ul>
@@ -213,14 +216,14 @@ const restknapp  = computed(() => {
       </button>
 
       <div class="neben">
-        <button v-if="istOffen" class="klein warn" @click="stoerung">Störung</button>
-        <button v-if="laeuft || zustand === 'malfunction'" class="klein" @click="zuruecksetzen">Abbrechen</button>
+        <button v-if="istOffen" class="klein warn" @click="stoerung">{{ t('v3.epp.stoerung') }}</button>
+        <button v-if="laeuft || zustand === 'malfunction'" class="klein" @click="zuruecksetzen">{{ t('v3.allgemein.abbrechen') }}</button>
       </div>
 
       <!-- Signalprobe: gehört später in die Einstellungen, hier zum Abhören -->
       <div class="probe" v-if="!laeuft">
         <button class="hinweis-schalter" @click="probeOffen = !probeOffen">
-          {{ probeOffen ? 'Signalprobe schließen' : 'Signalprobe' }}
+          {{ probeOffen ? t('v3.epp.signalprobeSchliessen') : t('v3.epp.signalprobe') }}
           <span class="regel">{{ startLaenge }} ms</span>
         </button>
         <div v-if="probeOffen" class="probe-reihe">
@@ -230,8 +233,7 @@ const restknapp  = computed(() => {
             @click="probiere(ms)">{{ ms }}</button>
         </div>
         <p v-if="probeOffen" class="probe-hinweis">
-          Gilt für das Startsignal. Die Dauer des zweiten Signals steht in C.17.14
-          und bleibt bei 2 Sekunden.
+          {{ t('v3.epp.signalprobeHinweis') }}
         </p>
       </div>
 

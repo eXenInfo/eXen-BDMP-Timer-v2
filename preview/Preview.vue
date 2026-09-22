@@ -4,6 +4,8 @@
  * In der fertigen App übernimmt das die Navigation der Anwendung.
  */
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import SprachWahl from '../src/components/SprachWahl.vue'
 import EppMatchView from '../src/views/EppMatchView.vue'
 import SequenceMatchView from '../src/views/SequenceMatchView.vue'
 import LibraryView from '../src/views/LibraryView.vue'
@@ -11,6 +13,8 @@ import EditorView from '../src/views/EditorView.vue'
 import { createLibrary } from '../src/core/library.js'
 import { nominalDurationMs } from '../src/core/legacyImport.js'
 import legacy from '../public/disziplinen.json'
+
+const { t } = useI18n()
 
 const speicher = (() => {
   try { window.localStorage.setItem('__probe', '1'); window.localStorage.removeItem('__probe'); return window.localStorage }
@@ -31,11 +35,11 @@ const editorSatz = computed(() => saetze.value.find(s => s.id === editorSatzId.v
 const disziplinen = computed(() => aktiverSatz.value.disciplines)
 
 function dauerText(d) {
-  if (d.kind === 'epp') return '7 Stationen · 50 Schuss · 5:30 Gesamtzeit'
+  if (d.kind === 'epp') return t('v3.wahl.eppKurz')
   const ms = nominalDurationMs(d.phases)
   const m = Math.floor(ms / 60000), s = Math.round((ms % 60000) / 1000)
   const zeit = m > 0 ? `${m}:${String(s).padStart(2, '0')} min` : `${s} s`
-  return `${d.phases.length} Phasen · ${zeit} Schieß- und Vorlaufzeit`
+  return `${d.phases.length} ${t('v3.allgemein.phasen')} · ${zeit} ${t('v3.wahl.schiessUndVorlaufzeit')}`
 }
 
 function starte(d) { gewaehlt.value = d; schirm.value = 'lauf' }
@@ -49,8 +53,8 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
   <!-- Disziplinwahl -->
   <div v-if="schirm === 'wahl'" class="seite">
     <header class="kopfzeile">
-      <h1>BDMP Timer</h1>
-      <p>Satz in Benutzung: <strong>{{ aktiverSatz.name }}</strong></p>
+      <h1>{{ t('v3.wahl.titel') }}</h1>
+      <p>{{ t('v3.wahl.satzInBenutzung') }}: <strong>{{ aktiverSatz.name }}</strong></p>
     </header>
 
     <button
@@ -63,16 +67,17 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
 
     <div class="k-spalte abstand">
       <button class="k-zweit" @click="schirm = 'saetze'">
-        Sätze und Disziplinen verwalten
-        <span class="k-unter">bearbeiten, ausgeben, einlesen, nachladen</span>
+        {{ t('v3.wahl.verwalten') }}
+        <span class="k-unter">{{ t('v3.wahl.verwaltenUnter') }}</span>
       </button>
+      <SprachWahl />
     </div>
   </div>
 
   <!-- Lauf -->
   <div v-else-if="schirm === 'lauf'" class="lauf">
     <div class="navleiste">
-      <button class="k-nav" @click="schirm = 'wahl'">Andere Disziplin wählen</button>
+      <button class="k-nav" @click="schirm = 'wahl'">{{ t('v3.wahl.andereDisziplin') }}</button>
     </div>
     <EppMatchView
       v-if="gewaehlt.kind === 'epp'"
