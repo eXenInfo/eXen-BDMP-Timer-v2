@@ -97,7 +97,7 @@
   ],
   "BDMP 1020": [
     {
-      "name": "Match 1: Wir gehen auf 10 Meter\n2 x 6 Schuss  - stehend frei - in 20 Sek. inkl. Nachladen\nDazu die Waffen laden und Holstern.\nIst jemand nicht fertig? - ACHTUNG!",
+      "name": "Match 1: Wir gehen auf 7 Meter\n2 x 6 Schuss  - stehend frei - in 20 Sek. inkl. Nachladen\nDazu die Waffen laden und Holstern.\nIst jemand nicht fertig? - ACHTUNG!",
       "prepTime": 3,
       "duration": 20,
       "repetitions": 1,
@@ -597,7 +597,7 @@
       "pauseAfter": true
     },
     {
-      "name": "Match 5 - Station 2:\n25 Meter/Yards - 90 Sekunden - nur double action\n6 Schüsse kniend frei\n6 Schüsse linke Hand, Pfosten links\n6 Schüsse rechte Hand, Pfosten rechts",
+      "name": "Match 5 - Station 2:\n25 Meter/Yards - 90 Sekunden - nur double action\n6 Schüsse kniend frei\n6 Schüsse stehend, linke Hand, Pfosten links\n6 Schüsse stehend, rechte Hand, Pfosten rechts",
       "prepTime": 3,
       "duration": 90,
       "repetitions": 1,
@@ -615,6 +615,16 @@
       "soundAtStart": true,
       "soundAtEnd": true,
       "pauseAfter": true
+    },
+    {
+      "name": "Match 5 - Station 4:\n25 Meter/Yards - 12 Sekunden - nur double action\n6 Schüsse stehend frei",
+      "prepTime": 3,
+      "duration": 12,
+      "repetitions": 1,
+      "pauseDuration": 0,
+      "soundAtStart": true,
+      "soundAtEnd": true,
+      "pauseAfter": false
     }
   ]
 }
