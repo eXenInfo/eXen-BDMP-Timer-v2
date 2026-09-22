@@ -99,6 +99,26 @@ function fortsetzen()        { clock.call('resume', now()) }
 function zuruecksetzen()     { clock.call('reset', now()) }
 async function zuPhase(i)    { await audio.arm(); clock.call('goToPhase', i, now()) }
 
+/**
+ * Der Ablauf, wie der RO ihn den Schützen ansagt.
+ *
+ * Steht bewusst vor der Kommandofolge und in lesbarer Größe: Der RO liest
+ * ihn laut vor, bevor er das erste Kommando gibt. Klein und grau am
+ * Bildschirmrand wäre er dafür unbrauchbar.
+ */
+const ansage = computed(() => {
+  const p = phase.value
+  if (!p) return null
+  const kopf = [
+    p.distance,
+    p.repetitions > 1 ? t('v3.seq.durchgangPlan', { anzahl: p.repetitions, dauer: Math.round(p.durationMs / 1000) })
+                      : (p.durationMs ? `${Math.round(p.durationMs / 1000)} s` : null),
+    p.repPauseMs ? t('v3.seq.mitPause', { pause: Math.round(p.repPauseMs / 1000) }).trim() : null,
+  ].filter(Boolean).join(' · ')
+  const zeilen = String(p.description ?? '').split('\n').map(z => z.trim()).filter(Boolean)
+  return { kopf, zeilen: zeilen.length ? zeilen : [p.name] }
+})
+
 const wiederholungen = computed(() => {
   const p = phase.value
   if (!p || p.repetitions <= 1) return null
@@ -124,7 +144,7 @@ const wiederholungen = computed(() => {
         <strong>{{ phase?.name }}</strong>
         <span v-if="phase?.distance" class="distanz">{{ phase.distance }}</span>
       </p>
-      <p v-if="phase?.description" class="beschreibung">{{ phase.description }}</p>
+      <p v-if="phase?.description && laeuft" class="beschreibung">{{ phase.description }}</p>
 
       <div class="uhr" :class="{ gross: zustand === 'prep' || (s?.remainingMs ?? 0) < 60000 }">{{ anzeige }}</div>
       <p class="uhr-marke">{{ beschriftung }}</p>
@@ -135,6 +155,13 @@ const wiederholungen = computed(() => {
           v-if="phase.repPauseMs">{{ t('v3.seq.mitPause', { pause: Math.round(phase.repPauseMs / 1000) }) }}</span>
       </p>
     </main>
+
+    <!-- Ablauf zum Vorlesen — steht vor den Kommandos -->
+    <section v-if="ansage && (zustand === 'idle' || zustand === 'waitingNext')" class="ansage">
+      <p class="ansage-marke">{{ t('v3.seq.ansage') }}<span class="ansage-unter">{{ t('v3.seq.ansageUnter') }}</span></p>
+      <p v-if="ansage.kopf" class="ansage-kopf">{{ ansage.kopf }}</p>
+      <p v-for="(z, i) in ansage.zeilen" :key="i" class="ansage-zeile">{{ z }}</p>
+    </section>
 
     <!-- Kommandofolge vor der Serie -->
     <section v-if="zustand === 'idle' || zustand === 'waitingNext'" class="kommandos">
@@ -279,6 +306,18 @@ const wiederholungen = computed(() => {
 .uhr-marke { margin: 0.2rem 0 0; color: var(--gedaempft); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; }
 .wdh { margin: 0.4rem 0 0; font-size: 1.1rem; color: var(--akzent); font-variant-numeric: tabular-nums; }
 .wdh-plan { margin: 0.3rem 0 0; color: var(--gedaempft); font-size: 0.85rem; }
+
+.ansage {
+  background: #1b2029; border: 1px solid var(--rand); border-left: 4px solid #3b82f6;
+  border-radius: 0.75rem; padding: 0.85rem 1rem;
+}
+.ansage-marke {
+  margin: 0 0 0.5rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--gedaempft); display: flex; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
+}
+.ansage-unter { text-transform: none; letter-spacing: 0; font-style: italic; }
+.ansage-kopf { margin: 0 0 0.4rem; font-size: 1rem; color: #93c5fd; font-variant-numeric: tabular-nums; }
+.ansage-zeile { margin: 0.25rem 0; font-size: 1.15rem; line-height: 1.5; color: var(--text); }
 
 .kommandos { background: var(--flaeche); border: 1px solid var(--rand); border-left: 4px solid var(--akzent); border-radius: 0.75rem; padding: 0.8rem 1rem; }
 .kommandos.nachher { border-left-color: var(--gruen); }

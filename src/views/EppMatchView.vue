@@ -127,6 +127,17 @@ function weiter()       { clock.call('resumeAfterMalfunction', now()) }
 function zuruecksetzen() { clock.call('reset', now()) }
 function zuStation(i)   { clock.call('goToStation', i, now()) }
 
+/** Der Ablauf der Station, wie ihn der RO vorliest. */
+const ansage = computed(() => {
+  const p = phase.value
+  if (!p) return null
+  const kopf = [p.distance, p.position,
+                p.shots ? `${p.shots} ${t('v3.epp.schuss')}` : null,
+                p.shotsNote,
+                p.timeLimitMs > 0 ? `${p.timeLimitMs / 1000} s` : null].filter(Boolean).join(' · ')
+  return { kopf, zeilen: (p.notes ?? []).filter(Boolean) }
+})
+
 const stoerungen = computed(() => s.value?.malfunctionCount ?? 0)
 const restknapp  = computed(() => {
   const r = s.value?.totalRemainingMs
@@ -180,6 +191,13 @@ const restknapp  = computed(() => {
         {{ t('v3.epp.signalHinweis', { beginn: phase.stopSignalAtMs / 1000, dauer: phase.stopSignalDurationMs / 1000 }) }}
       </p>
     </main>
+
+    <!-- Ablauf zum Vorlesen — steht vor den Kommandos -->
+    <section v-if="ansage?.zeilen.length && zustand === 'idle'" class="ansage-block">
+      <p class="ansage-marke2">{{ t('v3.epp.ansage') }}<span class="ansage-unter">{{ t('v3.epp.ansageUnter') }}</span></p>
+      <p v-if="ansage.kopf" class="ansage-kopf">{{ ansage.kopf }}</p>
+      <p v-for="(z, i) in ansage.zeilen" :key="i" class="ansage-zeile2">{{ z }}</p>
+    </section>
 
     <!-- RO-Kommandos der laufenden Station -->
     <section v-if="phase?.roCommands?.length && zustand === 'idle'" class="kommandos">
@@ -306,6 +324,18 @@ const restknapp  = computed(() => {
 .uhr.gross { font-size: clamp(6rem, 38vw, 13rem); color: var(--akzent); }
 .uhr-marke { margin: 0.2rem 0 0; color: var(--gedaempft); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; }
 .signal-hinweis { margin: 0.6rem 0 0; max-width: 28rem; color: var(--gedaempft); font-size: 0.8rem; line-height: 1.4; }
+
+.ansage-block {
+  background: #1b2029; border: 1px solid var(--rand); border-left: 4px solid #3b82f6;
+  border-radius: 0.75rem; padding: 0.85rem 1rem; max-height: 38vh; overflow-y: auto;
+}
+.ansage-marke2 {
+  margin: 0 0 0.5rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--gedaempft); display: flex; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
+}
+.ansage-unter { text-transform: none; letter-spacing: 0; font-style: italic; }
+.ansage-kopf { margin: 0 0 0.4rem; font-size: 1rem; color: #93c5fd; font-variant-numeric: tabular-nums; }
+.ansage-zeile2 { margin: 0.3rem 0; font-size: 1.1rem; line-height: 1.5; color: var(--text); }
 
 .kommandos { background: var(--flaeche); border: 1px solid var(--rand); border-left: 4px solid var(--akzent); border-radius: 0.75rem; padding: 0.75rem 1rem; }
 .kommando { margin: 0.15rem 0; font-size: 1.15rem; font-weight: 600; }

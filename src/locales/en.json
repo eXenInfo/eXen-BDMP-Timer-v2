@@ -308,7 +308,9 @@
       "waffenarten": "Weapon classes",
       "variantenTitel": "Applies to these weapon classes",
       "gleicheZeiten": "Identical timings across the listed weapon classes — one set for both.",
-      "eigenerSatz": "Separate set, because the timings differ from the handgun version."
+      "eigenerSatz": "Separate set, because the timings differ from the handgun version.",
+      "ansage": "Announcement to the shooters",
+      "ansageUnter": "read out before the commands"
     },
     "seq": {
       "disziplin": "Discipline",
@@ -346,7 +348,9 @@
       "waffenarten": "Weapon classes",
       "variantenTitel": "Applies to these weapon classes",
       "gleicheZeiten": "Identical timings across the listed weapon classes — one set for both.",
-      "eigenerSatz": "Separate set, because the timings differ from the handgun version."
+      "eigenerSatz": "Separate set, because the timings differ from the handgun version.",
+      "ansage": "Announcement to the shooters",
+      "ansageUnter": "read out before the commands"
     },
     "bib": {
       "titel": "Sets",

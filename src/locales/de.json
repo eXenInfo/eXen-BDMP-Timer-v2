@@ -308,7 +308,9 @@
       "waffenarten": "Waffenarten",
       "variantenTitel": "Gilt für diese Waffenarten",
       "gleicheZeiten": "Gleiche Zeiten in allen aufgeführten Waffenarten — ein Satz für beide.",
-      "eigenerSatz": "Eigener Satz, weil die Zeiten von der Kurzwaffenfassung abweichen."
+      "eigenerSatz": "Eigener Satz, weil die Zeiten von der Kurzwaffenfassung abweichen.",
+      "ansage": "Ansage an die Schützen",
+      "ansageUnter": "vor den Kommandos vorlesen"
     },
     "seq": {
       "disziplin": "Disziplin",
@@ -346,7 +348,9 @@
       "waffenarten": "Waffenarten",
       "variantenTitel": "Gilt für diese Waffenarten",
       "gleicheZeiten": "Gleiche Zeiten in allen aufgeführten Waffenarten — ein Satz für beide.",
-      "eigenerSatz": "Eigener Satz, weil die Zeiten von der Kurzwaffenfassung abweichen."
+      "eigenerSatz": "Eigener Satz, weil die Zeiten von der Kurzwaffenfassung abweichen.",
+      "ansage": "Ansage an die Schützen",
+      "ansageUnter": "vor den Kommandos vorlesen"
     },
     "bib": {
       "titel": "Sätze",
