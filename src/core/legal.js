@@ -52,12 +52,12 @@ export const DATENSCHUTZ = [
 ]
 
 export const REGELGRUNDLAGE = {
-  quelle: 'BDMP-Handbuch Sportordnung, Teil C: Kurzwaffen-Disziplinen',
+  quelle: 'BDMP-Handbuch Sportordnung, Teil C: Kurzwaffen-Disziplinen und Teil D: Langwaffen-Disziplinen',
   stand: 'Fassung vom 24.02.2026',
   // Bewusst nur die Verbandsseite: Der Ablageort der einzelnen Register
   // ändert sich mit jeder Fassung, die Startseite bleibt.
   url: 'https://www.bdmp.de',
-  wegweiser: 'Die jeweils gültige Fassung steht auf der Seite des BDMP unter „Über uns“ im Handbuch.',
+  wegweiser: 'Die jeweils gültige Fassung steht auf der Seite des BDMP.',
   abschnitte: [
     { ref: 'C.6.10', was: 'Kommandos des Leitenden für Police Pistol, NPA Service Pistol und Super Magnum' },
     { ref: 'C.8.2',  was: 'Ablauf BDMP 1500 (PPC)' },
@@ -67,6 +67,12 @@ export const REGELGRUNDLAGE = {
     { ref: 'C.15A',  was: 'Dynamisches Kleinkaliberschießen 1 – 1020 (DKS 1 – 1020)' },
     { ref: 'C.17',   was: 'Europäischer Präzisions Parcours (EPP)' },
     { ref: 'C.21',   was: 'BDMP 1020 Wettkampfarten' },
+    { ref: 'D.22.A', was: 'Dynamisches Kleinkaliberschießen 2 – 1020 (Langwaffe)' },
+    { ref: 'D.25',   was: 'Europäischer Präzisions Parcours .223 Rem. — EPP Rifle und EPP Carbine' },
+    { ref: 'D.26',   was: 'Sports Carbine PP1' },
+    { ref: 'D.27',   was: 'Sports Carbine NPA' },
+    { ref: 'D.36',   was: 'Sports Carbine PP2' },
+    { ref: 'D.37',   was: 'BDMP 1500 Carbine' },
   ],
 }
 

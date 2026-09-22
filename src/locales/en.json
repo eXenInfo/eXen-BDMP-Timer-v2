@@ -295,7 +295,11 @@
       "immerGueltig": "Always applies",
       "signalprobe": "Signal check",
       "signalprobeSchliessen": "Close signal check",
-      "signalprobeHinweis": "Applies to the start signal. The length of the second signal is set by C.17.14 and stays at 2 seconds."
+      "signalprobeHinweis": "Applies to the start signal. The length of the second signal is set by C.17.14 and stays at 2 seconds.",
+      "waffenarten": "Weapon classes",
+      "variantenTitel": "Applies to these weapon classes",
+      "gleicheZeiten": "Identical timings across the listed weapon classes — one set for both.",
+      "eigenerSatz": "Separate set, because the timings differ from the handgun version."
     },
     "seq": {
       "disziplin": "Discipline",
@@ -329,7 +333,11 @@
       "weitereRegeln": "Further rules",
       "entladenVorzeigen": "Unloading and showing clear",
       "munition": "Ammunition",
-      "scheibe": "Target"
+      "scheibe": "Target",
+      "waffenarten": "Weapon classes",
+      "variantenTitel": "Applies to these weapon classes",
+      "gleicheZeiten": "Identical timings across the listed weapon classes — one set for both.",
+      "eigenerSatz": "Separate set, because the timings differ from the handgun version."
     },
     "bib": {
       "titel": "Sets",

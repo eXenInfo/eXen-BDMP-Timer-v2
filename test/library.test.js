@@ -19,11 +19,13 @@ function fakeStorage() {
 
 describe('Mitgelieferter Satz', () => {
   const satz = createBuiltinSet(legacy)
-  it('enthält den EPP, die 14 gepflegten Disziplinen und die DKS 1 – 1020', () => {
-    expect(satz.disciplines).toHaveLength(16)
+  it('enthält den EPP, die 14 gepflegten Disziplinen und die zwei ergänzten', () => {
+    expect(satz.disciplines).toHaveLength(17)
     expect(satz.disciplines[0].kind).toBe('epp')
-    expect(satz.disciplines.filter(d => d.kind === 'sequence')).toHaveLength(15)
-    expect(satz.disciplines.map(d => d.name)).toContain('DKS 1 – 1020 (Kleinkaliber)')
+    expect(satz.disciplines.filter(d => d.kind === 'sequence')).toHaveLength(16)
+    const namen = satz.disciplines.map(d => d.name)
+    expect(namen).toContain('DKS 1 – 1020 (Kleinkaliber)')
+    expect(namen).toContain('Sports Carbine PP2 (Langwaffe)')
   })
   it('ist schreibgeschützt', () => {
     expect(satz.readonly).toBe(true)
@@ -97,7 +99,7 @@ describe('Ausgeben und Einlesen', () => {
   it('Ausgabe im Altformat lässt sich vom alten Timer wieder lesen', () => {
     const text = exportSetLegacy(satz)
     const wieder = JSON.parse(text)
-    expect(Object.keys(wieder)).toHaveLength(15)          // EPP ist dort kein Listeneintrag
+    expect(Object.keys(wieder)).toHaveLength(16)          // EPP ist dort kein Listeneintrag
     expect(Array.isArray(wieder['BDMP 1020'])).toBe(true)
     expect(wieder['BDMP 1020'][0]).toHaveProperty('duration')
   })

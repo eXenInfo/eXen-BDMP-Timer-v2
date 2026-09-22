@@ -11,6 +11,18 @@
  * die App zweisprachig ist.
  */
 
+/**
+ * Waffenarten. Eine Disziplin kann in mehreren gefochten werden; wo die
+ * Zeiten übereinstimmen, beschreibt ein Satz beide Varianten, wo sie
+ * abweichen, braucht jede Variante ihren eigenen.
+ */
+export const WEAPON_CLASSES = {
+  kurzwaffe:   { id: 'kurzwaffe',   kurz: 'KW',    label: 'Kurzwaffe' },
+  kkKurzwaffe: { id: 'kkKurzwaffe', kurz: 'KK-KW', label: 'Kleinkaliber-Kurzwaffe' },
+  langwaffe:   { id: 'langwaffe',   kurz: 'LW',    label: 'Langwaffe' },
+  kkLangwaffe: { id: 'kkLangwaffe', kurz: 'KK-LW', label: 'Kleinkaliber-Langwaffe' },
+}
+
 export const COMMAND_SETS = {
   policePistol: {
     id: 'policePistol',
@@ -131,6 +143,7 @@ export const READINESS = {
 export const DISCIPLINE_RULES = [
   {
     match: /^Police Pistol 1\b/i, ruleRef: 'C.6A', commandSet: 'policePistol', readiness: 'abgesenkt45',
+    varianten: [{ klasse: 'kurzwaffe', ruleRef: 'C.6A', label: 'Police Pistol 1' }],
     ammo: '30 Patronen', target: 'PP-1-Scheibe',
     ablauf: [
       '25 m: 12 Schüsse in 2 Minuten einschließlich eines eventuellen Nachladens. Jetloader und Speedloader sind erlaubt.',
@@ -141,6 +154,7 @@ export const DISCIPLINE_RULES = [
   },
   {
     match: /^Police Pistol 2\b/i, ruleRef: 'C.6B', commandSet: 'policePistol', readiness: 'gemischt',
+    varianten: [{ klasse: 'kurzwaffe', ruleRef: 'C.6B', label: 'Police Pistol 2' }],
     ammo: '60 Patronen, dazu 6 Probeschüsse', target: 'PP-1-Scheibe',
     ablauf: [
       'Station A, 10 m: zweimal 6 Schüsse in 5 Sekunden, stehend frei, ein- oder beidhändig.',
@@ -211,6 +225,12 @@ export const DISCIPLINE_RULES = [
   },
   {
     match: /^BDMP 1500/i, ruleRef: 'C.8.2', commandSet: 'ppc1500', readiness: 'geholstert',
+    varianten: [
+      { klasse: 'kurzwaffe', ruleRef: 'C.8.2', label: 'BDMP 1500 (PPC)' },
+      { klasse: 'langwaffe', ruleRef: 'D.37', label: 'BDMP 1500 Carbine',
+        hinweise: ['Gleicher Ablauf und gleiche Zeiten wie die Kurzwaffenfassung.',
+                   'Zu keinem Zeitpunkt dürfen Waffe, Speedloader oder Magazin mit mehr als sechs Patronen geladen sein.'] },
+    ],
     ammo: '150 Schuss auf fünf Matches verteilt', target: 'BDMP-1500-Scheibe je Schütze und Match',
     ablauf: [
       'Match 1: 7 m — 20 Sekunden — nur double action — 12 Schüsse stehend frei. Danach 15 m, 20 Sekunden, 12 Schüsse stehend frei.',
@@ -248,6 +268,13 @@ export const DISCIPLINE_RULES = [
   {
     match: /^DKS 1\s*[–-]\s*1020|^DKS 1020|Dynamisches Kleinkaliberschie(ß|ss)en 1 1020/i,
     ruleRef: 'C.15A', commandSet: 'ppc1500', readiness: 'geholstert',
+    varianten: [
+      { klasse: 'kkKurzwaffe', ruleRef: 'C.15A',  label: 'DKS 1 – 1020' },
+      { klasse: 'kkLangwaffe', ruleRef: 'D.22.A', label: 'DKS 2 – 1020',
+        hinweise: ['Gleiche Distanzen und gleiche Zeiten wie die Kurzwaffenfassung.',
+                   'Es dürfen nur sechs Patronen ins Magazin geladen werden.',
+                   'Scheibe: mindestens eine BDMP 1500 reduziert je Schütze und Match.'] },
+    ],
     ammo: 'Kleinkaliber .22 lr', target: 'mindestens eine BDMP-1500-Scheibe je Schütze und Match',
     ablauf: [
       'Match 1: 10 m — 20 Sekunden — nur double action — 2 × 6 Schüsse stehend frei. Danach 15 m, 20 Sekunden, 2 × 6 Schüsse stehend frei.',
@@ -275,6 +302,24 @@ export const DISCIPLINE_RULES = [
       '10 m: 2 × 5 Schüsse in Intervallen. Die Scheibe zeigt sich fünfmal für je 2 Sekunden, dabei jeweils 1 Schuss.',
     ],
     hinweise: ['Die Geschossenergie muss bei einer E2-Messung mindestens 1200 Joule erreichen.'],
+  },
+  {
+    match: /^Sports Carbine PP ?2|^Police Pistol 2 \(SpCb\)/i,
+    ruleRef: 'D.36', commandSet: 'policePistol', readiness: 'geholstert',
+    ammo: 'höchstens sechs Patronen in Waffe, Speedloader oder Magazin',
+    target: 'PP-1-Scheibe; auf 10 m und 25 m auf 50 % verkleinert',
+    varianten: [{ klasse: 'langwaffe', ruleRef: 'D.36', label: 'Sports Carbine PP2' }],
+    ablauf: [
+      'Station A, 10 m: zweimal 6 Schuss stehend freihändig in je 7 Sekunden.',
+      'Station B, 50 m: 140 Sekunden, auch single action — 6 liegend, 6 kniend, 6 stehend linke Hand Pfosten links, 6 stehend rechte Hand Pfosten rechts.',
+      'Station C, 25 m: 90 Sekunden, auch single action — 6 stehend frei, 6 kniend, 6 stehend rechte Hand Pfosten rechts, 6 stehend linke Hand Pfosten links.',
+    ],
+    hinweise: [
+      'Weicht von der Kurzwaffen-PP2 ab: Station A 7 statt 5 Sekunden, Station B 140 statt 180 Sekunden, Station C 90 statt 120 Sekunden. Deshalb ein eigener Satz.',
+      'Zu keinem Zeitpunkt dürfen Waffe, Speedloader oder Magazin mit mehr als sechs Patronen geladen sein.',
+      'Der Stellungswechsel darf ausschließlich mit leerer Waffe erfolgen: Magazin entfernt und Verschluss offen, beziehungsweise Trommel leer und ausgeschwenkt.',
+      'Die Entfernungen können wahlweise in Metern oder Yards geschossen werden; das ist in der Ausschreibung bekanntzugeben.',
+    ],
   },
 ]
 
@@ -352,6 +397,7 @@ export function enrichDiscipline(disziplin) {
     ablauf:     regeln?.ablauf ?? [],
     hinweise:   regeln?.hinweise ?? [],
     abweichung: regeln?.abweichung ?? null,
+    varianten:  disziplin.varianten ?? regeln?.varianten ?? [],
     phases:     mitStellungen(disziplin.phases),
   }
 }
@@ -395,7 +441,26 @@ const dks = (name, beschreibung, sekunden, letzte = false) => ({
   waitAfter: !letzte,
 })
 
+const scp = (name, beschreibung, sekunden, letzte = false) => ({
+  name, description: beschreibung, roCommands: [],
+  distance: (name.match(/(\d+)\s*m/) ?? [])[0] ?? null,
+  prepMs: 5000, durationMs: sekunden * 1000, repetitions: 1, repPauseMs: 0,
+  soundAtStart: true, soundAtEnd: true, waitAfter: !letzte,
+})
+
 export const GENERATED_DISCIPLINES = [
+  {
+    id: 'sports-carbine-pp2',
+    name: 'Sports Carbine PP2 (Langwaffe)',
+    kind: 'sequence',
+    varianten: [{ klasse: 'langwaffe', ruleRef: 'D.36', label: 'Sports Carbine PP2' }],
+    phases: [
+      { ...scp('Station A — 10 m, 1. Durchgang', '6 Schuss stehend freihändig.', 7) },
+      { ...scp('Station A — 10 m, 2. Durchgang', '6 Schuss stehend freihändig.', 7) },
+      { ...scp('Station B — 50 m', '6 Schuss liegend\n6 Schuss kniend\n6 Schuss stehend, linke Hand, Pfosten links\n6 Schuss stehend, rechte Hand, Pfosten rechts\nAuch single action erlaubt.', 140) },
+      { ...scp('Station C — 25 m', '6 Schuss stehend frei\n6 Schuss kniend\n6 Schuss stehend, rechte Hand, Pfosten rechts\n6 Schuss stehend, linke Hand, Pfosten links\nAuch single action erlaubt.', 90, true) },
+    ],
+  },
   {
     id: 'dks-1-1020',
     name: 'DKS 1 – 1020 (Kleinkaliber)',

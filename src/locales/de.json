@@ -295,7 +295,11 @@
       "immerGueltig": "Immer gültig",
       "signalprobe": "Signalprobe",
       "signalprobeSchliessen": "Signalprobe schließen",
-      "signalprobeHinweis": "Gilt für das Startsignal. Die Dauer des zweiten Signals steht in C.17.14 und bleibt bei 2 Sekunden."
+      "signalprobeHinweis": "Gilt für das Startsignal. Die Dauer des zweiten Signals steht in C.17.14 und bleibt bei 2 Sekunden.",
+      "waffenarten": "Waffenarten",
+      "variantenTitel": "Gilt für diese Waffenarten",
+      "gleicheZeiten": "Gleiche Zeiten in allen aufgeführten Waffenarten — ein Satz für beide.",
+      "eigenerSatz": "Eigener Satz, weil die Zeiten von der Kurzwaffenfassung abweichen."
     },
     "seq": {
       "disziplin": "Disziplin",
@@ -329,7 +333,11 @@
       "weitereRegeln": "Weitere Regeln",
       "entladenVorzeigen": "Zum Entladen und Vorzeigen",
       "munition": "Munition",
-      "scheibe": "Scheibe"
+      "scheibe": "Scheibe",
+      "waffenarten": "Waffenarten",
+      "variantenTitel": "Gilt für diese Waffenarten",
+      "gleicheZeiten": "Gleiche Zeiten in allen aufgeführten Waffenarten — ein Satz für beide.",
+      "eigenerSatz": "Eigener Satz, weil die Zeiten von der Kurzwaffenfassung abweichen."
     },
     "bib": {
       "titel": "Sätze",

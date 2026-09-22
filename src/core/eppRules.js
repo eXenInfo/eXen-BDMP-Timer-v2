@@ -15,6 +15,25 @@
 export const EPP_TOTAL_TIME_MS = 330_000   // 5:30 Minuten, C.17.8
 export const EPP_TOTAL_SHOTS   = 50        // C.17.8
 
+/**
+ * Der EPP wird auch mit der Langwaffe gefochten (D.25). Die Stationen und
+ * die Zeiten sind dieselben, abweichend ist nur die Handhabung — deshalb
+ * ein Satz, der beide Varianten beschreibt, statt zweier gleichlautender.
+ */
+export const EPP_VARIANTEN = [
+  { klasse: 'kurzwaffe', ruleRef: 'C.17', label: 'EPP Kurzwaffe' },
+  {
+    klasse: 'langwaffe', ruleRef: 'D.25', label: 'EPP Rifle .223 / EPP Carbine',
+    hinweise: [
+      'Gleiche Stationen und gleiche Zeiten wie die Kurzwaffenfassung.',
+      'Kommando an Station 1: „Teilladen und fertigmachen“. Die Waffe wird mit dem ersten Magazin teilgeladen und die Sicherheitsfahne entfernt; das zweite Magazin mit 5 Patronen wird bereitgehalten.',
+      'Auf das Startsignal geht der Schütze in Anschlag, lädt fertig und schießt. Nach dem fünften Schuss wird selbstständig das Magazin gewechselt.',
+      'Nach dem letzten Schuss wird die Sicherheitsfahne ins Patronenlager eingeführt, das Magazin entnommen und zum Vorzeigen in der Hand gehalten. Der Lauf zeigt 45 Grad nach unten in Richtung Geschossfang.',
+      'An Station 6 wird nicht zwischen ein- und beidhändig unterschieden, sondern zwischen rechter und linker Hand am Abzug.',
+    ],
+  },
+]
+
 /** Gilt an jeder Station, C.17.12 */
 export const EPP_GENERAL_NOTES = [
   'Vor dem Startsignal steht der Schütze aufrecht in Richtung Scheibe, die Arme hängen zwanglos herab.',

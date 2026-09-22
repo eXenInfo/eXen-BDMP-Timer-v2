@@ -16,7 +16,7 @@
 
 import { convertLegacyCollection, toLegacyPhase } from './legacyImport.js'
 import { enrichDiscipline, GENERATED_DISCIPLINES } from './disciplineRules.js'
-import { EPP_PHASES, EPP_TOTAL_TIME_MS } from './eppRules.js'
+import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_VARIANTEN } from './eppRules.js'
 
 export const SPEICHER_SCHLUESSEL = 'bdmp.bibliothek.v1'
 export const FORMAT = 'bdmp-timer-satz/1'
@@ -42,6 +42,7 @@ export function createBuiltinSet(legacyCollection) {
     name: 'Europäischer Präzisions Parcours (EPP)',
     kind: 'epp',
     ruleRef: 'C.17',
+    varianten: EPP_VARIANTEN,
     totalTimeMs: EPP_TOTAL_TIME_MS,
     prepMs: 3000,
     phases: structuredClone(EPP_PHASES),

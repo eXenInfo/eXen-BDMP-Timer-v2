@@ -14,6 +14,7 @@ import EditorView from '../src/views/EditorView.vue'
 import { createLibrary } from '../src/core/library.js'
 import { nominalDurationMs } from '../src/core/legacyImport.js'
 import legacy from '../public/disziplinen.json'
+import { WEAPON_CLASSES } from '../src/core/disciplineRules.js'
 
 const { t } = useI18n()
 
@@ -78,6 +79,9 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
       @click="starte(d)">
       <strong>{{ d.name }}</strong>
       <span>{{ dauerText(d) }}</span>
+      <span v-if="d.varianten?.length" class="klassen">
+        <span v-for="v in d.varianten" :key="v.ruleRef" class="klasse">{{ WEAPON_CLASSES[v.klasse]?.kurz ?? v.klasse }}</span>
+      </span>
     </button>
 
     <div class="k-spalte abstand">
@@ -134,6 +138,8 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
 .karte strong { font-size: 1.05rem; }
 .karte span { color: var(--f-gedaempft); font-size: 0.82rem; }
 .karte.epp { border-left: 4px solid var(--f-akzent); }
+.klassen { display: flex; gap: 0.3rem; margin-top: 0.3rem; }
+.klasse { background: var(--f-flaeche-hoch); border: 1px solid var(--f-rand); border-radius: 0.35rem; padding: 0.1rem 0.4rem; font-size: 0.68rem; letter-spacing: 0.03em; color: var(--f-akzent); }
 .karte:active { border-color: var(--f-akzent); }
 .abstand { margin-top: 1rem; }
 .lauf { display: flex; flex-direction: column; }

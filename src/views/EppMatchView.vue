@@ -9,7 +9,7 @@
 import { useI18n } from 'vue-i18n'
 import { computed, onMounted, ref } from 'vue'
 import { createEppEngine, EppState, EppEvent } from '../core/eppEngine.js'
-import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_GENERAL_NOTES } from '../core/eppRules.js'
+import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_GENERAL_NOTES, EPP_VARIANTEN } from '../core/eppRules.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
 
@@ -19,6 +19,7 @@ const props = defineProps({
   phases:      { type: Array,  default: () => EPP_PHASES },
   totalTimeMs: { type: Number, default: EPP_TOTAL_TIME_MS },
   prepMs:      { type: Number, default: 3000 },
+  varianten:   { type: Array,  default: () => EPP_VARIANTEN },
 })
 
 const signalLaeuft = ref(false)
@@ -192,6 +193,15 @@ const restknapp  = computed(() => {
         <span class="regel">{{ phase.ruleRef }}</span>
       </button>
       <div v-if="hinweiseOffen" class="hinweis-liste">
+        <template v-if="varianten.length">
+          <p class="hinweis-titel">{{ t('v3.epp.variantenTitel') }}</p>
+          <p class="variante-zeile">{{ t('v3.epp.gleicheZeiten') }}</p>
+          <div v-for="v in varianten" :key="v.ruleRef" class="variante">
+            <strong>{{ v.label }} <span class="regel">{{ v.ruleRef }}</span></strong>
+            <ul v-if="v.hinweise?.length"><li v-for="(h, i) in v.hinweise" :key="i">{{ h }}</li></ul>
+          </div>
+        </template>
+        <p class="hinweis-titel">{{ t('v3.epp.hinweiseZeigen') }}</p>
         <ul>
           <li v-for="(n, i) in phase.notes" :key="'n' + i">{{ n }}</li>
         </ul>
@@ -306,6 +316,10 @@ const restknapp  = computed(() => {
 .hinweis-liste { margin-top: 0.5rem; background: var(--flaeche); border: 1px solid var(--rand); border-radius: 0.75rem; padding: 0.75rem 1rem; max-height: 40vh; overflow-y: auto; }
 .hinweis-liste ul { margin: 0.25rem 0 0.5rem; padding-left: 1.1rem; }
 .hinweis-liste li { margin: 0.3rem 0; font-size: 0.9rem; line-height: 1.45; color: #d7dee6; }
+.variante { margin: 0.4rem 0 0.7rem; }
+.variante strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
+.variante-zeile { margin: 0 0 0.4rem; font-size: 0.82rem; color: var(--gedaempft); line-height: 1.5; }
+.regel { font-size: 0.7rem; padding: 0.1rem 0.4rem; border: 1px solid var(--rand); border-radius: 0.4rem; color: var(--gedaempft); font-weight: 400; }
 .hinweis-titel { margin: 0.6rem 0 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gedaempft); }
 
 .fuss { display: flex; flex-direction: column; gap: 0.5rem; }

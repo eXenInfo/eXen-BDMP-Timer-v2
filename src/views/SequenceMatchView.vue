@@ -182,6 +182,15 @@ const wiederholungen = computed(() => {
           <p class="warnung">{{ disziplin.abweichung }}</p>
         </template>
 
+        <template v-if="disziplin.varianten?.length">
+          <p class="hinweis-titel">{{ t('v3.seq.variantenTitel') }}</p>
+          <p class="fliess klein">{{ disziplin.varianten.length > 1 ? t('v3.seq.gleicheZeiten') : t('v3.seq.eigenerSatz') }}</p>
+          <div v-for="v in disziplin.varianten" :key="v.ruleRef" class="variante">
+            <strong>{{ v.label }} <span class="regel">{{ v.ruleRef }}</span></strong>
+            <ul v-if="v.hinweise?.length"><li v-for="(h, i) in v.hinweise" :key="i">{{ h }}</li></ul>
+          </div>
+        </template>
+
         <template v-if="phase?.positions?.length">
           <p class="hinweis-titel">{{ t('v3.seq.stellungenDieserPhase') }}</p>
           <div v-for="st in phase.positions" :key="st.name" class="stellung">
@@ -290,6 +299,10 @@ const wiederholungen = computed(() => {
 .hinweis-titel { margin: 0.9rem 0 0.2rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gedaempft); }
 .hinweis-titel:first-child { margin-top: 0; }
 .fliess { margin: 0.3rem 0 0.6rem; font-size: 0.88rem; line-height: 1.5; color: #d7dee6; }
+.variante { margin: 0.4rem 0 0.7rem; }
+.variante strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
+.variante ul { margin: 0.25rem 0 0; }
+.fliess.klein { font-size: 0.82rem; color: var(--gedaempft); }
 .stellung { margin: 0.4rem 0 0.7rem; }
 .stellung strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
 .stellung p { margin: 0; font-size: 0.86rem; line-height: 1.5; color: #d7dee6; }
