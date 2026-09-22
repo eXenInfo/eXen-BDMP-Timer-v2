@@ -12,11 +12,14 @@ import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
 
 const props = defineProps({
-  name:   { type: String, default: 'Disziplin' },
-  phases: { type: Array, required: true },
+  /** Angereicherte Disziplin: Phasen, Kommandofolge, Stellungen, Regeltexte. */
+  disziplin: { type: Object, required: true },
 })
 
 const hinweiseOffen = ref(false)
+const name   = computed(() => props.disziplin.name)
+const phases = computed(() => props.disziplin.phases)
+const befehle = computed(() => props.disziplin.commandSet ?? null)
 
 const clock = useEngineClock({
   onEvents(events) {
@@ -29,10 +32,10 @@ const clock = useEngineClock({
 })
 
 function neuAufsetzen() {
-  clock.setEngine(createSequenceEngine({ phases: props.phases }))
+  clock.setEngine(createSequenceEngine({ phases: phases.value }))
 }
 onMounted(() => { neuAufsetzen(); clock.start() })
-watch(() => props.phases, neuAufsetzen)
+watch(() => props.disziplin, neuAufsetzen)
 
 const s = clock.snapshot
 const zustand = computed(() => s.value?.state ?? SeqState.IDLE)
@@ -81,7 +84,7 @@ const hauptaktion = computed(() => {
     case SeqState.REP_PAUSE:
       return { text: 'Anhalten', unter: 'Zeit stoppt sofort', fn: anhalten, klasse: 'gelb' }
     case SeqState.FINISHED:
-      return { text: 'Neuer Durchgang', unter: props.name, fn: zuruecksetzen, klasse: 'grau' }
+      return { text: 'Neuer Durchgang', unter: name.value, fn: zuruecksetzen, klasse: 'grau' }
     default: return null
   }
 })
@@ -130,8 +133,89 @@ const wiederholungen = computed(() => {
       </p>
     </main>
 
-    <section v-if="phase?.roCommands?.length && (zustand === 'idle' || zustand === 'waitingNext')" class="kommandos">
-      <p v-for="(k, i) in phase.roCommands" :key="i" class="kommando">„{{ k }}“</p>
+    <!-- Kommandofolge vor der Serie -->
+    <section v-if="zustand === 'idle' || zustand === 'waitingNext'" class="kommandos">
+      <p class="kommando-marke" v-if="befehle">
+        Kommandofolge {{ befehle.ruleRef }}
+      </p>
+      <ol class="kommando-liste" v-if="befehle">
+        <li v-for="(k, i) in [...befehle.vorher, ...befehle.start]" :key="i">
+          <span class="kommando">„{{ k.de }}“</span>
+          <span class="kommando-en">{{ k.en }}</span>
+          <span class="kommando-hinweis" v-if="k.hinweis">{{ k.hinweis }}</span>
+        </li>
+      </ol>
+      <p v-for="(k, i) in (phase?.roCommands ?? [])" :key="'e' + i" class="kommando eigen">„{{ k }}“</p>
+    </section>
+
+    <!-- Kommandofolge nach der Serie -->
+    <section v-else-if="zustand === 'finished' && befehle" class="kommandos nachher">
+      <p class="kommando-marke">Nach der Serie — {{ befehle.ruleRef }}</p>
+      <ol class="kommando-liste">
+        <li v-for="(k, i) in befehle.nachher" :key="i">
+          <span class="kommando">„{{ k.de }}“</span>
+          <span class="kommando-en">{{ k.en }}</span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Abbruchkommando, solange geschossen wird -->
+    <section v-else-if="laeuft && befehle?.abbruch?.length" class="kommandos abbruch">
+      <p class="kommando-marke">Abbruch</p>
+      <p class="kommando">„{{ befehle.abbruch[0].de }}“ <span class="kommando-en">{{ befehle.abbruch[0].en }}</span></p>
+      <p class="kommando-hinweis">{{ befehle.abbruch[0].hinweis }}</p>
+    </section>
+
+    <!-- Stellungen, Fertigstellung, Ablauf und Hinweise -->
+    <section v-if="!laeuft" class="hinweise">
+      <button class="k-nav" @click="hinweiseOffen = !hinweiseOffen">
+        {{ hinweiseOffen ? 'Regeltexte ausblenden' : 'Stellungen, Fertigstellung und Regeltexte' }}
+        <span class="regel" v-if="disziplin.ruleRef">{{ disziplin.ruleRef }}</span>
+      </button>
+
+      <div v-if="hinweiseOffen" class="hinweis-liste">
+        <template v-if="disziplin.abweichung">
+          <p class="warnung">{{ disziplin.abweichung }}</p>
+        </template>
+
+        <template v-if="phase?.positions?.length">
+          <p class="hinweis-titel">Stellungen dieser Phase</p>
+          <div v-for="st in phase.positions" :key="st.name" class="stellung">
+            <strong>{{ st.name }} <span class="regel">{{ st.ruleRef }}</span></strong>
+            <p>{{ st.text }}</p>
+          </div>
+        </template>
+
+        <template v-if="phase?.positionChangeNotes?.length">
+          <p class="hinweis-titel">Beim Stellungswechsel</p>
+          <ul><li v-for="(n, i) in phase.positionChangeNotes" :key="i">{{ n }}</li></ul>
+        </template>
+
+        <template v-if="disziplin.readiness">
+          <p class="hinweis-titel">Fertigstellung <span class="regel">{{ disziplin.readiness.ruleRef }}</span></p>
+          <p class="fliess">{{ disziplin.readiness.text }}</p>
+        </template>
+
+        <template v-if="disziplin.ablauf?.length">
+          <p class="hinweis-titel">Ablauf laut Sportordnung</p>
+          <ul><li v-for="(a, i) in disziplin.ablauf" :key="i">{{ a }}</li></ul>
+        </template>
+
+        <template v-if="disziplin.hinweise?.length">
+          <p class="hinweis-titel">Weitere Regeln</p>
+          <ul><li v-for="(h, i) in disziplin.hinweise" :key="i">{{ h }}</li></ul>
+        </template>
+
+        <template v-if="befehle?.hinweise?.length">
+          <p class="hinweis-titel">Zum Entladen und Vorzeigen</p>
+          <ul><li v-for="(h, i) in befehle.hinweise" :key="i">{{ h }}</li></ul>
+        </template>
+
+        <p class="quelle" v-if="disziplin.ammo || disziplin.target">
+          <template v-if="disziplin.ammo">Munition: {{ disziplin.ammo }}. </template>
+          <template v-if="disziplin.target">Scheibe: {{ disziplin.target }}.</template>
+        </p>
+      </div>
     </section>
 
     <footer class="fuss">
@@ -183,8 +267,30 @@ const wiederholungen = computed(() => {
 .wdh { margin: 0.4rem 0 0; font-size: 1.1rem; color: var(--akzent); font-variant-numeric: tabular-nums; }
 .wdh-plan { margin: 0.3rem 0 0; color: var(--gedaempft); font-size: 0.85rem; }
 
-.kommandos { background: var(--flaeche); border: 1px solid var(--rand); border-left: 4px solid var(--akzent); border-radius: 0.75rem; padding: 0.7rem 1rem; }
-.kommando { margin: 0.15rem 0; font-size: 1.1rem; font-weight: 600; }
+.kommandos { background: var(--flaeche); border: 1px solid var(--rand); border-left: 4px solid var(--akzent); border-radius: 0.75rem; padding: 0.8rem 1rem; }
+.kommandos.nachher { border-left-color: var(--gruen); }
+.kommandos.abbruch { border-left-color: #dc2626; }
+.kommando-marke { margin: 0 0 0.5rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gedaempft); }
+.kommando-liste { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.kommando-liste li::marker { color: var(--akzent); font-weight: 700; }
+.kommando { display: block; margin: 0; font-size: 1.12rem; font-weight: 600; line-height: 1.35; }
+.kommando.eigen { margin-top: 0.6rem; color: var(--akzent); }
+.kommando-en { display: block; font-size: 0.82rem; font-weight: 400; color: var(--gedaempft); font-style: italic; }
+.kommando-hinweis { display: block; margin-top: 0.25rem; font-size: 0.82rem; color: var(--gedaempft); line-height: 1.45; }
+
+.hinweise { display: flex; flex-direction: column; gap: 0.5rem; }
+.regel { font-size: 0.7rem; padding: 0.1rem 0.4rem; border: 1px solid var(--rand); border-radius: 0.4rem; color: var(--gedaempft); font-weight: 400; }
+.hinweis-liste { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 0.75rem; padding: 0.85rem 1rem; max-height: 50vh; overflow-y: auto; }
+.hinweis-liste ul { margin: 0.3rem 0 0.6rem; padding-left: 1.1rem; }
+.hinweis-liste li { margin: 0.35rem 0; font-size: 0.88rem; line-height: 1.5; color: #d7dee6; }
+.hinweis-titel { margin: 0.9rem 0 0.2rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gedaempft); }
+.hinweis-titel:first-child { margin-top: 0; }
+.fliess { margin: 0.3rem 0 0.6rem; font-size: 0.88rem; line-height: 1.5; color: #d7dee6; }
+.stellung { margin: 0.4rem 0 0.7rem; }
+.stellung strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
+.stellung p { margin: 0; font-size: 0.86rem; line-height: 1.5; color: #d7dee6; }
+.warnung { margin: 0 0 0.8rem; padding: 0.6rem 0.8rem; background: #3b1d05; border: 1px solid #7c4a08; border-radius: 0.5rem; color: var(--akzent); font-size: 0.86rem; line-height: 1.5; }
+.quelle { margin: 0.8rem 0 0; font-size: 0.8rem; color: var(--gedaempft); line-height: 1.5; }
 
 .fuss { display: flex; flex-direction: column; gap: 0.5rem; }
 .haupt { width: 100%; min-height: 5.5rem; border: none; border-radius: 1rem; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem; cursor: pointer; }

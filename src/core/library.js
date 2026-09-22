@@ -15,6 +15,7 @@
  */
 
 import { convertLegacyCollection, toLegacyPhase } from './legacyImport.js'
+import { enrichDiscipline } from './disciplineRules.js'
 import { EPP_PHASES, EPP_TOTAL_TIME_MS } from './eppRules.js'
 
 export const SPEICHER_SCHLUESSEL = 'bdmp.bibliothek.v1'
@@ -29,7 +30,7 @@ const slug = (s) => String(s ?? '')
 
 /** Baut den mitgelieferten Satz aus den Regeldaten und der Altsammlung. */
 export function createBuiltinSet(legacyCollection) {
-  const disciplines = convertLegacyCollection(legacyCollection).map(d => ({
+  const disciplines = convertLegacyCollection(legacyCollection).map(d => enrichDiscipline({
     id: slug(d.name), name: d.name, kind: d.kind, phases: d.phases,
   }))
   disciplines.unshift({

@@ -79,7 +79,7 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
       :phases="gewaehlt.phases"
       :total-time-ms="gewaehlt.totalTimeMs ?? 330000"
       :prep-ms="gewaehlt.prepMs ?? 3000" />
-    <SequenceMatchView v-else :name="gewaehlt.name" :phases="gewaehlt.phases" />
+    <SequenceMatchView v-else :disziplin="gewaehlt" />
   </div>
 
   <!-- Sätze -->
