@@ -5,7 +5,8 @@
  */
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import SprachWahl from '../src/components/SprachWahl.vue'
+import StartView from '../src/views/StartView.vue'
+import HelpView from '../src/views/HelpView.vue'
 import EppMatchView from '../src/views/EppMatchView.vue'
 import SequenceMatchView from '../src/views/SequenceMatchView.vue'
 import LibraryView from '../src/views/LibraryView.vue'
@@ -27,7 +28,8 @@ const saetze = computed(() => (stand.value, bibliothek.sets()))
 const aktiverId = computed(() => (stand.value, bibliothek.activeSetId()))
 const aktiverSatz = computed(() => (stand.value, bibliothek.activeSet()))
 
-const schirm = ref('wahl')                             // wahl | lauf | saetze | editor
+const schirm = ref('start')                            // start | wahl | lauf | saetze | editor | hilfe
+const zuletzt = ref(null)
 const gewaehlt = ref(null)
 const editorSatzId = ref(null)
 const editorSatz = computed(() => saetze.value.find(s => s.id === editorSatzId.value))
@@ -42,7 +44,7 @@ function dauerText(d) {
   return `${d.phases.length} ${t('v3.allgemein.phasen')} · ${zeit} ${t('v3.wahl.schiessUndVorlaufzeit')}`
 }
 
-function starte(d) { gewaehlt.value = d; schirm.value = 'lauf' }
+function starte(d) { gewaehlt.value = d; zuletzt.value = d; schirm.value = 'lauf' }
 function sichern(satz) { bibliothek.save(satz); stand.value++ }
 function aktivieren(id) { bibliothek.setActive(id); stand.value++ }
 function loeschen(id) { bibliothek.remove(id); stand.value++ }
@@ -50,8 +52,21 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
 </script>
 
 <template>
+  <!-- Startseite -->
+  <StartView
+    v-if="schirm === 'start'"
+    :satz="aktiverSatz" :zuletzt="zuletzt"
+    @waehlen="schirm = 'wahl'"
+    @weiter="starte(zuletzt)"
+    @saetze="schirm = 'saetze'"
+    @hilfe="schirm = 'hilfe'" />
+
+  <!-- Hilfe und Rechtliches -->
+  <HelpView v-else-if="schirm === 'hilfe'" @schliessen="schirm = 'start'" />
+
   <!-- Disziplinwahl -->
-  <div v-if="schirm === 'wahl'" class="seite">
+  <div v-else-if="schirm === 'wahl'" class="seite">
+    <button class="k-nav" @click="schirm = 'start'">{{ t('v3.hilfe.zurueck') }}</button>
     <header class="kopfzeile">
       <h1>{{ t('v3.wahl.titel') }}</h1>
       <p>{{ t('v3.wahl.satzInBenutzung') }}: <strong>{{ aktiverSatz.name }}</strong></p>
@@ -70,7 +85,6 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
         {{ t('v3.wahl.verwalten') }}
         <span class="k-unter">{{ t('v3.wahl.verwaltenUnter') }}</span>
       </button>
-      <SprachWahl />
     </div>
   </div>
 
@@ -92,7 +106,7 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
     v-else-if="schirm === 'saetze'"
     :sets="saetze" :active-id="aktiverId"
     @aktivieren="aktivieren" @sichern="sichern" @loeschen="loeschen"
-    @bearbeiten="bearbeiten" @schliessen="schirm = 'wahl'" />
+    @bearbeiten="bearbeiten" @schliessen="schirm = 'start'" />
 
   <!-- Editor -->
   <EditorView
