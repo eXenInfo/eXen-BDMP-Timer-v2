@@ -10,6 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { computed, onMounted, ref } from 'vue'
 import { createEppEngine, EppState, EppEvent } from '../core/eppEngine.js'
 import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_GENERAL_NOTES, EPP_VARIANTEN } from '../core/eppRules.js'
+import { buildEppAnnouncement } from '../core/ansage.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
 
@@ -129,13 +130,10 @@ function zuStation(i)   { clock.call('goToStation', i, now()) }
 
 /** Der Ablauf der Station, wie ihn der RO vorliest. */
 const ansage = computed(() => {
-  const p = phase.value
-  if (!p) return null
-  const kopf = [p.distance, p.position,
-                p.shots ? `${p.shots} ${t('v3.epp.schuss')}` : null,
-                p.shotsNote,
-                p.timeLimitMs > 0 ? `${p.timeLimitMs / 1000} s` : null].filter(Boolean).join(' · ')
-  return { kopf, zeilen: (p.notes ?? []).filter(Boolean) }
+  const phasen = props.phases ?? []
+  if (!phasen.length) return null
+  const a = buildEppAnnouncement(phasen, s.value?.stationIndex ?? 0)
+  return a.detail ? a : null
 })
 
 const stoerungen = computed(() => s.value?.malfunctionCount ?? 0)
@@ -193,10 +191,10 @@ const restknapp  = computed(() => {
     </main>
 
     <!-- Ablauf zum Vorlesen — steht vor den Kommandos -->
-    <section v-if="ansage?.zeilen.length && zustand === 'idle'" class="ansage-block">
+    <section v-if="ansage && zustand === 'idle'" class="ansage-block">
       <p class="ansage-marke2">{{ t('v3.epp.ansage') }}<span class="ansage-unter">{{ t('v3.epp.ansageUnter') }}</span></p>
-      <p v-if="ansage.kopf" class="ansage-kopf">{{ ansage.kopf }}</p>
-      <p v-for="(z, i) in ansage.zeilen" :key="i" class="ansage-zeile2">{{ z }}</p>
+      <p v-if="ansage.fuehrung" class="ansage-fuehrung">{{ ansage.fuehrung }}</p>
+      <p class="ansage-zeile2">{{ ansage.detail }}</p>
     </section>
 
     <!-- RO-Kommandos der laufenden Station -->
@@ -335,6 +333,7 @@ const restknapp  = computed(() => {
 }
 .ansage-unter { text-transform: none; letter-spacing: 0; font-style: italic; }
 .ansage-kopf { margin: 0 0 0.4rem; font-size: 1rem; color: #93c5fd; font-variant-numeric: tabular-nums; }
+.ansage-fuehrung { margin: 0 0 0.35rem; font-size: 1.35rem; font-weight: 700; line-height: 1.35; color: var(--text); }
 .ansage-zeile2 { margin: 0.3rem 0; font-size: 1.1rem; line-height: 1.5; color: var(--text); }
 
 .kommandos { background: var(--flaeche); border: 1px solid var(--rand); border-left: 4px solid var(--akzent); border-radius: 0.75rem; padding: 0.75rem 1rem; }

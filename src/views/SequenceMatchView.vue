@@ -9,6 +9,7 @@
 import { useI18n } from 'vue-i18n'
 import { computed, onMounted, ref, watch } from 'vue'
 import { createSequenceEngine, SeqState, SeqEvent } from '../core/sequenceEngine.js'
+import { buildAnnouncement } from '../core/ansage.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
 
@@ -107,16 +108,17 @@ async function zuPhase(i)    { await audio.arm(); clock.call('goToPhase', i, now
  * Bildschirmrand wäre er dafür unbrauchbar.
  */
 const ansage = computed(() => {
+  const phasen = props.disziplin?.phases ?? []
+  if (!phasen.length) return null
+  const a = buildAnnouncement(phasen, s.value?.index ?? 0, props.disziplin)
+  if (!a.detail) return null
+  // Pausen zwischen den Durchgängen gehören in die Ansage, weil die Schützen
+  // sonst nicht wissen, ob sie die Waffe absetzen dürfen.
   const p = phase.value
-  if (!p) return null
-  const kopf = [
-    p.distance,
-    p.repetitions > 1 ? t('v3.seq.durchgangPlan', { anzahl: p.repetitions, dauer: Math.round(p.durationMs / 1000) })
-                      : (p.durationMs ? `${Math.round(p.durationMs / 1000)} s` : null),
-    p.repPauseMs ? t('v3.seq.mitPause', { pause: Math.round(p.repPauseMs / 1000) }).trim() : null,
-  ].filter(Boolean).join(' · ')
-  const zeilen = String(p.description ?? '').split('\n').map(z => z.trim()).filter(Boolean)
-  return { kopf, zeilen: zeilen.length ? zeilen : [p.name] }
+  const zusatz = p?.repPauseMs
+    ? t('v3.seq.mitPause', { pause: Math.round(p.repPauseMs / 1000) }).trim()
+    : null
+  return { ...a, zusatz }
 })
 
 const wiederholungen = computed(() => {
@@ -159,8 +161,9 @@ const wiederholungen = computed(() => {
     <!-- Ablauf zum Vorlesen — steht vor den Kommandos -->
     <section v-if="ansage && (zustand === 'idle' || zustand === 'waitingNext')" class="ansage">
       <p class="ansage-marke">{{ t('v3.seq.ansage') }}<span class="ansage-unter">{{ t('v3.seq.ansageUnter') }}</span></p>
-      <p v-if="ansage.kopf" class="ansage-kopf">{{ ansage.kopf }}</p>
-      <p v-for="(z, i) in ansage.zeilen" :key="i" class="ansage-zeile">{{ z }}</p>
+      <p v-if="ansage.fuehrung" class="ansage-fuehrung">{{ ansage.fuehrung }}</p>
+      <p class="ansage-zeile">{{ ansage.detail }}</p>
+      <p v-if="ansage.zusatz" class="ansage-kopf">{{ ansage.zusatz }}</p>
     </section>
 
     <!-- Kommandofolge vor der Serie -->
@@ -317,6 +320,7 @@ const wiederholungen = computed(() => {
 }
 .ansage-unter { text-transform: none; letter-spacing: 0; font-style: italic; }
 .ansage-kopf { margin: 0 0 0.4rem; font-size: 1rem; color: #93c5fd; font-variant-numeric: tabular-nums; }
+.ansage-fuehrung { margin: 0 0 0.35rem; font-size: 1.35rem; font-weight: 700; line-height: 1.35; color: var(--text); }
 .ansage-zeile { margin: 0.25rem 0; font-size: 1.15rem; line-height: 1.5; color: var(--text); }
 
 .kommandos { background: var(--flaeche); border: 1px solid var(--rand); border-left: 4px solid var(--akzent); border-radius: 0.75rem; padding: 0.8rem 1rem; }

@@ -439,7 +439,13 @@
       "kommandofolge": "Range officer command sequence",
       "kommandofolgeHinweis": "“Detect from name” assigns the official sequence by the discipline's name. For your own exercises you can pick it explicitly here.",
       "eigeneDisziplin": "own discipline",
-      "phasenZahl": "{anzahl} phases"
+      "phasenZahl": "{anzahl} phases",
+      "schuetzenAnsage": "Announcement to the shooters",
+      "schuetzenAnsageHilfe": "The RO reads this out before the first command. First line: where the shooters go. Second line: the course of fire. Leave empty to derive it from the phase fields.",
+      "ansageAbgeleitet": "Derived from the phase",
+      "ansageEigen": "Own text",
+      "ansageUebernehmen": "Copy derived text",
+      "ansageZuruecksetzen": "Back to derived text"
     },
     "start": {
       "untertitel": "Timing for dynamic BDMP pistol disciplines",

@@ -409,8 +409,8 @@
       "doppeln": "Doppeln",
       "ueberschrift": "Überschrift",
       "beschreibung": "Beschreibung für den Schützen",
-      "ansagen": "Ansagen der Aufsicht",
-      "ansageHinzufuegen": "Ansage hinzufügen",
+      "ansagen": "Kommandos der Aufsicht",
+      "ansageHinzufuegen": "Kommando hinzufügen",
       "distanz": "Distanz",
       "anschlag": "Anschlag",
       "zeitlimit": "Zeitlimit in Sekunden (0 = offen)",
@@ -439,7 +439,13 @@
       "kommandofolge": "Kommandofolge der Aufsicht",
       "kommandofolgeHinweis": "„Nach Name erkennen“ ordnet die amtliche Folge anhand des Disziplinnamens zu. Für eigene Übungen lässt sie sich hier ausdrücklich wählen.",
       "eigeneDisziplin": "eigene Disziplin",
-      "phasenZahl": "{anzahl} Phasen"
+      "phasenZahl": "{anzahl} Phasen",
+      "schuetzenAnsage": "Ansage an die Schützen",
+      "schuetzenAnsageHilfe": "Der RO liest das vor dem ersten Kommando laut vor. Erste Zeile: wohin die Schützen gehen. Zweite Zeile: der Ablauf. Leer lassen, dann wird die Ansage aus den Feldern der Phase gebildet.",
+      "ansageAbgeleitet": "Wird aus der Phase gebildet",
+      "ansageEigen": "Eigener Text",
+      "ansageUebernehmen": "Ableitung als Text übernehmen",
+      "ansageZuruecksetzen": "Auf Ableitung zurücksetzen"
     },
     "start": {
       "untertitel": "Zeitsteuerung für dynamische Schießdisziplinen",

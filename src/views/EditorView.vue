@@ -10,6 +10,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { createDiscipline, COMMAND_SET_OPTIONS } from '../core/disciplineRules.js'
+import { buildAnnouncement, buildEppAnnouncement } from '../core/ansage.js'
 
 const props = defineProps({
   satz: { type: Object, required: true },
@@ -46,6 +47,31 @@ function setSekunden(feld, wert) {
 function ansageAendern(i, wert) { phase.value.roCommands[i] = wert; merken() }
 function ansageHinzu()   { (phase.value.roCommands ??= []).push(''); merken() }
 function ansageWeg(i)    { phase.value.roCommands.splice(i, 1); merken() }
+
+/**
+ * Die Ansage, die der RO vorliest — abgeleitet aus den Feldern der Phase.
+ *
+ * Sie wird hier immer mitgerechnet, damit sichtbar ist, was ohne eigenen
+ * Text herauskommt. Erst wenn jemand in das Feld schreibt, gilt sein Text.
+ */
+const abgeleiteteAnsage = computed(() => {
+  const liste = disziplin.value?.phases ?? []
+  if (!liste.length) return ''
+  const roh = { ...(liste[pIndex.value] ?? {}) }
+  delete roh.ansage                      // die Ableitung, nicht die Übersteuerung
+  const ohne = liste.map((p, i) => (i === pIndex.value ? roh : p))
+  const a = istEpp.value
+    ? buildEppAnnouncement(ohne, pIndex.value)
+    : buildAnnouncement(ohne, pIndex.value, disziplin.value)
+  return [a.fuehrung, a.detail].filter(Boolean).join('\n')
+})
+
+function ansageSetzen(wert) {
+  const t = String(wert ?? '')
+  if (t.trim()) phase.value.ansage = t
+  else delete phase.value.ansage
+  merken()
+}
 
 // ── Disziplinen ────────────────────────────────────────────────────────────
 function disziplinNeu() {
@@ -258,6 +284,29 @@ const regelAbweichung = computed(() => {
         </div>
 
         <div class="e-gruppe">
+          <label class="e-marke" for="f-ansage">
+            {{ t('v3.editor.schuetzenAnsage') }}
+            <span class="e-status" :class="{ eigen: !!phase.ansage }">
+              {{ phase.ansage ? t('v3.editor.ansageEigen') : t('v3.editor.ansageAbgeleitet') }}
+            </span>
+          </label>
+          <p class="e-hilfe">{{ t('v3.editor.schuetzenAnsageHilfe') }}</p>
+          <textarea id="f-ansage" class="e-feld ansage-feld" rows="2"
+                    :value="phase.ansage ?? ''"
+                    :placeholder="abgeleiteteAnsage"
+                    @input="e => ansageSetzen(e.target.value)"></textarea>
+          <p class="e-vorschau" v-if="!phase.ansage">{{ abgeleiteteAnsage }}</p>
+          <div class="e-knopfpaar">
+            <button class="k-zweit" v-if="!phase.ansage" @click="ansageSetzen(abgeleiteteAnsage)">
+              {{ t('v3.editor.ansageUebernehmen') }}
+            </button>
+            <button class="k-zweit" v-else @click="ansageSetzen('')">
+              {{ t('v3.editor.ansageZuruecksetzen') }}
+            </button>
+          </div>
+        </div>
+
+        <div class="e-gruppe">
           <label class="e-marke" for="f-besch">{{ t('v3.editor.beschreibung') }}</label>
           <textarea id="f-besch" class="e-feld" rows="3"
                     :value="istEpp ? (phase.notes ?? []).join('\n') : phase.description"
@@ -397,6 +446,16 @@ const regelAbweichung = computed(() => {
 
 .block { border: 1px solid var(--f-rand); border-radius: var(--r-mittel); background: var(--f-flaeche-hoch); padding: 1rem; margin: 0; }
 .block:disabled { opacity: 0.55; }
+.e-status { float: right; font-weight: 500; text-transform: none; letter-spacing: 0; opacity: 0.7; }
+.e-status.eigen { color: var(--f-akzent); opacity: 1; }
+.e-hilfe { margin: 0 0 0.4rem; font-size: 0.82rem; line-height: 1.45; opacity: 0.75; }
+.ansage-feld { font-size: 1rem; line-height: 1.5; }
+.e-vorschau {
+  margin: 0.4rem 0 0; padding: 0.5rem 0.7rem; border-radius: 0.5rem;
+  background: rgba(59, 130, 246, 0.12); border-left: 3px solid #3b82f6;
+  font-size: 0.95rem; line-height: 1.5; white-space: pre-line;
+}
+.e-knopfpaar { margin-top: 0.5rem; }
 .ansage-zeile { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; margin-bottom: 0.5rem; }
 .regel-warnung { margin: 0.25rem 0 0; color: var(--f-akzent); font-size: 0.85rem; line-height: 1.45; }
 .abstand { margin-top: 0.5rem; }
