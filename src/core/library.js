@@ -20,6 +20,7 @@ import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_VARIANTEN } from './eppRules.js'
 
 export const SPEICHER_SCHLUESSEL = 'bdmp.bibliothek.v1'
 export const FORMAT = 'bdmp-timer-satz/1'
+export const MAX_FAVORITEN = 5
 
 const jetzt = () => new Date().toISOString()
 
@@ -94,7 +95,8 @@ export function createLibrary(storage, legacyCollection) {
     catch { return false }
   }
 
-  let zustand = lesen() ?? { sets: [], activeSetId: 'bdmp-standard' }
+  let zustand = lesen() ?? { sets: [], activeSetId: 'bdmp-standard', favoriten: [] }
+  if (!Array.isArray(zustand.favoriten)) zustand = { ...zustand, favoriten: [] }
   const builtin = createBuiltinSet(legacyCollection)
 
   const alleSaetze = () => [builtin, ...zustand.sets]
@@ -136,7 +138,60 @@ export function createLibrary(storage, legacyCollection) {
       return schreiben(zustand)
     },
 
-    reload() { zustand = lesen() ?? { sets: [], activeSetId: builtin.id } },
+    reload() {
+      zustand = lesen() ?? { sets: [], activeSetId: builtin.id, favoriten: [] }
+      if (!Array.isArray(zustand.favoriten)) zustand.favoriten = []
+    },
+
+    // ── Favoriten ───────────────────────────────────────────────────────────
+    // Höchstens fünf, damit die Startseite eine Auswahl bleibt und keine
+    // zweite Disziplinliste wird. Gespeichert werden Kennungen, nicht Kopien.
+    favoriten() { return [...zustand.favoriten] },
+
+    istFavorit(id) { return zustand.favoriten.includes(id) },
+
+    /** Schaltet um. Gibt false zurück, wenn die Höchstzahl erreicht ist. */
+    favoritUmschalten(id) {
+      const drin = zustand.favoriten.includes(id)
+      if (!drin && zustand.favoriten.length >= MAX_FAVORITEN) return false
+      const favoriten = drin
+        ? zustand.favoriten.filter(x => x !== id)
+        : [...zustand.favoriten, id]
+      zustand = { ...zustand, favoriten }
+      schreiben(zustand)
+      return true
+    },
+
+    /** Die Favoriten des aktiven Satzes in der gespeicherten Reihenfolge. */
+    favoritenDisziplinen() {
+      const satz = alleSaetze().find(s => s.id === zustand.activeSetId) ?? builtin
+      return zustand.favoriten
+        .map(id => satz.disciplines.find(d => d.id === id))
+        .filter(Boolean)
+        .map(enrichDiscipline)
+    },
+
+    /**
+     * Legt eine eigene Disziplin an. Ist der aktive Satz schreibgeschützt,
+     * entsteht zuerst eine bearbeitbare Kopie — sonst stünde der Nutzer vor
+     * einer Sperre, die er nicht versteht.
+     * @returns {{satz, disziplin, kopieAngelegt}}
+     */
+    disziplinAnlegen(name, erzeuger) {
+      let satz = alleSaetze().find(s => s.id === zustand.activeSetId) ?? builtin
+      let kopieAngelegt = false
+      if (satz.readonly) {
+        satz = duplicateSet(satz, 'Eigene Disziplinen')
+        kopieAngelegt = true
+      } else {
+        satz = structuredClone(satz)
+      }
+      const disziplin = erzeuger(name)
+      satz.disciplines.push(disziplin)
+      const gesichert = this.save(satz)
+      if (gesichert) this.setActive(gesichert.id)
+      return { satz: gesichert || satz, disziplin, kopieAngelegt }
+    },
   }
 }
 

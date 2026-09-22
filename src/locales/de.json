@@ -262,7 +262,16 @@
       "verwaltenUnter": "bearbeiten, ausgeben, einlesen, nachladen",
       "andereDisziplin": "Andere Disziplin wählen",
       "schiessUndVorlaufzeit": "Schieß- und Vorlaufzeit",
-      "eppKurz": "7 Stationen · 50 Schuss · 5:30 Gesamtzeit"
+      "eppKurz": "7 Stationen · 50 Schuss · 5:30 Gesamtzeit",
+      "favoriten": "Favoriten",
+      "keineFavoriten": "Noch keine Favoriten. In der Disziplinliste mit dem Stern markieren, bis zu fünf.",
+      "favoritSetzen": "Als Favorit",
+      "favoritEntfernen": "Favorit entfernen",
+      "favoritenVoll": "Höchstens fünf Favoriten. Entferne zuerst einen.",
+      "disziplinErstellen": "Disziplin erstellen",
+      "disziplinErstellenUnter": "eigene Übung mit eigenen Zeiten",
+      "kopieAngelegt": "Der mitgelieferte Satz ist schreibgeschützt. „Eigene Disziplinen“ wurde als bearbeitbare Kopie angelegt und ist jetzt in Benutzung.",
+      "dankeschoen": "Dankeschön"
     },
     "epp": {
       "restzeitGesamt": "Restzeit gesamt",
@@ -438,7 +447,16 @@
       "saetzeUnter": "bearbeiten, ausgeben, einlesen, nachladen",
       "hilfe": "Hilfe und Rechtliches",
       "hilfeUnter": "Bedienung, Signale, Regelgrundlage, Impressum",
-      "hinweisKurz": "Hilfsmittel für Aufsicht und Training. Verbindlich sind die Sportordnung und die Entscheidungen der Aufsicht."
+      "hinweisKurz": "Hilfsmittel für Aufsicht und Training. Verbindlich sind die Sportordnung und die Entscheidungen der Aufsicht.",
+      "favoriten": "Favoriten",
+      "keineFavoriten": "Noch keine Favoriten. In der Disziplinliste mit dem Stern markieren, bis zu fünf.",
+      "favoritSetzen": "Als Favorit",
+      "favoritEntfernen": "Favorit entfernen",
+      "favoritenVoll": "Höchstens fünf Favoriten. Entferne zuerst einen.",
+      "disziplinErstellen": "Disziplin erstellen",
+      "disziplinErstellenUnter": "eigene Übung mit eigenen Zeiten",
+      "kopieAngelegt": "Der mitgelieferte Satz ist schreibgeschützt. „Eigene Disziplinen“ wurde als bearbeitbare Kopie angelegt und ist jetzt in Benutzung.",
+      "dankeschoen": "Dankeschön"
     },
     "hilfe": {
       "titel": "Hilfe",
@@ -473,7 +491,16 @@
       "b5": "Eigene Sätze",
       "b5t": "Der mitgelieferte Satz ist schreibgeschützt. „Kopie anlegen“ erzeugt eine bearbeitbare Fassung, in der sich Überschriften, Beschreibungen und Ansagen ändern lassen.",
       "b6": "Weitergeben und nachladen",
-      "b6t": "Sätze lassen sich vollständig oder im Altformat des früheren Timers ausgeben und ebenso wieder einlesen. Nachladen ergänzt neue Disziplinen, ohne eigene Änderungen zu überschreiben."
+      "b6t": "Sätze lassen sich vollständig oder im Altformat des früheren Timers ausgeben und ebenso wieder einlesen. Nachladen ergänzt neue Disziplinen, ohne eigene Änderungen zu überschreiben.",
+      "favoriten": "Favoriten",
+      "keineFavoriten": "Noch keine Favoriten. In der Disziplinliste mit dem Stern markieren, bis zu fünf.",
+      "favoritSetzen": "Als Favorit",
+      "favoritEntfernen": "Favorit entfernen",
+      "favoritenVoll": "Höchstens fünf Favoriten. Entferne zuerst einen.",
+      "disziplinErstellen": "Disziplin erstellen",
+      "disziplinErstellenUnter": "eigene Übung mit eigenen Zeiten",
+      "kopieAngelegt": "Der mitgelieferte Satz ist schreibgeschützt. „Eigene Disziplinen“ wurde als bearbeitbare Kopie angelegt und ist jetzt in Benutzung.",
+      "dankeschoen": "Dankeschön"
     }
   }
 }

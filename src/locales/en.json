@@ -262,7 +262,16 @@
       "verwaltenUnter": "edit, export, import, update",
       "andereDisziplin": "Choose another discipline",
       "schiessUndVorlaufzeit": "shooting and preparation time",
-      "eppKurz": "7 stations · 50 rounds · 5:30 total time"
+      "eppKurz": "7 stations · 50 rounds · 5:30 total time",
+      "favoriten": "Favourites",
+      "keineFavoriten": "No favourites yet. Mark up to five with the star in the discipline list.",
+      "favoritSetzen": "Add to favourites",
+      "favoritEntfernen": "Remove favourite",
+      "favoritenVoll": "Five favourites at most. Remove one first.",
+      "disziplinErstellen": "Create a discipline",
+      "disziplinErstellenUnter": "your own exercise with your own timings",
+      "kopieAngelegt": "The bundled set is read-only. “Eigene Disziplinen” was created as an editable copy and is now in use.",
+      "dankeschoen": "Thank you"
     },
     "epp": {
       "restzeitGesamt": "Total time left",
@@ -438,7 +447,16 @@
       "saetzeUnter": "edit, export, import, update",
       "hilfe": "Help and legal notice",
       "hilfeUnter": "operation, signals, rule basis, imprint",
-      "hinweisKurz": "An aid for range officers and training. The Sportordnung and the range officer's decisions prevail."
+      "hinweisKurz": "An aid for range officers and training. The Sportordnung and the range officer's decisions prevail.",
+      "favoriten": "Favourites",
+      "keineFavoriten": "No favourites yet. Mark up to five with the star in the discipline list.",
+      "favoritSetzen": "Add to favourites",
+      "favoritEntfernen": "Remove favourite",
+      "favoritenVoll": "Five favourites at most. Remove one first.",
+      "disziplinErstellen": "Create a discipline",
+      "disziplinErstellenUnter": "your own exercise with your own timings",
+      "kopieAngelegt": "The bundled set is read-only. “Eigene Disziplinen” was created as an editable copy and is now in use.",
+      "dankeschoen": "Thank you"
     },
     "hilfe": {
       "titel": "Help",
@@ -473,7 +491,16 @@
       "b5": "Your own sets",
       "b5t": "The bundled set is read-only. “Create a copy” produces an editable version in which headings, descriptions and commands can be changed.",
       "b6": "Passing on and updating",
-      "b6t": "Sets can be exported in full or in the old timer's format and imported again the same way. Updating adds new disciplines without overwriting your own changes."
+      "b6t": "Sets can be exported in full or in the old timer's format and imported again the same way. Updating adds new disciplines without overwriting your own changes.",
+      "favoriten": "Favourites",
+      "keineFavoriten": "No favourites yet. Mark up to five with the star in the discipline list.",
+      "favoritSetzen": "Add to favourites",
+      "favoritEntfernen": "Remove favourite",
+      "favoritenVoll": "Five favourites at most. Remove one first.",
+      "disziplinErstellen": "Create a discipline",
+      "disziplinErstellenUnter": "your own exercise with your own timings",
+      "kopieAngelegt": "The bundled set is read-only. “Eigene Disziplinen” was created as an editable copy and is now in use.",
+      "dankeschoen": "Thank you"
     }
   }
 }

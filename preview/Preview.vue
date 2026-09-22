@@ -14,7 +14,7 @@ import EditorView from '../src/views/EditorView.vue'
 import { createLibrary } from '../src/core/library.js'
 import { nominalDurationMs } from '../src/core/legacyImport.js'
 import legacy from '../public/disziplinen.json'
-import { WEAPON_CLASSES } from '../src/core/disciplineRules.js'
+import { WEAPON_CLASSES, createDiscipline } from '../src/core/disciplineRules.js'
 
 const { t } = useI18n()
 
@@ -36,6 +36,24 @@ const editorSatzId = ref(null)
 const editorSatz = computed(() => saetze.value.find(s => s.id === editorSatzId.value))
 
 const disziplinen = computed(() => aktiverSatz.value.disciplines)
+const favoriten = computed(() => (stand.value, bibliothek.favoritenDisziplinen()))
+const meldung = ref(null)
+
+function favoritUmschalten(d) {
+  if (!bibliothek.favoritUmschalten(d.id)) meldung.value = t('v3.wahl.favoritenVoll')
+  else meldung.value = null
+  stand.value++
+}
+
+function erstellen() {
+  const { disziplin, kopieAngelegt } = bibliothek.disziplinAnlegen(
+    t('v3.editor.neueDisziplinName'), createDiscipline)
+  stand.value++
+  meldung.value = kopieAngelegt ? t('v3.wahl.kopieAngelegt') : null
+  editorSatzId.value = bibliothek.activeSetId()
+  schirm.value = 'editor'
+  return disziplin
+}
 
 function dauerText(d) {
   if (d.kind === 'epp') return t('v3.wahl.eppKurz')
@@ -56,9 +74,11 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
   <!-- Startseite -->
   <StartView
     v-if="schirm === 'start'"
-    :satz="aktiverSatz" :zuletzt="zuletzt"
+    :satz="aktiverSatz" :zuletzt="zuletzt" :favoriten="favoriten"
     @waehlen="schirm = 'wahl'"
     @weiter="starte(zuletzt)"
+    @starten="starte"
+    @erstellen="erstellen"
     @saetze="schirm = 'saetze'"
     @hilfe="schirm = 'hilfe'" />
 
@@ -73,18 +93,28 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
       <p>{{ t('v3.wahl.satzInBenutzung') }}: <strong>{{ aktiverSatz.name }}</strong></p>
     </header>
 
-    <button
-      v-for="d in disziplinen" :key="d.id"
-      class="karte" :class="{ epp: d.kind === 'epp' }"
-      @click="starte(d)">
-      <strong>{{ d.name }}</strong>
-      <span>{{ dauerText(d) }}</span>
-      <span v-if="d.varianten?.length" class="klassen">
-        <span v-for="v in d.varianten" :key="v.ruleRef" class="klasse">{{ WEAPON_CLASSES[v.klasse]?.kurz ?? v.klasse }}</span>
-      </span>
-    </button>
+    <p v-if="meldung" class="meldung">{{ meldung }}</p>
+
+    <div v-for="d in disziplinen" :key="d.id" class="reihe">
+      <button class="karte" :class="{ epp: d.kind === 'epp' }" @click="starte(d)">
+        <strong>{{ d.name }}</strong>
+        <span>{{ dauerText(d) }}</span>
+        <span v-if="d.varianten?.length" class="klassen">
+          <span v-for="v in d.varianten" :key="v.ruleRef" class="klasse">{{ WEAPON_CLASSES[v.klasse]?.kurz ?? v.klasse }}</span>
+        </span>
+      </button>
+      <button
+        class="stern" :class="{ an: bibliothek.istFavorit(d.id) }"
+        :title="bibliothek.istFavorit(d.id) ? t('v3.wahl.favoritEntfernen') : t('v3.wahl.favoritSetzen')"
+        :aria-pressed="bibliothek.istFavorit(d.id)"
+        @click="favoritUmschalten(d)">★</button>
+    </div>
 
     <div class="k-spalte abstand">
+      <button class="k-zweit" @click="erstellen">
+        {{ t('v3.wahl.disziplinErstellen') }}
+        <span class="k-unter">{{ t('v3.wahl.disziplinErstellenUnter') }}</span>
+      </button>
       <button class="k-zweit" @click="schirm = 'saetze'">
         {{ t('v3.wahl.verwalten') }}
         <span class="k-unter">{{ t('v3.wahl.verwaltenUnter') }}</span>
@@ -138,6 +168,13 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
 .karte strong { font-size: 1.05rem; }
 .karte span { color: var(--f-gedaempft); font-size: 0.82rem; }
 .karte.epp { border-left: 4px solid var(--f-akzent); }
+.reihe { display: grid; grid-template-columns: 1fr auto; gap: 0.4rem; align-items: stretch; }
+.stern {
+  min-width: 3.25rem; background: var(--f-flaeche); border: 1px solid var(--f-rand);
+  border-radius: var(--r-mittel); color: #3d4653; font-size: 1.5rem; cursor: pointer; line-height: 1;
+}
+.stern.an { color: var(--f-akzent); border-color: var(--f-akzent); }
+.meldung { margin: 0 0 0.25rem; padding: 0.6rem 0.8rem; background: #3b1d05; border: 1px solid #7c4a08; border-radius: var(--r-klein); color: var(--f-akzent); font-size: 0.85rem; line-height: 1.5; }
 .klassen { display: flex; gap: 0.3rem; margin-top: 0.3rem; }
 .klasse { background: var(--f-flaeche-hoch); border: 1px solid var(--f-rand); border-radius: 0.35rem; padding: 0.1rem 0.4rem; font-size: 0.68rem; letter-spacing: 0.03em; color: var(--f-akzent); }
 .karte:active { border-color: var(--f-akzent); }

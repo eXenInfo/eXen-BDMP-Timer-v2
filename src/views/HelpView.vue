@@ -8,7 +8,7 @@
 import { getCurrentInstance, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { IMPRESSUM, HAFTUNG, DATENSCHUTZ, REGELGRUNDLAGE, SIGNALE, APP_INFO } from '../core/legal.js'
+import { IMPRESSUM, HAFTUNG, DATENSCHUTZ, REGELGRUNDLAGE, SIGNALE, APP_INFO, DANKESCHOEN } from '../core/legal.js'
 
 const emit = defineEmits(['schliessen'])
 const { t, locale } = useI18n()
@@ -30,8 +30,12 @@ const offen = ref('bedienung')
 const umschalten = (name) => { offen.value = offen.value === name ? null : name }
 
 const bedienung = ['b1', 'b2', 'b3', 'b4', 'b5', 'b6']
+const faq = [1, 2, 3, 4, 5]
+const schnellstart = [1, 2, 3, 4]
 const abschnitte = [
   { id: 'bedienung',      titel: 'v3.hilfe.bedienung' },
+  { id: 'schnellstart',   titel: 'help.quickstartSection' },
+  { id: 'faq',            titel: 'help.title' },
   { id: 'signale',        titel: 'v3.hilfe.signale' },
   { id: 'regelgrundlage', titel: 'v3.hilfe.regelgrundlage' },
   { id: 'haftung',        titel: 'v3.hilfe.haftung' },
@@ -60,6 +64,19 @@ const abschnitte = [
           <div v-for="b in bedienung" :key="b" class="eintrag">
             <strong>{{ t('v3.hilfe.' + b) }}</strong>
             <p>{{ t('v3.hilfe.' + b + 't') }}</p>
+          </div>
+        </template>
+
+        <template v-else-if="a.id === 'schnellstart'">
+          <ol class="schritte">
+            <li v-for="n in schnellstart" :key="n">{{ t('help.quickstart' + n) }}</li>
+          </ol>
+        </template>
+
+        <template v-else-if="a.id === 'faq'">
+          <div v-for="n in faq" :key="n" class="eintrag">
+            <strong>{{ t('help.faq' + n + 'q') }}</strong>
+            <p>{{ t('help.faq' + n + 'a') }}</p>
           </div>
         </template>
 
@@ -120,6 +137,9 @@ const abschnitte = [
           <p class="zeile"><span class="feld">{{ APP_INFO.name }}</span>{{ APP_INFO.zweck }}</p>
           <p class="zeile"><span class="feld">{{ t('v3.hilfe.lizenz') }}</span>{{ APP_INFO.lizenz }}</p>
           <p class="zeile"><span class="feld">{{ t('v3.hilfe.quelltext') }}</span>{{ APP_INFO.repo }}</p>
+          <p class="feld abstand">{{ t('v3.hilfe.dankeschoen') }}</p>
+          <p>{{ DANKESCHOEN.text }}</p>
+          <p><a class="verweis" :href="DANKESCHOEN.url" target="_blank" rel="noopener noreferrer">{{ DANKESCHOEN.label }}</a></p>
         </template>
       </div>
     </section>

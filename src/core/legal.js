@@ -84,6 +84,16 @@ export const SIGNALE = [
   { name: 'Warnton', beschreibung: 'Ein tiefer Ton bei Ausschluss nach der zweiten Störung.' },
 ]
 
+/**
+ * Freiwilliges Dankeschön. Bewusst kein Bezahlvorgang in der App: Der
+ * Verweis führt nach außen, es werden keine Zahlungsdaten verarbeitet.
+ */
+export const DANKESCHOEN = {
+  text: 'Der Timer ist kostenlos und werbefrei. Wer die Arbeit daran unterstützen möchte, kann ein Dankeschön senden.',
+  url: 'https://paypal.me/exen',
+  label: 'Ein Dankeschön senden (PayPal)',
+}
+
 export const APP_INFO = {
   name: 'eXen BDMP Timer',
   zweck: 'Zeitsteuerung für dynamische Schießdisziplinen des BDMP',
