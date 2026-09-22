@@ -1,0 +1,337 @@
+<script setup>
+/**
+ * Wettkampfmodus EPP — Ansicht für die Aufsicht auf dem Stand.
+ *
+ * Gestaltungsregel: In jedem Zustand gibt es genau eine große, naheliegende
+ * Aktion. Alles Weitere ist kleiner und nachgeordnet. Restzeit und
+ * Störungszähler bleiben dauerhaft sichtbar, weil beide wertungsrelevant sind.
+ */
+import { computed, onMounted, ref } from 'vue'
+import { createEppEngine, EppState, EppEvent } from '../core/eppEngine.js'
+import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_GENERAL_NOTES } from '../core/eppRules.js'
+import { useEngineClock, now } from '../composables/useEngineClock.js'
+import * as audio from '../core/audio.js'
+
+const props = defineProps({
+  phases:      { type: Array,  default: () => EPP_PHASES },
+  totalTimeMs: { type: Number, default: EPP_TOTAL_TIME_MS },
+  prepMs:      { type: Number, default: 3000 },
+})
+
+const signalLaeuft = ref(false)
+const hinweiseOffen = ref(false)
+const probeOffen = ref(false)
+const startLaenge = ref(audio.getStartSignalMs())
+const LAENGEN = [400, 600, 800, 1000, 1200, 1500]
+
+async function probiere(ms) {
+  await audio.arm()
+  startLaenge.value = ms
+  audio.setStartSignalMs(ms)
+  audio.probeStartSignal(ms)
+}
+
+const clock = useEngineClock({
+  onEvents(events) {
+    for (const e of events) {
+      if (e.type === EppEvent.START_SIGNAL) audio.playStartSignal()
+      if (e.type === EppEvent.STOP_SIGNAL) {
+        audio.playStopSignal(e.durationMs)
+        signalLaeuft.value = true
+        setTimeout(() => { signalLaeuft.value = false }, e.durationMs)
+      }
+      if (e.type === EppEvent.FINISHED) audio.playFinishSignal()
+      if (e.type === EppEvent.EXCLUDED) audio.playAlert()
+    }
+  },
+})
+
+onMounted(() => {
+  clock.setEngine(createEppEngine({
+    phases: props.phases, totalTimeMs: props.totalTimeMs, prepMs: props.prepMs,
+  }))
+  clock.start()
+})
+
+const s = clock.snapshot
+const zustand = computed(() => s.value?.state ?? EppState.IDLE)
+const phase   = computed(() => s.value?.phase ?? null)
+
+function mmss(ms) {
+  if (ms == null) return '—:—'
+  const g = Math.ceil(ms / 1000)
+  return `${String(Math.floor(g / 60)).padStart(2, '0')}:${String(g % 60).padStart(2, '0')}`
+}
+function sek(ms) {
+  if (ms == null) return '—'
+  return String(Math.ceil(ms / 1000))
+}
+
+/** Die große Zahl in der Mitte — je nach Zustand etwas anderes. */
+const grosseZahl = computed(() => {
+  if (!s.value) return '—'
+  switch (zustand.value) {
+    case EppState.PREP:          return sek(s.value.prepRemainingMs)
+    case EppState.RUNNING_FIXED: return sek(s.value.stationRemainingMs)
+    case EppState.RUNNING_OPEN:
+    case EppState.MALFUNCTION:   return mmss(s.value.stationElapsedMs)
+    case EppState.FINISHED:      return mmss(s.value.totalRemainingMs)
+    default:                     return phase.value?.timeLimitMs > 0 ? sek(phase.value.timeLimitMs) : '00:00'
+  }
+})
+
+const zahlBeschriftung = computed(() => ({
+  [EppState.PREP]:          'Achtung — Startsignal folgt',
+  [EppState.RUNNING_FIXED]: 'Sekunden verbleibend',
+  [EppState.RUNNING_OPEN]:  'Stationszeit läuft',
+  [EppState.MALFUNCTION]:   'Störung — Zeit steht',
+  [EppState.FINISHED]:      'Restzeit für die Auswertekarte',
+  [EppState.EXCLUDED]:      'Ausschluss nach der zweiten Störung',
+}[zustand.value] ?? 'Bereit'))
+
+const istOffen = computed(() => zustand.value === EppState.RUNNING_OPEN)
+const istFest  = computed(() => zustand.value === EppState.RUNNING_FIXED)
+const laeuft   = computed(() => istOffen.value || istFest.value)
+
+/** Genau eine Hauptaktion je Zustand. */
+const hauptaktion = computed(() => {
+  switch (zustand.value) {
+    case EppState.IDLE:
+      return { text: `${phase.value?.station ?? 'Station'} starten`, unter: 'Startsignal auslösen', fn: starten, klasse: 'gruen' }
+    case EppState.RUNNING_OPEN:
+      return { text: 'Station beenden', unter: 'nach dem Holstern der geladenen Waffe', fn: beenden, klasse: 'gruen' }
+    case EppState.RUNNING_FIXED:
+      return { text: 'Störung', unter: 'Zeit sofort anhalten', fn: stoerung, klasse: 'gelb' }
+    case EppState.MALFUNCTION:
+      return { text: 'Weiter', unter: 'Zeit läuft mit dem nächsten Schuss', fn: weiter, klasse: 'gruen' }
+    case EppState.FINISHED:
+    case EppState.EXCLUDED:
+      return { text: 'Neuer Durchgang', unter: 'Parcours zurücksetzen', fn: zuruecksetzen, klasse: 'grau' }
+    default:
+      return null
+  }
+})
+
+async function starten() {
+  await audio.arm()
+  clock.call('start', now())
+}
+function beenden()      { clock.call('stopStation', now()) }
+function stoerung()     { clock.call('reportMalfunction', now()) }
+function weiter()       { clock.call('resumeAfterMalfunction', now()) }
+function zuruecksetzen() { clock.call('reset', now()) }
+function zuStation(i)   { clock.call('goToStation', i, now()) }
+
+const stoerungen = computed(() => s.value?.malfunctionCount ?? 0)
+const restknapp  = computed(() => {
+  const r = s.value?.totalRemainingMs
+  return r != null && r <= 60_000
+})
+</script>
+
+<template>
+  <div class="schirm" :class="{ signal: signalLaeuft, gesperrt: zustand === 'excluded' }">
+
+    <!-- Kopfzeile: dauerhaft sichtbare, wertungsrelevante Werte -->
+    <header class="kopf">
+      <div class="kopf-block">
+        <span class="kopf-marke">Restzeit gesamt</span>
+        <strong class="kopf-wert" :class="{ knapp: restknapp }">{{ mmss(s?.totalRemainingMs) }}</strong>
+      </div>
+      <div class="kopf-block mitte">
+        <span class="kopf-marke">Station</span>
+        <strong class="kopf-wert">{{ (s?.stationIndex ?? 0) + 1 }}<span class="von">/{{ phases.length }}</span></strong>
+      </div>
+      <div class="kopf-block rechts">
+        <span class="kopf-marke">Störungen</span>
+        <strong class="kopf-wert">
+          <span class="punkt" :class="{ an: stoerungen >= 1 }"></span>
+          <span class="punkt" :class="{ an: stoerungen >= 2 }"></span>
+        </strong>
+      </div>
+    </header>
+
+    <!-- Restzeitansage vor Station 6, C.17.8 -->
+    <div v-if="phase?.announceRemainingBeforeStart && zustand === 'idle'" class="ansage">
+      <span class="ansage-marke">Vor dem Startsignal ansagen</span>
+      <strong class="ansage-wert">Restzeit {{ mmss(s?.totalRemainingMs) }}</strong>
+    </div>
+
+    <!-- Station und Uhr -->
+    <main class="mitte-block">
+      <p class="station-zeile">
+        <strong>{{ phase?.station }}</strong>
+        <span v-if="phase?.distance"> · {{ phase.distance }}</span>
+        <span v-if="phase?.position"> · {{ phase.position }}</span>
+      </p>
+      <p class="schuss-zeile" v-if="phase?.shots">
+        {{ phase.shots }} Schuss<span v-if="phase.shotsNote"> — {{ phase.shotsNote }}</span>
+      </p>
+
+      <div class="uhr" :class="{ gross: zustand === 'prep' || istFest }">{{ grosseZahl }}</div>
+      <p class="uhr-marke">{{ zahlBeschriftung }}</p>
+
+      <p v-if="istFest && phase?.stopSignalAtMs != null" class="signal-hinweis">
+        Zweites Signal bei {{ phase.stopSignalAtMs / 1000 }} s, Dauer {{ phase.stopSignalDurationMs / 1000 }} s —
+        Schüsse nach dessen Ende zählen nicht.
+      </p>
+    </main>
+
+    <!-- RO-Kommandos der laufenden Station -->
+    <section v-if="phase?.roCommands?.length && zustand === 'idle'" class="kommandos">
+      <p v-for="(k, i) in phase.roCommands" :key="i" class="kommando">„{{ k }}“</p>
+    </section>
+
+    <!-- Ablauf und Hinweise -->
+    <section v-if="phase && (phase.notes?.length || phase.afterStation?.length)" class="hinweise">
+      <button class="hinweis-schalter" @click="hinweiseOffen = !hinweiseOffen">
+        {{ hinweiseOffen ? 'Hinweise ausblenden' : 'Ablauf und Hinweise' }}
+        <span class="regel">{{ phase.ruleRef }}</span>
+      </button>
+      <div v-if="hinweiseOffen" class="hinweis-liste">
+        <ul>
+          <li v-for="(n, i) in phase.notes" :key="'n' + i">{{ n }}</li>
+        </ul>
+        <template v-if="phase.afterStation?.length">
+          <p class="hinweis-titel">Nach der Station</p>
+          <ul>
+            <li v-for="(n, i) in phase.afterStation" :key="'a' + i">{{ n }}</li>
+          </ul>
+        </template>
+        <p class="hinweis-titel">Immer gültig</p>
+        <ul>
+          <li v-for="(n, i) in EPP_GENERAL_NOTES" :key="'g' + i">{{ n }}</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Aktionen -->
+    <footer class="fuss">
+      <button v-if="hauptaktion" class="haupt" :class="hauptaktion.klasse" @click="hauptaktion.fn">
+        <span class="haupt-text">{{ hauptaktion.text }}</span>
+        <span class="haupt-unter">{{ hauptaktion.unter }}</span>
+      </button>
+
+      <div class="neben">
+        <button v-if="istOffen" class="klein warn" @click="stoerung">Störung</button>
+        <button v-if="laeuft || zustand === 'malfunction'" class="klein" @click="zuruecksetzen">Abbrechen</button>
+      </div>
+
+      <!-- Signalprobe: gehört später in die Einstellungen, hier zum Abhören -->
+      <div class="probe" v-if="!laeuft">
+        <button class="hinweis-schalter" @click="probeOffen = !probeOffen">
+          {{ probeOffen ? 'Signalprobe schließen' : 'Signalprobe' }}
+          <span class="regel">{{ startLaenge }} ms</span>
+        </button>
+        <div v-if="probeOffen" class="probe-reihe">
+          <button
+            v-for="ms in LAENGEN" :key="ms"
+            class="probe-knopf" :class="{ aktiv: ms === startLaenge }"
+            @click="probiere(ms)">{{ ms }}</button>
+        </div>
+        <p v-if="probeOffen" class="probe-hinweis">
+          Gilt für das Startsignal. Die Dauer des zweiten Signals steht in C.17.14
+          und bleibt bei 2 Sekunden.
+        </p>
+      </div>
+
+      <!-- Stationswahl: im Wettkampf selten, im Training ständig -->
+      <nav class="stationen" v-if="!laeuft">
+        <button
+          v-for="(p, i) in phases" :key="p.id"
+          class="station-knopf"
+          :class="{ aktiv: i === s?.stationIndex, erledigt: i < (s?.stationIndex ?? 0) }"
+          @click="zuStation(i)">
+          {{ p.station.replace('Station ', '') }}
+        </button>
+      </nav>
+    </footer>
+  </div>
+</template>
+
+<style scoped>
+.schirm {
+  --grund: #0b0d10;
+  --flaeche: #15191f;
+  --rand: #262c35;
+  --text: #f2f5f8;
+  --gedaempft: #9aa6b4;
+  --akzent: #f59e0b;
+  --gruen: #16a34a;
+  --rot: #dc2626;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: var(--grund);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  transition: background 120ms linear;
+}
+.schirm.signal { background: #3b1d05; }
+.schirm.gesperrt { background: #2a0b0b; }
+
+.kopf { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.5rem; }
+.kopf-block { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 0.75rem; padding: 0.5rem 0.75rem; }
+.kopf-block.mitte { text-align: center; }
+.kopf-block.rechts { text-align: right; }
+.kopf-marke { display: block; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gedaempft); }
+.kopf-wert { display: block; font-size: 1.6rem; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.kopf-wert.knapp { color: var(--akzent); }
+.von { font-size: 1rem; color: var(--gedaempft); }
+.punkt { display: inline-block; width: 0.85rem; height: 0.85rem; border-radius: 50%; border: 2px solid var(--gedaempft); margin-left: 0.3rem; }
+.punkt.an { background: var(--rot); border-color: var(--rot); }
+
+.ansage { background: var(--akzent); color: #1a1205; border-radius: 0.75rem; padding: 0.6rem 0.9rem; }
+.ansage-marke { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.8; }
+.ansage-wert { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+
+.mitte-block { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 0.15rem; }
+.station-zeile { font-size: 1.25rem; margin: 0; }
+.schuss-zeile { margin: 0; color: var(--gedaempft); font-size: 0.95rem; }
+.uhr { font-size: clamp(4.5rem, 26vw, 9rem); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin: 0.4rem 0 0; }
+.uhr.gross { font-size: clamp(6rem, 38vw, 13rem); color: var(--akzent); }
+.uhr-marke { margin: 0.2rem 0 0; color: var(--gedaempft); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; }
+.signal-hinweis { margin: 0.6rem 0 0; max-width: 28rem; color: var(--gedaempft); font-size: 0.8rem; line-height: 1.4; }
+
+.kommandos { background: var(--flaeche); border: 1px solid var(--rand); border-left: 4px solid var(--akzent); border-radius: 0.75rem; padding: 0.75rem 1rem; }
+.kommando { margin: 0.15rem 0; font-size: 1.15rem; font-weight: 600; }
+
+.hinweise { }
+.hinweis-schalter { width: 100%; background: transparent; color: var(--gedaempft); border: 1px solid var(--rand); border-radius: 0.75rem; padding: 0.6rem; font-size: 0.85rem; display: flex; justify-content: center; gap: 0.5rem; align-items: center; }
+.regel { font-size: 0.7rem; padding: 0.1rem 0.4rem; border: 1px solid var(--rand); border-radius: 0.4rem; }
+.hinweis-liste { margin-top: 0.5rem; background: var(--flaeche); border: 1px solid var(--rand); border-radius: 0.75rem; padding: 0.75rem 1rem; max-height: 40vh; overflow-y: auto; }
+.hinweis-liste ul { margin: 0.25rem 0 0.5rem; padding-left: 1.1rem; }
+.hinweis-liste li { margin: 0.3rem 0; font-size: 0.9rem; line-height: 1.45; color: #d7dee6; }
+.hinweis-titel { margin: 0.6rem 0 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gedaempft); }
+
+.fuss { display: flex; flex-direction: column; gap: 0.5rem; }
+.haupt { width: 100%; min-height: 5.5rem; border: none; border-radius: 1rem; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem; cursor: pointer; }
+.haupt-text { font-size: 1.6rem; font-weight: 700; }
+.haupt-unter { font-size: 0.8rem; opacity: 0.85; font-weight: 400; }
+.haupt.gruen { background: var(--gruen); }
+.haupt.gelb  { background: var(--akzent); color: #1a1205; }
+.haupt.grau  { background: #374151; }
+.haupt:active { filter: brightness(0.9); }
+
+.neben { display: flex; gap: 0.5rem; }
+.klein { flex: 1; min-height: 3rem; background: var(--flaeche); color: var(--text); border: 1px solid var(--rand); border-radius: 0.75rem; font-size: 1rem; cursor: pointer; }
+.klein.warn { border-color: var(--akzent); color: var(--akzent); }
+
+.probe { display: flex; flex-direction: column; gap: 0.4rem; }
+.probe-reihe { display: flex; gap: 0.3rem; }
+.probe-knopf { flex: 1; min-height: 3rem; background: var(--flaeche); color: var(--text); border: 1px solid var(--rand); border-radius: 0.6rem; font-size: 0.9rem; font-variant-numeric: tabular-nums; cursor: pointer; }
+.probe-knopf.aktiv { background: var(--akzent); color: #1a1205; border-color: var(--akzent); font-weight: 700; }
+.probe-hinweis { margin: 0; color: var(--gedaempft); font-size: 0.78rem; line-height: 1.4; }
+
+.stationen { display: flex; gap: 0.3rem; }
+.station-knopf { flex: 1; min-height: 2.75rem; background: var(--flaeche); color: var(--gedaempft); border: 1px solid var(--rand); border-radius: 0.6rem; font-size: 0.85rem; cursor: pointer; }
+.station-knopf.aktiv { background: var(--akzent); color: #1a1205; border-color: var(--akzent); font-weight: 700; }
+.station-knopf.erledigt { color: var(--gruen); border-color: #1f4030; }
+
+@media (min-width: 40rem) {
+  .uhr { font-size: clamp(6rem, 18vw, 11rem); }
+  .haupt { min-height: 6.5rem; }
+}
+</style>
