@@ -54,7 +54,10 @@ export const DATENSCHUTZ = [
 export const REGELGRUNDLAGE = {
   quelle: 'BDMP-Handbuch Sportordnung, Teil C: Kurzwaffen-Disziplinen',
   stand: 'Fassung vom 24.02.2026',
-  url: 'https://www.bdmp.de/fileadmin/user_upload/bdmp/ueber_uns/handbuch/2025/Register_8_neu.pdf',
+  // Bewusst nur die Verbandsseite: Der Ablageort der einzelnen Register
+  // ändert sich mit jeder Fassung, die Startseite bleibt.
+  url: 'https://www.bdmp.de',
+  wegweiser: 'Die jeweils gültige Fassung steht auf der Seite des BDMP unter „Über uns“ im Handbuch.',
   abschnitte: [
     { ref: 'C.6.10', was: 'Kommandos des Leitenden für Police Pistol, NPA Service Pistol und Super Magnum' },
     { ref: 'C.8.2',  was: 'Ablauf BDMP 1500 (PPC)' },

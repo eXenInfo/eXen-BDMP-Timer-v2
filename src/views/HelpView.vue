@@ -65,7 +65,8 @@ const abschnitte = [
               <span class="regel">{{ r.ref }}</span> {{ r.was }}
             </li>
           </ul>
-          <p class="quelle">{{ REGELGRUNDLAGE.url }}</p>
+          <p class="wegweiser">{{ REGELGRUNDLAGE.wegweiser }}</p>
+          <p><a class="verweis" :href="REGELGRUNDLAGE.url" target="_blank" rel="noopener noreferrer">{{ REGELGRUNDLAGE.url.replace('https://', '') }}</a></p>
         </template>
 
         <template v-else-if="a.id === 'haftung'">
@@ -140,5 +141,11 @@ h1 { margin: 0.6rem 0 0.2rem; font-size: 1.6rem; }
 .regelliste { margin: 0.3rem 0 0.6rem; padding-left: 0; list-style: none; }
 .regelliste li { margin: 0.35rem 0; font-size: 0.86rem; line-height: 1.5; color: #d7dee6; }
 .regel { display: inline-block; min-width: 3.6rem; font-size: 0.72rem; padding: 0.1rem 0.4rem; margin-right: 0.4rem; border: 1px solid var(--f-rand); border-radius: 0.4rem; color: var(--f-gedaempft); }
-.quelle { font-size: 0.76rem; word-break: break-all; color: var(--f-gedaempft); }
+.wegweiser { font-size: 0.84rem; color: var(--f-gedaempft); }
+.verweis {
+  display: inline-flex; align-items: center; min-height: 3rem; padding: 0.5rem 0.9rem;
+  background: var(--f-flaeche-hoch); border: 1px solid var(--f-rand); border-radius: var(--r-klein);
+  color: var(--f-akzent); text-decoration: none; font-size: 0.95rem;
+}
+.verweis:active { filter: brightness(0.88); }
 </style>
