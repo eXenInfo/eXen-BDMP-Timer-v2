@@ -252,8 +252,7 @@
       "disziplinen": "disciplines",
       "phasen": "phases",
       "stationen": "stations",
-      "sprache": "Language",
-      "nurDeutsch": "This rule text is available in German only. The Sportordnung is published in German; your own translations can be stored in the translations area."
+      "sprache": "Language"
     },
     "wahl": {
       "titel": "BDMP Timer",

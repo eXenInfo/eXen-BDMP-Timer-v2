@@ -13,7 +13,7 @@ import { buildAnnouncement } from '../core/ansage.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const props = defineProps({
   /** Angereicherte Disziplin: Phasen, Kommandofolge, Stellungen, Regeltexte. */
@@ -110,7 +110,7 @@ async function zuPhase(i)    { await audio.arm(); clock.call('goToPhase', i, now
 const ansage = computed(() => {
   const phasen = props.disziplin?.phases ?? []
   if (!phasen.length) return null
-  const a = buildAnnouncement(phasen, s.value?.index ?? 0, props.disziplin)
+  const a = buildAnnouncement(phasen, s.value?.index ?? 0, props.disziplin, locale.value)
   if (!a.detail) return null
   // Pausen zwischen den Durchgängen gehören in die Ansage, weil die Schützen
   // sonst nicht wissen, ob sie die Waffe absetzen dürfen.
@@ -207,7 +207,6 @@ const wiederholungen = computed(() => {
       </button>
 
       <div v-if="hinweiseOffen" class="hinweis-liste">
-        <p v-if="$i18n.locale !== 'de'" class="sprachhinweis">{{ t('v3.allgemein.nurDeutsch') }}</p>
         <template v-if="disziplin.abweichung">
           <p class="warnung">{{ disziplin.abweichung }}</p>
         </template>

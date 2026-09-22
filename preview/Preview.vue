@@ -12,11 +12,14 @@ import SequenceMatchView from '../src/views/SequenceMatchView.vue'
 import LibraryView from '../src/views/LibraryView.vue'
 import EditorView from '../src/views/EditorView.vue'
 import { createLibrary } from '../src/core/library.js'
+import { lokalisiereDisziplin } from '../src/core/lokalisierung.js'
+import { uebersetze } from '../src/core/textEn.js'
+import { EPP_GENERAL_NOTES, EPP_VARIANTEN } from '../src/core/eppRules.js'
 import { nominalDurationMs } from '../src/core/legacyImport.js'
 import legacy from '../public/disziplinen.json'
 import { WEAPON_CLASSES, createDiscipline } from '../src/core/disciplineRules.js'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const speicher = (() => {
   try { window.localStorage.setItem('__probe', '1'); window.localStorage.removeItem('__probe'); return window.localStorage }
@@ -36,7 +39,20 @@ const editorSatzId = ref(null)
 const editorSatz = computed(() => saetze.value.find(s => s.id === editorSatzId.value))
 
 const disziplinen = computed(() => aktiverSatz.value.disciplines)
-const favoriten = computed(() => (stand.value, bibliothek.favoritenDisziplinen()))
+/** Name in der gewählten Sprache — die Bibliothek selbst bleibt deutsch. */
+const anzeigeName = (d) => uebersetze(d?.name, locale.value)
+/** Die laufende Disziplin vollständig in der gewählten Sprache. */
+const gewaehltLokal = computed(() => lokalisiereDisziplin(gewaehlt.value, locale.value))
+const eppHinweise = computed(() => (EPP_GENERAL_NOTES).map(h => uebersetze(h, locale.value)))
+const eppVarianten = computed(() => EPP_VARIANTEN.map(v => ({
+  ...v, label: uebersetze(v.label, locale.value),
+  hinweise: (v.hinweise ?? []).map(h => uebersetze(h, locale.value)),
+})))
+const favoriten = computed(() => (stand.value, bibliothek.favoritenDisziplinen())
+  .map(d => ({ ...d, name: uebersetze(d.name, locale.value) })))
+/** Zuletzt gelaufene Disziplin mit übersetztem Namen für die Startseite. */
+const zuletztAnzeige = computed(() => zuletzt.value
+  ? { ...zuletzt.value, name: uebersetze(zuletzt.value.name, locale.value) } : null)
 const meldung = ref(null)
 
 function favoritUmschalten(d) {
@@ -74,7 +90,7 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
   <!-- Startseite -->
   <StartView
     v-if="schirm === 'start'"
-    :satz="aktiverSatz" :zuletzt="zuletzt" :favoriten="favoriten"
+    :satz="aktiverSatz" :zuletzt="zuletztAnzeige" :favoriten="favoriten"
     @waehlen="schirm = 'wahl'"
     @weiter="starte(zuletzt)"
     @starten="starte"
@@ -97,7 +113,7 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
 
     <div v-for="d in disziplinen" :key="d.id" class="reihe">
       <button class="karte" :class="{ epp: d.kind === 'epp' }" @click="starte(d)">
-        <strong>{{ d.name }}</strong>
+        <strong>{{ anzeigeName(d) }}</strong>
         <span>{{ dauerText(d) }}</span>
         <span v-if="d.varianten?.length" class="klassen">
           <span v-for="v in d.varianten" :key="v.ruleRef" class="klasse">{{ WEAPON_CLASSES[v.klasse]?.kurz ?? v.klasse }}</span>
@@ -129,10 +145,12 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
     </div>
     <EppMatchView
       v-if="gewaehlt.kind === 'epp'"
-      :phases="gewaehlt.phases"
-      :total-time-ms="gewaehlt.totalTimeMs ?? 330000"
-      :prep-ms="gewaehlt.prepMs ?? 3000" />
-    <SequenceMatchView v-else :disziplin="gewaehlt" />
+      :phases="gewaehltLokal.phases"
+      :varianten="eppVarianten"
+      :allgemeine-hinweise="eppHinweise"
+      :total-time-ms="gewaehltLokal.totalTimeMs ?? 330000"
+      :prep-ms="gewaehltLokal.prepMs ?? 3000" />
+    <SequenceMatchView v-else :disziplin="gewaehltLokal" />
   </div>
 
   <!-- Sätze -->

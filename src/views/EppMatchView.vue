@@ -14,13 +14,14 @@ import { buildEppAnnouncement } from '../core/ansage.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const props = defineProps({
   phases:      { type: Array,  default: () => EPP_PHASES },
   totalTimeMs: { type: Number, default: EPP_TOTAL_TIME_MS },
   prepMs:      { type: Number, default: 3000 },
   varianten:   { type: Array,  default: () => EPP_VARIANTEN },
+  allgemeineHinweise: { type: Array, default: () => EPP_GENERAL_NOTES },
 })
 
 const signalLaeuft = ref(false)
@@ -132,7 +133,7 @@ function zuStation(i)   { clock.call('goToStation', i, now()) }
 const ansage = computed(() => {
   const phasen = props.phases ?? []
   if (!phasen.length) return null
-  const a = buildEppAnnouncement(phasen, s.value?.stationIndex ?? 0)
+  const a = buildEppAnnouncement(phasen, s.value?.stationIndex ?? 0, locale.value)
   return a.detail ? a : null
 })
 
@@ -229,7 +230,7 @@ const restknapp  = computed(() => {
         </template>
         <p class="hinweis-titel">{{ t('v3.epp.immerGueltig') }}</p>
         <ul>
-          <li v-for="(n, i) in EPP_GENERAL_NOTES" :key="'g' + i">{{ n }}</li>
+          <li v-for="(n, i) in allgemeineHinweise" :key="'g' + i">{{ n }}</li>
         </ul>
       </div>
     </section>

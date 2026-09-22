@@ -5,9 +5,11 @@
  * Neue Sprachen brauchen keinen Codeeingriff: eine weitere Datei unter
  * src/locales/ anlegen, in src/i18n.js registrieren und hier eintragen.
  *
- * Regeltexte aus der Sportordnung sind davon nicht betroffen — sie werden
- * in deutscher Sprache veröffentlicht. Eigene Übersetzungen dafür liegen im
- * Übersetzungsspeicher und lassen sich in der App pflegen.
+ * Regeltexte, Disziplinnamen und Phasentexte werden mitübersetzt: die
+ * englische Fassung steht in src/core/textEn.js und wird erst beim Anzeigen
+ * angewandt (src/core/lokalisierung.js). Gespeichert bleibt immer der
+ * deutsche Originaltext, damit ein Sprachwechsel die Daten nicht verändert.
+ * Maßgeblich ist und bleibt die deutsche Fassung der Sportordnung.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
