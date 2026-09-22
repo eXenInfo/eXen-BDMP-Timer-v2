@@ -9,6 +9,7 @@
  */
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { createDiscipline, COMMAND_SET_OPTIONS } from '../core/disciplineRules.js'
 
 const props = defineProps({
   satz: { type: Object, required: true },
@@ -22,6 +23,8 @@ const ebene = ref('disziplinen')      // disziplinen | phasen | phase
 const dIndex = ref(0)
 const pIndex = ref(0)
 const loeschFrage = ref(null)
+const dLoeschFrage = ref(null)
+const BEFEHLSFOLGEN = COMMAND_SET_OPTIONS
 
 const disziplin = computed(() => arbeit.value.disciplines[dIndex.value] ?? null)
 const phase     = computed(() => disziplin.value?.phases[pIndex.value] ?? null)
@@ -43,6 +46,35 @@ function setSekunden(feld, wert) {
 function ansageAendern(i, wert) { phase.value.roCommands[i] = wert; merken() }
 function ansageHinzu()   { (phase.value.roCommands ??= []).push(''); merken() }
 function ansageWeg(i)    { phase.value.roCommands.splice(i, 1); merken() }
+
+// ── Disziplinen ────────────────────────────────────────────────────────────
+function disziplinNeu() {
+  const d = createDiscipline(t('v3.editor.neueDisziplinName'))
+  arbeit.value.disciplines.push(d)
+  merken()
+  oeffneDisziplin(arbeit.value.disciplines.length - 1)
+}
+function disziplinDoppeln(i) {
+  const kopie = structuredClone(arbeit.value.disciplines[i])
+  kopie.id = `eigen-${Date.now().toString(36)}`
+  kopie.name = `${kopie.name} (Kopie)`
+  kopie.eigen = true
+  arbeit.value.disciplines.splice(i + 1, 0, kopie)
+  merken()
+}
+function disziplinLoeschen(i) {
+  arbeit.value.disciplines.splice(i, 1)
+  dLoeschFrage.value = null
+  if (dIndex.value >= arbeit.value.disciplines.length) dIndex.value = 0
+  merken()
+}
+function disziplinVerschieben(i, richtung) {
+  const liste = arbeit.value.disciplines
+  const ziel = i + richtung
+  if (ziel < 0 || ziel >= liste.length) return
+  ;[liste[i], liste[ziel]] = [liste[ziel], liste[i]]
+  merken()
+}
 
 function phaseVerschieben(i, richtung) {
   const liste = disziplin.value.phases
@@ -99,17 +131,37 @@ const regelAbweichung = computed(() => {
         <p v-else class="unterzeile">{{ arbeit.disciplines.length }} {{ t('v3.allgemein.disziplinen') }} · {{ t('v3.allgemein.fassung') }} {{ arbeit.version }}</p>
       </header>
 
-      <button
-        v-for="(d, i) in arbeit.disciplines" :key="d.id"
-        class="zeile" @click="oeffneDisziplin(i)">
-        <span class="zeile-haupt">{{ d.name }}</span>
-        <span class="zeile-neben">
-          {{ d.phases.length }} {{ d.kind === 'epp' ? t('v3.allgemein.stationen') : t('v3.allgemein.phasen') }}
-          <template v-if="d.kind === 'epp'"> · C.17</template>
-        </span>
-      </button>
+      <div v-for="(d, i) in arbeit.disciplines" :key="d.id" class="karte">
+        <button class="zeile blank" @click="oeffneDisziplin(i)">
+          <span class="zeile-haupt">{{ d.name }}</span>
+          <span class="zeile-neben">
+            {{ d.phases.length }} {{ d.kind === 'epp' ? t('v3.allgemein.stationen') : t('v3.allgemein.phasen') }}
+            <template v-if="d.kind === 'epp'"> · C.17</template>
+            <template v-else-if="d.eigen"> · {{ t('v3.editor.eigeneDisziplin') }}</template>
+          </span>
+        </button>
+
+        <div class="karten-werkzeug" v-if="!arbeit.readonly">
+          <button class="k-zweit schmal" :disabled="i === 0" @click="disziplinVerschieben(i, -1)">{{ t('v3.editor.hoch') }}</button>
+          <button class="k-zweit schmal" :disabled="i === arbeit.disciplines.length - 1" @click="disziplinVerschieben(i, 1)">{{ t('v3.editor.runter') }}</button>
+          <button class="k-zweit schmal" @click="disziplinDoppeln(i)">{{ t('v3.editor.disziplinDoppeln') }}</button>
+          <button class="k-gefahr schmal" @click="dLoeschFrage = i">{{ t('v3.editor.disziplinLoeschen') }}</button>
+        </div>
+
+        <div v-if="dLoeschFrage === i" class="rueckfrage">
+          <p>{{ t('v3.editor.disziplinLoeschFrage', { name: d.name }) }}</p>
+          <div class="k-reihe">
+            <button class="k-zweit" @click="dLoeschFrage = null">{{ t('v3.allgemein.behalten') }}</button>
+            <button class="k-gefahr" @click="disziplinLoeschen(i)">{{ t('v3.allgemein.endgueltigLoeschen') }}</button>
+          </div>
+        </div>
+      </div>
 
       <div class="k-spalte abstand" v-if="!arbeit.readonly">
+        <button class="k-zweit" @click="disziplinNeu">
+          {{ t('v3.editor.neueDisziplin') }}
+          <span class="k-unter">{{ t('v3.editor.neueDisziplinUnter') }}</span>
+        </button>
         <button class="k-haupt" :disabled="!geaendert" @click="sichern">
           {{ t('v3.editor.satzSichern') }}
           <span class="k-unter">{{ geaendert ? t('v3.allgemein.offeneAenderungen') : t('v3.allgemein.keineAenderungen') }}</span>
@@ -125,6 +177,27 @@ const regelAbweichung = computed(() => {
         <h2>{{ disziplin.name }}</h2>
         <p class="unterzeile">{{ istEpp ? t('v3.editor.stationenNachC17') : t('v3.editor.phasenDesAblaufs') }}</p>
       </header>
+
+      <fieldset class="block" :disabled="arbeit.readonly">
+        <div class="e-gruppe">
+          <label class="e-marke" for="d-name">{{ t('v3.editor.disziplinName') }}</label>
+          <input id="d-name" class="e-feld" :value="disziplin.name"
+                 @input="e => { disziplin.name = e.target.value; merken() }" />
+        </div>
+        <div class="e-gruppe">
+          <label class="e-marke" for="d-besch">{{ t('v3.editor.disziplinBeschreibung') }}</label>
+          <textarea id="d-besch" class="e-feld" rows="2" :value="disziplin.description ?? ''"
+                    @input="e => { disziplin.description = e.target.value; merken() }"></textarea>
+        </div>
+        <div class="e-gruppe" v-if="!istEpp">
+          <label class="e-marke" for="d-bef">{{ t('v3.editor.kommandofolge') }}</label>
+          <select id="d-bef" class="e-feld" :value="disziplin.commandSetId ?? 'auto'"
+                  @change="e => { disziplin.commandSetId = e.target.value; merken() }">
+            <option v-for="o in BEFEHLSFOLGEN" :key="o.id" :value="o.id">{{ o.label }}</option>
+          </select>
+          <p class="feldhinweis">{{ t('v3.editor.kommandofolgeHinweis') }}</p>
+        </div>
+      </fieldset>
 
       <div v-for="(p, i) in disziplin.phases" :key="i" class="karte">
         <button class="zeile blank" @click="oeffnePhase(i)">
@@ -327,4 +400,6 @@ const regelAbweichung = computed(() => {
 .ansage-zeile { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; margin-bottom: 0.5rem; }
 .regel-warnung { margin: 0.25rem 0 0; color: var(--f-akzent); font-size: 0.85rem; line-height: 1.45; }
 .abstand { margin-top: 0.5rem; }
+.feldhinweis { margin: 0.35rem 0 0; color: var(--f-gedaempft); font-size: 0.8rem; line-height: 1.45; }
+select.e-feld { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--f-gedaempft) 50%), linear-gradient(135deg, var(--f-gedaempft) 50%, transparent 50%); background-position: calc(100% - 18px) 1.45rem, calc(100% - 12px) 1.45rem; background-size: 6px 6px, 6px 6px; background-repeat: no-repeat; padding-right: 2.2rem; }
 </style>

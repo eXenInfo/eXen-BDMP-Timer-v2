@@ -308,31 +308,68 @@ export function detectPositions(text) {
   return [...new Set(treffer)]
 }
 
+/** Auswahl für eigene Disziplinen im Editor. */
+export const COMMAND_SET_OPTIONS = [
+  { id: 'auto',         label: 'Nach Name erkennen' },
+  { id: 'policePistol', label: 'Police Pistol / NPA / SM (C.6.10)' },
+  { id: 'ppc1500',      label: 'BDMP 1500 / 1020 (C.8.5)' },
+  { id: 'keine',        label: 'Keine Kommandofolge' },
+]
+
+function mitStellungen(phasen) {
+  return (phasen ?? []).map(p => {
+    const quelle = [p.name, p.description, ...(p.roCommands ?? [])].join(' ')
+    const stellungen = detectPositions(quelle).map(k => POSITIONS[k]).filter(Boolean)
+    return { ...p, positions: stellungen,
+             positionChangeNotes: stellungen.length > 1 ? POSITION_CHANGE_NOTES : [] }
+  })
+}
+
 /**
- * Hängt die Regeltexte an eine umgewandelte Disziplin.
+ * Hängt die Regeltexte an eine Disziplin.
+ *
  * Zeiten und Abläufe bleiben unangetastet — die kommen aus der gepflegten
- * Disziplinendatei und sind dort verbindlich.
+ * Disziplinendatei oder vom Nutzer und sind dort verbindlich.
+ *
+ * Eine selbst angelegte Disziplin trägt keinen Namen, den die Sportordnung
+ * kennt. Damit sie trotzdem die amtlichen Kommandos führen kann, lässt sich
+ * die Kommandofolge über `commandSetId` ausdrücklich festlegen; ohne Angabe
+ * wird sie wie bisher am Namen erkannt.
  */
 export function enrichDiscipline(disziplin) {
   const regeln = findDisciplineRules(disziplin.name)
-  if (!regeln) return disziplin
-  const befehle = COMMAND_SETS[regeln.commandSet]
+  const wahl = disziplin.commandSetId ?? 'auto'
+  const befehleId = wahl === 'auto' ? regeln?.commandSet : (wahl === 'keine' ? null : wahl)
+  const befehle = befehleId ? COMMAND_SETS[befehleId] ?? null : null
+
   return {
     ...disziplin,
-    ruleRef: regeln.ruleRef,
+    ruleRef:    disziplin.ruleRef ?? regeln?.ruleRef ?? null,
     commandSet: befehle,
-    readiness: READINESS[regeln.readiness] ?? null,
-    ammo: regeln.ammo,
-    target: regeln.target,
-    ablauf: regeln.ablauf,
-    hinweise: regeln.hinweise,
-    abweichung: regeln.abweichung ?? null,
-    phases: disziplin.phases.map(p => {
-      const quelle = [p.name, p.description, ...(p.roCommands ?? [])].join(' ')
-      const stellungen = detectPositions(quelle).map(k => POSITIONS[k]).filter(Boolean)
-      return { ...p, positions: stellungen,
-               positionChangeNotes: stellungen.length > 1 ? POSITION_CHANGE_NOTES : [] }
-    }),
+    readiness:  READINESS[regeln?.readiness] ?? null,
+    ammo:       disziplin.ammo ?? regeln?.ammo ?? null,
+    target:     disziplin.target ?? regeln?.target ?? null,
+    ablauf:     regeln?.ablauf ?? [],
+    hinweise:   regeln?.hinweise ?? [],
+    abweichung: regeln?.abweichung ?? null,
+    phases:     mitStellungen(disziplin.phases),
+  }
+}
+
+/** Leere Disziplin mit einer ersten Phase. */
+export function createDiscipline(name = 'Neue Disziplin') {
+  return {
+    id: `eigen-${Date.now().toString(36)}`,
+    name,
+    kind: 'sequence',
+    eigen: true,
+    commandSetId: 'auto',
+    description: '',
+    phases: [{
+      name: 'Phase 1', description: '', roCommands: [],
+      prepMs: 3000, durationMs: 10000, repetitions: 1, repPauseMs: 0,
+      soundAtStart: true, soundAtEnd: true, waitAfter: false,
+    }],
   }
 }
 

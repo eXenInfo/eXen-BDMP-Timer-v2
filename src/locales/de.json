@@ -406,7 +406,19 @@
       "regelgrundlage": "Regelgrundlage {regel}",
       "neuePhase": "Neue Phase",
       "loeschFrage": "„{name}“ wirklich löschen? Das lässt sich nicht rückgängig machen.",
-      "regelWarnung": "Das zweite Signal endet nicht mit der Schießzeit. C.17.14 verlangt, dass sein Ende die Wertungsgrenze markiert."
+      "regelWarnung": "Das zweite Signal endet nicht mit der Schießzeit. C.17.14 verlangt, dass sein Ende die Wertungsgrenze markiert.",
+      "neueDisziplin": "Neue Disziplin anlegen",
+      "neueDisziplinUnter": "leere Disziplin mit einer ersten Phase",
+      "neueDisziplinName": "Neue Disziplin",
+      "disziplinDoppeln": "Doppeln",
+      "disziplinLoeschen": "Löschen",
+      "disziplinLoeschFrage": "Disziplin „{name}“ mit allen Phasen löschen? Das lässt sich nicht rückgängig machen.",
+      "disziplinName": "Name der Disziplin",
+      "disziplinBeschreibung": "Beschreibung der Disziplin",
+      "kommandofolge": "Kommandofolge der Aufsicht",
+      "kommandofolgeHinweis": "„Nach Name erkennen“ ordnet die amtliche Folge anhand des Disziplinnamens zu. Für eigene Übungen lässt sie sich hier ausdrücklich wählen.",
+      "eigeneDisziplin": "eigene Disziplin",
+      "phasenZahl": "{anzahl} Phasen"
     },
     "start": {
       "untertitel": "Zeitsteuerung für dynamische Schießdisziplinen",

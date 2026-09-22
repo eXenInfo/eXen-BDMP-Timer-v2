@@ -104,7 +104,10 @@ export function createLibrary(storage, legacyCollection) {
     activeSetId: () => zustand.activeSetId,
 
     activeSet() {
-      return alleSaetze().find(s => s.id === zustand.activeSetId) ?? builtin
+      const satz = alleSaetze().find(s => s.id === zustand.activeSetId) ?? builtin
+      // Beim Lesen anreichern: eigene Disziplinen werden schlank gespeichert,
+      // bekommen hier aber Kommandofolge, Stellungen und Regeltexte dazu.
+      return { ...satz, disciplines: satz.disciplines.map(enrichDiscipline) }
     },
 
     setActive(id) {

@@ -406,7 +406,19 @@
       "regelgrundlage": "Rule basis {regel}",
       "neuePhase": "New phase",
       "loeschFrage": "Really delete “{name}”? This cannot be undone.",
-      "regelWarnung": "The second signal no longer ends with the shooting time. C.17.14 requires its end to mark the scoring boundary."
+      "regelWarnung": "The second signal no longer ends with the shooting time. C.17.14 requires its end to mark the scoring boundary.",
+      "neueDisziplin": "Create a discipline",
+      "neueDisziplinUnter": "empty discipline with a first phase",
+      "neueDisziplinName": "New discipline",
+      "disziplinDoppeln": "Duplicate",
+      "disziplinLoeschen": "Delete",
+      "disziplinLoeschFrage": "Delete the discipline “{name}” with all its phases? This cannot be undone.",
+      "disziplinName": "Discipline name",
+      "disziplinBeschreibung": "Discipline description",
+      "kommandofolge": "Range officer command sequence",
+      "kommandofolgeHinweis": "“Detect from name” assigns the official sequence by the discipline's name. For your own exercises you can pick it explicitly here.",
+      "eigeneDisziplin": "own discipline",
+      "phasenZahl": "{anzahl} phases"
     },
     "start": {
       "untertitel": "Timing for dynamic BDMP pistol disciplines",
