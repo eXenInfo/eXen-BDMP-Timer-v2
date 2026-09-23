@@ -11,10 +11,22 @@
  *                 nie nur mit Pfeil.
  *   .k-gefahr     Zerstörend. Rot umrandet, immer mit Rückfrage, nie in
  *                 gleicher Größe direkt neben der Hauptaktion.
+ *   .k-start      Startet eine Disziplin sofort (Favorit, zuletzt benutzt).
+ *                 Immer mit grünem Startsymbol links, linksbündig.
+ *   .k-menue      Öffnet einen anderen Bildschirm. Linksbündig, Pfeil rechts,
+ *                 in einer gemeinsamen Liste (.k-liste) gebündelt.
+ *
+ * Bedeutung der Symbole ist fest: ▶ startet, › öffnet, ★ ist Favorit.
  *
  * Kleinstmaß für jede Trefferfläche: 3rem. Zwischen Knöpfen gegensätzlicher
  * Wirkung mindestens 0,75rem Abstand.
  */
+
+html, body {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--f-grund);
+  color: var(--f-text);
+}
 
 :root {
   --f-grund: #0b0d10;
@@ -93,6 +105,46 @@
   border: 1px solid #7f1d1d;
   font-size: 1.05rem;
 }
+
+/* Direktstart: Symbol links, Text linksbündig */
+.k-start {
+  font-family: inherit; cursor: pointer; width: 100%;
+  display: grid; grid-template-columns: 2.75rem 1fr; align-items: center; gap: 0.85rem;
+  min-height: 4rem; padding: 0.6rem 1rem 0.6rem 0.7rem;
+  background: var(--f-flaeche-hoch); color: var(--f-text);
+  border: 1px solid var(--f-rand); border-radius: var(--r-mittel);
+  text-align: left; line-height: 1.25; transition: filter 100ms linear;
+}
+.k-start:active { filter: brightness(0.88); }
+.k-start-symbol {
+  width: 2.75rem; height: 2.75rem; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--f-gruen); color: #fff; font-size: 1.05rem; padding-left: 0.15rem; box-sizing: border-box;
+}
+.k-start-text { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.k-start-text strong { font-size: 1.1rem; font-weight: 700; overflow-wrap: anywhere; }
+
+/* Menüliste: ein Block, Einträge durch Linien getrennt */
+.k-liste {
+  display: flex; flex-direction: column;
+  background: var(--f-flaeche); border: 1px solid var(--f-rand); border-radius: var(--r-mittel);
+  overflow: hidden;
+}
+.k-menue {
+  font-family: inherit; cursor: pointer; width: 100%;
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.75rem;
+  min-height: 3.75rem; padding: 0.65rem 1rem;
+  background: transparent; color: var(--f-text); border: none; border-top: 1px solid var(--f-rand);
+  text-align: left; line-height: 1.25; font-size: 1.05rem;
+}
+.k-menue:first-child { border-top: none; }
+.k-menue:active { background: var(--f-flaeche-hoch); }
+.k-menue-text { display: flex; flex-direction: column; gap: 0.15rem; }
+.k-menue-pfeil { font-size: 1.6rem; color: var(--f-gedaempft); line-height: 1; }
+
+/* Sichtbarer Tastaturfokus für alle Bedienelemente */
+.k-haupt:focus-visible, .k-zweit:focus-visible, .k-nav:focus-visible, .k-gefahr:focus-visible,
+.k-start:focus-visible, .k-menue:focus-visible { outline: 2px solid var(--f-akzent); outline-offset: 2px; }
 
 /** Zweitzeile in einem Knopf: sagt, was die Aktion bewirkt. */
 .k-unter { font-size: 0.8rem; font-weight: 400; opacity: 0.85; }

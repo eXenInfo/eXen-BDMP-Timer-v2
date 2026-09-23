@@ -29,40 +29,61 @@ const anzahl = computed(() => props.satz.disciplines.length)
       <p class="unter">{{ t('v3.start.untertitel') }}</p>
     </header>
 
-    <div class="k-spalte">
-      <button class="k-haupt" @click="$emit('waehlen')">
-        {{ t('v3.start.disziplinWaehlen') }}
-        <span class="k-unter">{{ t('v3.start.disziplinWaehlenUnter', { anzahl, satz: satz.name }) }}</span>
-      </button>
+    <button class="k-haupt" @click="$emit('waehlen')">
+      {{ t('v3.start.disziplinWaehlen') }}
+      <span class="k-unter">{{ t('v3.start.disziplinWaehlenUnter', { anzahl, satz: satz.name }) }}</span>
+    </button>
 
-      <template v-if="favoriten.length">
-        <p class="rubrik">{{ t('v3.start.favoriten') }}</p>
-        <button v-for="f in favoriten" :key="f.id" class="k-zweit favorit" @click="$emit('starten', f)">
-          {{ f.name }}
-          <span class="k-unter">{{ f.phases.length }} {{ f.kind === 'epp' ? t('v3.allgemein.stationen') : t('v3.allgemein.phasen') }}</span>
+    <!-- Direktstart: alles hier beginnt sofort eine Disziplin -->
+    <section class="favoriten" aria-labelledby="favoriten-titel">
+      <h2 id="favoriten-titel" class="favoriten-kopf">
+        <span class="favoriten-stern" aria-hidden="true">★</span>
+        {{ t('v3.start.favoriten') }}
+        <span v-if="favoriten.length" class="favoriten-zahl">{{ favoriten.length }}/5</span>
+      </h2>
+      <p class="favoriten-hinweis">
+        {{ favoriten.length ? t('v3.start.favoritenHinweis') : t('v3.start.keineFavoriten') }}
+      </p>
+      <div v-if="favoriten.length" class="favoriten-liste">
+        <button v-for="f in favoriten" :key="f.id" class="k-start" @click="$emit('starten', f)">
+          <span class="k-start-symbol" aria-hidden="true">▶</span>
+          <span class="k-start-text">
+            <strong>{{ f.name }}</strong>
+            <span class="k-unter">{{ f.phases.length }} {{ f.kind === 'epp' ? t('v3.allgemein.stationen') : t('v3.allgemein.phasen') }}</span>
+          </span>
         </button>
-      </template>
+      </div>
+    </section>
 
-      <button v-if="zuletzt" class="k-zweit betont" @click="$emit('weiter')">
-        {{ t('v3.start.weiterMit', { name: zuletzt.name }) }}
+    <button v-if="zuletzt" class="k-start zuletzt" @click="$emit('weiter')">
+      <span class="k-start-symbol" aria-hidden="true">▶</span>
+      <span class="k-start-text">
+        <strong>{{ t('v3.start.weiterMit', { name: zuletzt.name }) }}</strong>
         <span class="k-unter">{{ t('v3.start.zuletztBenutzt') }}</span>
-      </button>
+      </span>
+    </button>
 
-      <button class="k-zweit" @click="$emit('erstellen')">
-        {{ t('v3.start.disziplinErstellen') }}
-        <span class="k-unter">{{ t('v3.start.disziplinErstellenUnter') }}</span>
-      </button>
-
-      <button class="k-zweit" @click="$emit('saetze')">
-        {{ t('v3.start.saetze') }}
-        <span class="k-unter">{{ t('v3.start.saetzeUnter') }}</span>
-      </button>
-
-      <button class="k-zweit" @click="$emit('hilfe')">
-        {{ t('v3.start.hilfe') }}
-        <span class="k-unter">{{ t('v3.start.hilfeUnter') }}</span>
-      </button>
-    </div>
+    <!-- Menü: alles hier öffnet einen anderen Bildschirm -->
+    <nav :aria-label="t('v3.start.menue')">
+      <p class="rubrik">{{ t('v3.start.menue') }}</p>
+      <div class="k-liste">
+        <button class="k-menue" @click="$emit('erstellen')">
+          <span class="k-menue-text">{{ t('v3.start.disziplinErstellen') }}
+            <span class="k-unter">{{ t('v3.start.disziplinErstellenUnter') }}</span></span>
+          <span class="k-menue-pfeil" aria-hidden="true">›</span>
+        </button>
+        <button class="k-menue" @click="$emit('saetze')">
+          <span class="k-menue-text">{{ t('v3.start.saetze') }}
+            <span class="k-unter">{{ t('v3.start.saetzeUnter') }}</span></span>
+          <span class="k-menue-pfeil" aria-hidden="true">›</span>
+        </button>
+        <button class="k-menue" @click="$emit('hilfe')">
+          <span class="k-menue-text">{{ t('v3.start.hilfe') }}
+            <span class="k-unter">{{ t('v3.start.hilfeUnter') }}</span></span>
+          <span class="k-menue-pfeil" aria-hidden="true">›</span>
+        </button>
+      </div>
+    </nav>
 
     <SprachWahl class="sprache" />
 
@@ -88,8 +109,20 @@ const anzahl = computed(() => props.satz.disciplines.length)
 .kopf h1 { margin: 0.2rem 0 0.35rem; font-size: 2rem; line-height: 1.15; }
 .unter { margin: 0; color: var(--f-gedaempft); font-size: 0.95rem; line-height: 1.5; }
 .sprache { margin-top: 0.5rem; }
-.rubrik { margin: 0.4rem 0 -0.2rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--f-gedaempft); }
-.favorit { border-left: 3px solid var(--f-akzent); }
+.rubrik { margin: 0 0 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--f-gedaempft); }
+
+/* Favoriten: eigener, klar umgrenzter Block */
+.favoriten {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.10), rgba(245, 158, 11, 0.03));
+  border: 1px solid rgba(245, 158, 11, 0.55); border-radius: var(--r-gross);
+  padding: 0.85rem 0.75rem 0.75rem;
+}
+.favoriten-kopf { margin: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; font-weight: 700; }
+.favoriten-stern { color: var(--f-akzent); font-size: 1.25rem; line-height: 1; }
+.favoriten-zahl { margin-left: auto; font-size: 0.78rem; font-weight: 600; color: var(--f-akzent); font-variant-numeric: tabular-nums; }
+.favoriten-hinweis { margin: 0.2rem 0 0.7rem; font-size: 0.82rem; color: var(--f-gedaempft); line-height: 1.45; }
+.favoriten-liste { display: flex; flex-direction: column; gap: 0.5rem; }
+.zuletzt .k-start-symbol { background: transparent; border: 2px solid var(--f-gruen); color: var(--f-gruen); }
 .fusszeile { margin: 0.75rem 0 0; text-align: center; font-size: 0.78rem; color: var(--f-gedaempft); }
 .fusszeile a { color: var(--f-akzent); }
 .hinweis {

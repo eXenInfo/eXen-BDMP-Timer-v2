@@ -465,7 +465,9 @@
       "disziplinErstellen": "Create a discipline",
       "disziplinErstellenUnter": "your own exercise with your own timings",
       "kopieAngelegt": "The bundled set is read-only. “Eigene Disziplinen” was created as an editable copy and is now in use.",
-      "dankeschoen": "Thank you"
+      "dankeschoen": "Thank you",
+      "favoritenHinweis": "Tap to start right away",
+      "menue": "More functions"
     },
     "hilfe": {
       "titel": "Help",

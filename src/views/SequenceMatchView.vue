@@ -133,7 +133,7 @@ const wiederholungen = computed(() => {
     <header class="kopf">
       <div class="kopf-block">
         <span class="kopf-marke">{{ t('v3.seq.disziplin') }}</span>
-        <strong class="kopf-wert klein">{{ name }}</strong>
+        <strong class="kopf-wert name">{{ name }}</strong>
       </div>
       <div class="kopf-block rechts">
         <span class="kopf-marke">{{ t('v3.seq.phase') }}</span>
@@ -296,7 +296,7 @@ const wiederholungen = computed(() => {
 .kopf-block.rechts { text-align: right; }
 .kopf-marke { display: block; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gedaempft); }
 .kopf-wert { display: block; font-size: 1.6rem; font-variant-numeric: tabular-nums; line-height: 1.2; }
-.kopf-wert.klein { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kopf-wert.name { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .von { font-size: 1rem; color: var(--gedaempft); }
 
 .mitte-block { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 0.15rem; }
@@ -304,7 +304,7 @@ const wiederholungen = computed(() => {
 .distanz { color: var(--akzent); font-size: 0.95rem; }
 .beschreibung { margin: 0.35rem 0 0; color: var(--gedaempft); font-size: 0.9rem; line-height: 1.45; white-space: pre-line; max-width: 34rem; }
 .uhr { font-size: clamp(4rem, 22vw, 8rem); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin: 0.5rem 0 0; }
-.uhr.gross { font-size: clamp(5.5rem, 34vw, 12rem); color: var(--akzent); }
+.uhr.gross { font-size: clamp(4.5rem, 26vw, 12rem); color: var(--akzent); }
 .uhr-marke { margin: 0.2rem 0 0; color: var(--gedaempft); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; }
 .wdh { margin: 0.4rem 0 0; font-size: 1.1rem; color: var(--akzent); font-variant-numeric: tabular-nums; }
 .wdh-plan { margin: 0.3rem 0 0; color: var(--gedaempft); font-size: 0.85rem; }

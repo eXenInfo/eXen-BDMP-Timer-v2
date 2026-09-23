@@ -465,7 +465,9 @@
       "disziplinErstellen": "Disziplin erstellen",
       "disziplinErstellenUnter": "eigene Übung mit eigenen Zeiten",
       "kopieAngelegt": "Der mitgelieferte Satz ist schreibgeschützt. „Eigene Disziplinen“ wurde als bearbeitbare Kopie angelegt und ist jetzt in Benutzung.",
-      "dankeschoen": "Dankeschön"
+      "dankeschoen": "Dankeschön",
+      "favoritenHinweis": "Tippen startet sofort",
+      "menue": "Weitere Funktionen"
     },
     "hilfe": {
       "titel": "Hilfe",
