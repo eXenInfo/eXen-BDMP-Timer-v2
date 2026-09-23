@@ -26,16 +26,6 @@ const props = defineProps({
 
 const signalLaeuft = ref(false)
 const hinweiseOffen = ref(false)
-const probeOffen = ref(false)
-const startLaenge = ref(audio.getStartSignalMs())
-const LAENGEN = [400, 600, 800, 1000, 1200, 1500]
-
-async function probiere(ms) {
-  await audio.arm()
-  startLaenge.value = ms
-  audio.setStartSignalMs(ms)
-  audio.probeStartSignal(ms)
-}
 
 const clock = useEngineClock({
   onEvents(events) {
@@ -205,9 +195,11 @@ const restknapp  = computed(() => {
 
     <!-- Ablauf und Hinweise -->
     <section v-if="phase && (phase.notes?.length || phase.afterStation?.length)" class="hinweise">
-      <button class="hinweis-schalter" @click="hinweiseOffen = !hinweiseOffen">
-        {{ hinweiseOffen ? t('v3.epp.hinweiseVerbergen') : t('v3.epp.hinweiseZeigen') }}
-        <span class="regel">{{ phase.ruleRef }}</span>
+      <button class="k-aufklapp" :aria-expanded="hinweiseOffen" @click="hinweiseOffen = !hinweiseOffen">
+        <span class="k-aufklapp-text">
+          {{ hinweiseOffen ? t('v3.epp.hinweiseVerbergen') : t('v3.epp.hinweiseZeigen') }}
+          <span class="regel">{{ phase.ruleRef }}</span>
+        </span>
       </button>
       <div v-if="hinweiseOffen" class="hinweis-liste">
         <template v-if="varianten.length">
@@ -245,23 +237,6 @@ const restknapp  = computed(() => {
       <div class="neben">
         <button v-if="istOffen" class="klein warn" @click="stoerung">{{ t('v3.epp.stoerung') }}</button>
         <button v-if="laeuft || zustand === 'malfunction'" class="klein" @click="zuruecksetzen">{{ t('v3.allgemein.abbrechen') }}</button>
-      </div>
-
-      <!-- Signalprobe: gehört später in die Einstellungen, hier zum Abhören -->
-      <div class="probe" v-if="!laeuft">
-        <button class="hinweis-schalter" @click="probeOffen = !probeOffen">
-          {{ probeOffen ? t('v3.epp.signalprobeSchliessen') : t('v3.epp.signalprobe') }}
-          <span class="regel">{{ startLaenge }} ms</span>
-        </button>
-        <div v-if="probeOffen" class="probe-reihe">
-          <button
-            v-for="ms in LAENGEN" :key="ms"
-            class="probe-knopf" :class="{ aktiv: ms === startLaenge }"
-            @click="probiere(ms)">{{ ms }}</button>
-        </div>
-        <p v-if="probeOffen" class="probe-hinweis">
-          {{ t('v3.epp.signalprobeHinweis') }}
-        </p>
       </div>
 
       <!-- Stationswahl: im Wettkampf selten, im Training ständig -->
@@ -341,7 +316,6 @@ const restknapp  = computed(() => {
 .kommando { margin: 0.15rem 0; font-size: 1.15rem; font-weight: 600; }
 
 .hinweise { }
-.hinweis-schalter { width: 100%; background: transparent; color: var(--gedaempft); border: 1px solid var(--rand); border-radius: 0.75rem; padding: 0.6rem; font-size: 0.85rem; display: flex; justify-content: center; gap: 0.5rem; align-items: center; }
 .regel { font-size: 0.7rem; padding: 0.1rem 0.4rem; border: 1px solid var(--rand); border-radius: 0.4rem; }
 .hinweis-liste { margin-top: 0.5rem; background: var(--flaeche); border: 1px solid var(--rand); border-radius: 0.75rem; padding: 0.75rem 1rem; max-height: 40vh; overflow-y: auto; }
 .hinweis-liste ul { margin: 0.25rem 0 0.5rem; padding-left: 1.1rem; }
@@ -365,11 +339,6 @@ const restknapp  = computed(() => {
 .klein { flex: 1; min-height: 3rem; background: var(--flaeche); color: var(--text); border: 1px solid var(--rand); border-radius: 0.75rem; font-size: 1rem; cursor: pointer; }
 .klein.warn { border-color: var(--akzent); color: var(--akzent); }
 
-.probe { display: flex; flex-direction: column; gap: 0.4rem; }
-.probe-reihe { display: flex; gap: 0.3rem; }
-.probe-knopf { flex: 1; min-height: 3rem; background: var(--flaeche); color: var(--text); border: 1px solid var(--rand); border-radius: 0.6rem; font-size: 0.9rem; font-variant-numeric: tabular-nums; cursor: pointer; }
-.probe-knopf.aktiv { background: var(--akzent); color: #1a1205; border-color: var(--akzent); font-weight: 700; }
-.probe-hinweis { margin: 0; color: var(--gedaempft); font-size: 0.78rem; line-height: 1.4; }
 
 .stationen { display: flex; gap: 0.3rem; }
 .station-knopf { flex: 1; min-height: 2.75rem; background: var(--flaeche); color: var(--gedaempft); border: 1px solid var(--rand); border-radius: 0.6rem; font-size: 0.85rem; cursor: pointer; }

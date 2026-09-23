@@ -270,7 +270,9 @@
       "disziplinErstellen": "Create a discipline",
       "disziplinErstellenUnter": "your own exercise with your own timings",
       "kopieAngelegt": "The bundled set is read-only. “Eigene Disziplinen” was created as an editable copy and is now in use.",
-      "dankeschoen": "Thank you"
+      "dankeschoen": "Thank you",
+      "favorit": "Favourite",
+      "tippenOeffnet": "Tap to open the discipline ready to start; the star keeps it as a favourite."
     },
     "epp": {
       "restzeitGesamt": "Total time left",
@@ -376,7 +378,7 @@
       "einlesenKnopf": "Import",
       "einlesenKnopfUnter": "creates a new set; existing ones stay untouched",
       "nachladenTitel": "Load new disciplines",
-      "nachladenUnter": "Fetches a collection and adds it to the set currently in use:",
+      "nachladenUnter": "add new disciplines, your own changes stay",
       "quelle": "Source",
       "nurNeue": "Add new only",
       "nurNeueUnter": "your own changes stay untouched",
@@ -392,7 +394,9 @@
       "zwischenablageGesperrt": "The clipboard is blocked here. Select the text below and copy it yourself.",
       "dateiGesperrt": "Saving as a file is blocked here. Use the clipboard instead.",
       "nurEigener": "Loading only works into your own set. Create a copy first.",
-      "nichtsZuTun": "Nothing to do, everything was already present."
+      "nichtsZuTun": "Nothing to do, everything was already present.",
+      "weitere": "More functions",
+      "satzEinlesenUnter": "take over a set from text or a file"
     },
     "editor": {
       "zurueckZurWahl": "Back to the discipline list",
@@ -466,8 +470,10 @@
       "disziplinErstellenUnter": "your own exercise with your own timings",
       "kopieAngelegt": "The bundled set is read-only. “Eigene Disziplinen” was created as an editable copy and is now in use.",
       "dankeschoen": "Thank you",
-      "favoritenHinweis": "Tap to start right away",
-      "menue": "More functions"
+      "favoritenHinweis": "Tap to open the discipline ready to start",
+      "menue": "More functions",
+      "signale": "Signals and volume",
+      "signaleUnter": "volume, start signal length, test tone"
     },
     "hilfe": {
       "titel": "Help",
@@ -511,7 +517,29 @@
       "disziplinErstellen": "Create a discipline",
       "disziplinErstellenUnter": "your own exercise with your own timings",
       "kopieAngelegt": "The bundled set is read-only. “Eigene Disziplinen” was created as an editable copy and is now in use.",
-      "dankeschoen": "Thank you"
+      "dankeschoen": "Thank you",
+      "installieren": "Install as an app",
+      "installJetzt": "Install now",
+      "installJetztUnter": "puts the timer on the home screen",
+      "installLaeuft": "The timer is already running as an installed app.",
+      "installAndroid": "Android with Chrome",
+      "installAndroidT": "Open the ⋮ menu at the top right and choose “Install app” or “Add to home screen”.",
+      "installIos": "iPhone and iPad (Safari)",
+      "installIosT": "Tap “Share” at the bottom, then choose “Add to Home Screen”.",
+      "installOffline": "Once installed, the timer starts like an app and also works without a network at the range."
+    },
+    "signale": {
+      "titel": "Signals and volume",
+      "untertitel": "Listen once with hearing protection before the first run.",
+      "lautstaerke": "Volume",
+      "leiser": "Quieter",
+      "lauter": "Louder",
+      "minimum": "It cannot go below 10 %, so the start signal is never silent. The device volume applies on top.",
+      "laenge": "Start signal length",
+      "standard": "Default",
+      "probe": "Play start signal",
+      "probeUnter": "{ms} ms at {prozent} %",
+      "geraet": "These settings apply to this device and are kept."
     }
   }
 }

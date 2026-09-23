@@ -270,7 +270,9 @@
       "disziplinErstellen": "Disziplin erstellen",
       "disziplinErstellenUnter": "eigene Übung mit eigenen Zeiten",
       "kopieAngelegt": "Der mitgelieferte Satz ist schreibgeschützt. „Eigene Disziplinen“ wurde als bearbeitbare Kopie angelegt und ist jetzt in Benutzung.",
-      "dankeschoen": "Dankeschön"
+      "dankeschoen": "Dankeschön",
+      "favorit": "Favorit",
+      "tippenOeffnet": "Tippen öffnet die Disziplin startbereit, der Stern merkt sie als Favorit."
     },
     "epp": {
       "restzeitGesamt": "Restzeit gesamt",
@@ -376,7 +378,7 @@
       "einlesenKnopf": "Einlesen",
       "einlesenKnopfUnter": "legt einen neuen Satz an, vorhandene bleiben unberührt",
       "nachladenTitel": "Neue Disziplinen nachladen",
-      "nachladenUnter": "Holt eine Sammlung und ergänzt damit den Satz, der gerade in Benutzung ist:",
+      "nachladenUnter": "neue Disziplinen ergänzen, eigene Änderungen bleiben",
       "quelle": "Quelle",
       "nurNeue": "Nur neue aufnehmen",
       "nurNeueUnter": "eigene Änderungen bleiben unangetastet",
@@ -392,7 +394,9 @@
       "zwischenablageGesperrt": "Die Zwischenablage ist hier gesperrt. Text unten markieren und selbst kopieren.",
       "dateiGesperrt": "Das Sichern als Datei ist hier gesperrt. Nimm die Zwischenablage.",
       "nurEigener": "Nachladen geht nur in einen eigenen Satz. Lege zuerst eine Kopie an.",
-      "nichtsZuTun": "Nichts zu tun, alles war bereits vorhanden."
+      "nichtsZuTun": "Nichts zu tun, alles war bereits vorhanden.",
+      "weitere": "Weitere Funktionen",
+      "satzEinlesenUnter": "Satz aus Text oder Datei übernehmen"
     },
     "editor": {
       "zurueckZurWahl": "Zurück zur Disziplinwahl",
@@ -466,8 +470,10 @@
       "disziplinErstellenUnter": "eigene Übung mit eigenen Zeiten",
       "kopieAngelegt": "Der mitgelieferte Satz ist schreibgeschützt. „Eigene Disziplinen“ wurde als bearbeitbare Kopie angelegt und ist jetzt in Benutzung.",
       "dankeschoen": "Dankeschön",
-      "favoritenHinweis": "Tippen startet sofort",
-      "menue": "Weitere Funktionen"
+      "favoritenHinweis": "Tippen öffnet die Disziplin startbereit",
+      "menue": "Weitere Funktionen",
+      "signale": "Signale und Lautstärke",
+      "signaleUnter": "Lautstärke, Länge des Startsignals, Probeton"
     },
     "hilfe": {
       "titel": "Hilfe",
@@ -511,7 +517,29 @@
       "disziplinErstellen": "Disziplin erstellen",
       "disziplinErstellenUnter": "eigene Übung mit eigenen Zeiten",
       "kopieAngelegt": "Der mitgelieferte Satz ist schreibgeschützt. „Eigene Disziplinen“ wurde als bearbeitbare Kopie angelegt und ist jetzt in Benutzung.",
-      "dankeschoen": "Dankeschön"
+      "dankeschoen": "Dankeschön",
+      "installieren": "Als App installieren",
+      "installJetzt": "Jetzt installieren",
+      "installJetztUnter": "legt den Timer auf den Startbildschirm",
+      "installLaeuft": "Der Timer läuft bereits als installierte App.",
+      "installAndroid": "Android (Chrome)",
+      "installAndroidT": "Oben rechts das Menü ⋮ öffnen und „App installieren“ oder „Zum Startbildschirm hinzufügen“ wählen.",
+      "installIos": "iPhone und iPad (Safari)",
+      "installIosT": "Unten auf „Teilen“ tippen, dann „Zum Home-Bildschirm“ wählen.",
+      "installOffline": "Installiert startet der Timer wie eine App und funktioniert auch ohne Netz am Stand."
+    },
+    "signale": {
+      "titel": "Signale und Lautstärke",
+      "untertitel": "Vor dem ersten Lauf einmal mit Gehörschutz abhören.",
+      "lautstaerke": "Lautstärke",
+      "leiser": "Leiser",
+      "lauter": "Lauter",
+      "minimum": "Unter 10 % geht es nicht, damit das Startsignal nie stumm ist. Die Lautstärke des Geräts selbst gilt zusätzlich.",
+      "laenge": "Länge des Startsignals",
+      "standard": "Standard",
+      "probe": "Startsignal abspielen",
+      "probeUnter": "{ms} ms bei {prozent} %",
+      "geraet": "Die Einstellungen gelten auf diesem Gerät und bleiben gespeichert."
     }
   }
 }

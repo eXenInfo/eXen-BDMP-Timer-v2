@@ -159,10 +159,21 @@ async function nachladen() {
         </div>
       </div>
 
-      <div class="k-spalte abstand">
-        <button class="k-zweit" @click="ansicht = 'einlesen'">{{ t('v3.bib.satzEinlesen') }}</button>
-        <button class="k-zweit" @click="ansicht = 'nachladen'">{{ t('v3.bib.nachladen') }}</button>
-      </div>
+      <nav class="abstand" :aria-label="t('v3.bib.weitere')">
+        <p class="rubrik">{{ t('v3.bib.weitere') }}</p>
+        <div class="k-liste">
+          <button class="k-menue" @click="ansicht = 'einlesen'">
+            <span class="k-menue-text">{{ t('v3.bib.satzEinlesen') }}
+              <span class="k-unter">{{ t('v3.bib.satzEinlesenUnter') }}</span></span>
+            <span class="k-menue-pfeil" aria-hidden="true">›</span>
+          </button>
+          <button class="k-menue" @click="ansicht = 'nachladen'">
+            <span class="k-menue-text">{{ t('v3.bib.nachladen') }}
+              <span class="k-unter">{{ t('v3.bib.nachladenUnter') }}</span></span>
+            <span class="k-menue-pfeil" aria-hidden="true">›</span>
+          </button>
+        </div>
+      </nav>
     </template>
 
     <!-- Ausgeben -->
@@ -258,4 +269,5 @@ async function nachladen() {
 .rueckfrage p { margin: 0 0 0.6rem; font-size: 0.9rem; line-height: 1.45; }
 .ausgabe, .eingabe { min-height: 14rem; font-family: ui-monospace, monospace; font-size: 0.78rem; }
 .abstand { margin-top: 0.5rem; }
+.rubrik { margin: 0 0 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--f-gedaempft); }
 </style>

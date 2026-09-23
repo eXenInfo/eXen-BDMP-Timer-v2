@@ -8,6 +8,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import StartView from './views/StartView.vue'
 import HelpView from './views/HelpView.vue'
+import SignaleView from './views/SignaleView.vue'
 import EppMatchView from './views/EppMatchView.vue'
 import SequenceMatchView from './views/SequenceMatchView.vue'
 import LibraryView from './views/LibraryView.vue'
@@ -34,7 +35,7 @@ const saetze = computed(() => (stand.value, bibliothek.sets()))
 const aktiverId = computed(() => (stand.value, bibliothek.activeSetId()))
 const aktiverSatz = computed(() => (stand.value, bibliothek.activeSet()))
 
-const schirm = ref('start')                            // start | wahl | lauf | saetze | editor | hilfe
+const schirm = ref('start')                            // start | wahl | lauf | saetze | editor | hilfe | signale
 const zuletzt = ref(null)
 const gewaehlt = ref(null)
 const editorSatzId = ref(null)
@@ -99,7 +100,11 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
       @starten="starte"
       @erstellen="erstellen"
       @saetze="schirm = 'saetze'"
+      @signale="schirm = 'signale'"
       @hilfe="schirm = 'hilfe'" />
+
+    <!-- Signale und Lautstärke -->
+    <SignaleView v-else-if="schirm === 'signale'" @schliessen="schirm = 'start'" />
 
     <!-- Hilfe und Rechtliches -->
     <HelpView v-else-if="schirm === 'hilfe'" @schliessen="schirm = 'start'" />
@@ -110,23 +115,30 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
       <header class="kopfzeile">
         <h1>{{ t('v3.wahl.titel') }}</h1>
         <p>{{ t('v3.wahl.satzInBenutzung') }}: <strong>{{ aktiverSatz.name }}</strong></p>
+        <p class="tipp">{{ t('v3.wahl.tippenOeffnet') }}</p>
       </header>
 
       <p v-if="meldung" class="meldung">{{ meldung }}</p>
 
       <div v-for="d in disziplinen" :key="d.id" class="reihe">
-        <button class="karte" :class="{ epp: d.kind === 'epp' }" @click="starte(d)">
-          <strong>{{ anzeigeName(d) }}</strong>
-          <span>{{ dauerText(d) }}</span>
-          <span v-if="d.varianten?.length" class="klassen">
-            <span v-for="v in d.varianten" :key="v.ruleRef" class="klasse">{{ WEAPON_CLASSES[v.klasse]?.kurz ?? v.klasse }}</span>
+        <button class="k-start karte" @click="starte(d)">
+          <span class="k-start-symbol" aria-hidden="true">▶</span>
+          <span class="k-start-text">
+            <strong>{{ anzeigeName(d) }}</strong>
+            <span class="k-unter">{{ dauerText(d) }}</span>
+            <span v-if="d.varianten?.length" class="klassen">
+              <span v-for="v in d.varianten" :key="v.ruleRef" class="klasse">{{ WEAPON_CLASSES[v.klasse]?.kurz ?? v.klasse }}</span>
+            </span>
           </span>
         </button>
         <button
           class="stern" :class="{ an: bibliothek.istFavorit(d.id) }"
-          :title="bibliothek.istFavorit(d.id) ? t('v3.wahl.favoritEntfernen') : t('v3.wahl.favoritSetzen')"
+          :aria-label="bibliothek.istFavorit(d.id) ? t('v3.wahl.favoritEntfernen') : t('v3.wahl.favoritSetzen')"
           :aria-pressed="bibliothek.istFavorit(d.id)"
-          @click="favoritUmschalten(d)">★</button>
+          @click="favoritUmschalten(d)">
+          <span class="stern-zeichen" aria-hidden="true">{{ bibliothek.istFavorit(d.id) ? '★' : '☆' }}</span>
+          <span class="stern-text">{{ t('v3.wahl.favorit') }}</span>
+        </button>
       </div>
 
       <div class="k-spalte abstand">
@@ -183,24 +195,22 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
 .kopfzeile h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
 .kopfzeile p { margin: 0 0 0.75rem; color: var(--f-gedaempft); font-size: 0.9rem; }
 .kopfzeile strong { color: var(--f-text); }
-.karte {
-  width: 100%; text-align: left; background: var(--f-flaeche); border: 1px solid var(--f-rand);
-  border-radius: var(--r-mittel); padding: 0.9rem 1rem; color: inherit; cursor: pointer;
-  display: flex; flex-direction: column; gap: 0.2rem; min-height: 3.9rem; font-family: inherit;
-}
-.karte strong { font-size: 1.05rem; }
-.karte span { color: var(--f-gedaempft); font-size: 0.82rem; }
-.karte.epp { border-left: 4px solid var(--f-akzent); }
-.reihe { display: grid; grid-template-columns: 1fr auto; gap: 0.4rem; align-items: stretch; }
+.kopfzeile .tipp { margin: -0.4rem 0 0.75rem; font-size: 0.82rem; }
+.karte { min-height: 4.25rem; }
+.reihe { display: grid; grid-template-columns: 1fr 4.5rem; gap: 0.4rem; align-items: stretch; }
 .stern {
-  min-width: 3.25rem; background: var(--f-flaeche); border: 1px solid var(--f-rand);
-  border-radius: var(--r-mittel); color: #3d4653; font-size: 1.5rem; cursor: pointer; line-height: 1;
+  font-family: inherit; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem;
+  background: var(--f-flaeche); border: 1px solid var(--f-rand); border-radius: var(--r-mittel);
+  color: var(--f-gedaempft);
 }
-.stern.an { color: var(--f-akzent); border-color: var(--f-akzent); }
+.stern-zeichen { font-size: 1.6rem; line-height: 1; }
+.stern-text { font-size: 0.68rem; letter-spacing: 0.02em; }
+.stern.an { color: var(--f-akzent); border-color: var(--f-akzent); background: rgba(245, 158, 11, 0.10); }
+.stern:focus-visible { outline: 2px solid var(--f-akzent); outline-offset: 2px; }
 .meldung { margin: 0 0 0.25rem; padding: 0.6rem 0.8rem; background: #3b1d05; border: 1px solid #7c4a08; border-radius: var(--r-klein); color: var(--f-akzent); font-size: 0.85rem; line-height: 1.5; }
 .klassen { display: flex; gap: 0.3rem; margin-top: 0.3rem; }
 .klasse { background: var(--f-flaeche-hoch); border: 1px solid var(--f-rand); border-radius: 0.35rem; padding: 0.1rem 0.4rem; font-size: 0.68rem; letter-spacing: 0.03em; color: var(--f-akzent); }
-.karte:active { border-color: var(--f-akzent); }
 .abstand { margin-top: 1rem; }
 .lauf { display: flex; flex-direction: column; }
 .navleiste { padding: 0.75rem 0.75rem 0; background: var(--f-grund); max-width: 44rem; margin: 0 auto; width: 100%; box-sizing: border-box; }

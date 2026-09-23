@@ -7,8 +7,10 @@
  *   .k-haupt      Hauptaktion. Volle Breite, mindestens 5,5rem hoch, grün.
  *                 Genau eine je Bildschirm.
  *   .k-zweit      Nebenaktion. Mindestens 3,5rem, Umriss, nie grün.
- *   .k-nav        Navigation. Volle Breite, mindestens 3,5rem, immer mit Wort,
- *                 nie nur mit Pfeil.
+ *   .k-nav        Zurück. Volle Breite, mindestens 3,5rem, linksbündig,
+ *                 immer ‹ plus Wort, nie nur ein Pfeil.
+ *   .k-aufklapp   Blendet Inhalt auf demselben Bildschirm ein oder aus.
+ *                 Voller Kontrast, Winkel ▾/▴ rechts, nie blass.
  *   .k-gefahr     Zerstörend. Rot umrandet, immer mit Rückfrage, nie in
  *                 gleicher Größe direkt neben der Hauptaktion.
  *   .k-start      Startet eine Disziplin sofort (Favorit, zuletzt benutzt).
@@ -16,7 +18,8 @@
  *   .k-menue      Öffnet einen anderen Bildschirm. Linksbündig, Pfeil rechts,
  *                 in einer gemeinsamen Liste (.k-liste) gebündelt.
  *
- * Bedeutung der Symbole ist fest: ▶ startet, › öffnet, ★ ist Favorit.
+ * Bedeutung der Symbole ist fest: ▶ öffnet eine Disziplin startbereit,
+ * › öffnet einen Bildschirm, ‹ geht zurück, ▾ klappt auf, ★ ist Favorit.
  *
  * Kleinstmaß für jede Trefferfläche: 3rem. Zwischen Knöpfen gegensätzlicher
  * Wirkung mindestens 0,75rem Abstand.
@@ -89,13 +92,32 @@ html, body {
 .k-nav {
   width: 100%;
   min-height: 3.5rem;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 1rem 0.6rem 0.85rem;
   background: var(--f-flaeche-hoch);
   color: var(--f-text);
   border: 1px solid var(--f-rand);
   font-size: 1.05rem;
   font-weight: 600;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  text-align: left;
 }
+.k-nav::before { content: '‹'; font-size: 1.7rem; line-height: 1; color: var(--f-gedaempft); margin-top: -0.12rem; }
+
+/* Aufklappen auf demselben Bildschirm */
+.k-aufklapp {
+  font-family: inherit; cursor: pointer; width: 100%;
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.75rem;
+  min-height: 3.25rem; padding: 0.55rem 1rem;
+  background: var(--f-flaeche); color: var(--f-text);
+  border: 1px solid var(--f-rand); border-radius: var(--r-mittel);
+  font-size: 1rem; font-weight: 600; text-align: left; line-height: 1.3;
+}
+.k-aufklapp::after { content: '▾'; color: var(--f-akzent); font-size: 1.1rem; }
+.k-aufklapp[aria-expanded="true"]::after { content: '▴'; }
+.k-aufklapp:active { background: var(--f-flaeche-hoch); }
+.k-aufklapp-text { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
 .k-gefahr {
   min-height: 3.5rem;
@@ -144,7 +166,7 @@ html, body {
 
 /* Sichtbarer Tastaturfokus für alle Bedienelemente */
 .k-haupt:focus-visible, .k-zweit:focus-visible, .k-nav:focus-visible, .k-gefahr:focus-visible,
-.k-start:focus-visible, .k-menue:focus-visible { outline: 2px solid var(--f-akzent); outline-offset: 2px; }
+.k-start:focus-visible, .k-menue:focus-visible, .k-aufklapp:focus-visible { outline: 2px solid var(--f-akzent); outline-offset: 2px; }
 
 /** Zweitzeile in einem Knopf: sagt, was die Aktion bewirkt. */
 .k-unter { font-size: 0.8rem; font-weight: 400; opacity: 0.85; }

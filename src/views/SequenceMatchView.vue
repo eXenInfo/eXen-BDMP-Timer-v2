@@ -201,9 +201,11 @@ const wiederholungen = computed(() => {
 
     <!-- Stellungen, Fertigstellung, Ablauf und Hinweise -->
     <section v-if="!laeuft" class="hinweise">
-      <button class="k-nav" @click="hinweiseOffen = !hinweiseOffen">
-        {{ hinweiseOffen ? t('v3.seq.regeltexteVerbergen') : t('v3.seq.regeltexteZeigen') }}
-        <span class="regel" v-if="disziplin.ruleRef">{{ disziplin.ruleRef }}</span>
+      <button class="k-aufklapp" :aria-expanded="hinweiseOffen" @click="hinweiseOffen = !hinweiseOffen">
+        <span class="k-aufklapp-text">
+          {{ hinweiseOffen ? t('v3.seq.regeltexteVerbergen') : t('v3.seq.regeltexteZeigen') }}
+          <span class="regel" v-if="disziplin.ruleRef">{{ disziplin.ruleRef }}</span>
+        </span>
       </button>
 
       <div v-if="hinweiseOffen" class="hinweis-liste">

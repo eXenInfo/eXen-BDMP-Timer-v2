@@ -7,11 +7,13 @@
  */
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useInstallieren } from '../composables/useInstallieren.js'
 import { IMPRESSUM, HAFTUNG, DATENSCHUTZ, REGELGRUNDLAGE, SIGNALE, APP_INFO, DANKESCHOEN } from '../core/legal.js'
 
 const emit = defineEmits(['schliessen'])
 const { t, locale } = useI18n()
 const zurueck = () => emit('schliessen')
+const { angebot, installiert, jetztInstallieren } = useInstallieren()
 
 const offen = ref('bedienung')
 const umschalten = (name) => { offen.value = offen.value === name ? null : name }
@@ -21,6 +23,7 @@ const faq = [1, 2, 3, 4, 5]
 const schnellstart = [1, 2, 3, 4]
 const abschnitte = [
   { id: 'bedienung',      titel: 'v3.hilfe.bedienung' },
+  { id: 'installieren',   titel: 'v3.hilfe.installieren' },
   { id: 'schnellstart',   titel: 'help.quickstartSection' },
   { id: 'faq',            titel: 'help.title' },
   { id: 'signale',        titel: 'v3.hilfe.signale' },
@@ -42,7 +45,7 @@ const abschnitte = [
     <section v-for="a in abschnitte" :key="a.id" class="block">
       <button class="kopfzeile" :aria-expanded="offen === a.id" @click="umschalten(a.id)">
         <span>{{ t(a.titel) }}</span>
-        <span class="zeichen">{{ offen === a.id ? '−' : '+' }}</span>
+        <span class="zeichen" aria-hidden="true">{{ offen === a.id ? '▴' : '▾' }}</span>
       </button>
 
       <div v-if="offen === a.id" class="inhalt">
@@ -52,6 +55,25 @@ const abschnitte = [
             <strong>{{ t('v3.hilfe.' + b) }}</strong>
             <p>{{ t('v3.hilfe.' + b + 't') }}</p>
           </div>
+        </template>
+
+        <template v-else-if="a.id === 'installieren'">
+          <p v-if="installiert" class="betont">{{ t('v3.hilfe.installLaeuft') }}</p>
+          <template v-else>
+            <button v-if="angebot" class="k-haupt install" @click="jetztInstallieren">
+              {{ t('v3.hilfe.installJetzt') }}
+              <span class="k-unter">{{ t('v3.hilfe.installJetztUnter') }}</span>
+            </button>
+            <div class="eintrag">
+              <strong>{{ t('v3.hilfe.installAndroid') }}</strong>
+              <p>{{ t('v3.hilfe.installAndroidT') }}</p>
+            </div>
+            <div class="eintrag">
+              <strong>{{ t('v3.hilfe.installIos') }}</strong>
+              <p>{{ t('v3.hilfe.installIosT') }}</p>
+            </div>
+            <p>{{ t('v3.hilfe.installOffline') }}</p>
+          </template>
         </template>
 
         <template v-else-if="a.id === 'schnellstart'">
@@ -169,4 +191,5 @@ h1 { margin: 0.6rem 0 0.2rem; font-size: 1.6rem; }
   color: var(--f-akzent); text-decoration: none; font-size: 0.95rem;
 }
 .verweis:active { filter: brightness(0.88); }
+.install { margin-bottom: 0.9rem; min-height: 4.5rem; font-size: 1.3rem; }
 </style>
