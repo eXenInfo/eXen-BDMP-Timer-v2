@@ -5,26 +5,13 @@
  * Aufklappbare Abschnitte statt einer langen Seite — auf dem Telefon ist
  * ein Inhaltsverzeichnis, das man antippt, schneller als Scrollen.
  */
-import { getCurrentInstance, ref } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import { IMPRESSUM, HAFTUNG, DATENSCHUTZ, REGELGRUNDLAGE, SIGNALE, APP_INFO, DANKESCHOEN } from '../core/legal.js'
 
 const emit = defineEmits(['schliessen'])
 const { t, locale } = useI18n()
-
-/**
- * Diese Ansicht läuft in zwei Zusammenhängen: in der Vorschau-Hülle, die
- * das Schließen selbst behandelt, und an der Route /help der Anwendung.
- * Ohne Rückgriff auf den Router bliebe der Zurück-Knopf dort wirkungslos.
- */
-const instanz = getCurrentInstance()
-const router = useRouter()
-function zurueck() {
-  if (instanz?.vnode?.props?.onSchliessen) emit('schliessen')
-  else if (router) router.push('/home')
-  else history.back()
-}
+const zurueck = () => emit('schliessen')
 
 const offen = ref('bedienung')
 const umschalten = (name) => { offen.value = offen.value === name ? null : name }

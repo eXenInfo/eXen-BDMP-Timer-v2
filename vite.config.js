@@ -1,13 +1,11 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: '/eXen-BDMP-Timer-v2/',
   plugins: [
     vue(),
-    tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png'],
@@ -15,8 +13,8 @@ export default defineConfig({
         name: 'eXen-BDMP-Timer',
         short_name: 'eXenTimer',
         description: 'Ein anpassbarer Timer für dynamische Schießdisziplinen.',
-        theme_color: '#155f5b',
-        background_color: '#111827',
+        theme_color: '#0b0d10',
+        background_color: '#0b0d10',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
