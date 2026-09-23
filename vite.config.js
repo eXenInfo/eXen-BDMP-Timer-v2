@@ -7,7 +7,11 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt' statt 'autoUpdate': Eine neue Version wartet, bis der Nutzer
+      // im Hinweis „Aktualisieren“ tippt. Mit 'autoUpdate' lud die App sich
+      // selbst neu, sobald eine neue Version da war, auch mitten in einem Lauf,
+      // und der Hinweis erschien nie.
+      registerType: 'prompt',
       includeAssets: ['icons/*.png'],
       manifest: {
         name: 'eXen-BDMP-Timer',
