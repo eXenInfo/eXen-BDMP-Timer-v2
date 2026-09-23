@@ -1,8 +1,7 @@
 name: CI / Deploy to GitHub Pages
 
-# Vorübergehend: Die Seite wird aus dem Arbeitszweig zeitkern-neu gebaut,
-# damit jeder Upload sofort unter der Pages-Adresse zu sehen ist.
-# Zurück auf main: 'zeitkern-neu' hier und in der Deploy-Bedingung durch 'main' ersetzen.
+# Veröffentlicht wird nur aus main. zeitkern-neu wird bei jedem Upload
+# geprüft (Lint, Tests, Build), aber nicht veröffentlicht.
 on:
   push:
     branches: [main, zeitkern-neu]
@@ -56,10 +55,10 @@ jobs:
         with:
           path: dist
 
-  # ── 3. Deploy (vorübergehend aus zeitkern-neu) ──────────────────────────────────────────
+  # ── 3. Deploy (nur main) ──────────────────────────────────────────
   deploy:
     name: Deploy
-    if: github.ref == 'refs/heads/zeitkern-neu'
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
