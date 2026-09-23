@@ -1,8 +1,11 @@
 name: CI / Deploy to GitHub Pages
 
+# Vorübergehend: Die Seite wird aus dem Arbeitszweig zeitkern-neu gebaut,
+# damit jeder Upload sofort unter der Pages-Adresse zu sehen ist.
+# Zurück auf main: 'zeitkern-neu' hier und in der Deploy-Bedingung durch 'main' ersetzen.
 on:
   push:
-    branches: [main]
+    branches: [main, zeitkern-neu]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -17,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── 1. Lint ────────────────────────────────────────────────────────────────
+  # ── 1. Lint und Tests ────────────────────────────────────────────────────────────────
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -31,6 +34,7 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      - run: npm test
 
   # ── 2. Build ───────────────────────────────────────────────────────────────
   build:
@@ -52,10 +56,10 @@ jobs:
         with:
           path: dist
 
-  # ── 3. Deploy (main branch only) ──────────────────────────────────────────
+  # ── 3. Deploy (vorübergehend aus zeitkern-neu) ──────────────────────────────────────────
   deploy:
     name: Deploy
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/zeitkern-neu'
     needs: build
     runs-on: ubuntu-latest
     environment:
