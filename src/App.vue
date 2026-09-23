@@ -13,13 +13,16 @@ import EppMatchView from './views/EppMatchView.vue'
 import SequenceMatchView from './views/SequenceMatchView.vue'
 import LibraryView from './views/LibraryView.vue'
 import EditorView from './views/EditorView.vue'
+import RoTexteView from './views/RoTexteView.vue'
+import FreieZeitView from './views/FreieZeitView.vue'
+import { freieZeitDisziplin } from './core/laufModus.js'
 import { createLibrary } from './core/library.js'
 import { lokalisiereDisziplin } from './core/lokalisierung.js'
 import { uebersetze } from './core/textEn.js'
 import { EPP_GENERAL_NOTES, EPP_VARIANTEN } from './core/eppRules.js'
 import { nominalDurationMs } from './core/legacyImport.js'
 import legacy from '../public/disziplinen.json'
-import { WEAPON_CLASSES, createDiscipline } from './core/disciplineRules.js'
+import { WEAPON_CLASSES, createDiscipline, enrichDiscipline } from './core/disciplineRules.js'
 import PWAUpdateToast from './components/ui/PWAUpdateToast.vue'
 
 const { t, locale } = useI18n()
@@ -35,9 +38,11 @@ const saetze = computed(() => (stand.value, bibliothek.sets()))
 const aktiverId = computed(() => (stand.value, bibliothek.activeSetId()))
 const aktiverSatz = computed(() => (stand.value, bibliothek.activeSet()))
 
-const schirm = ref('start')                            // start | wahl | lauf | saetze | editor | hilfe | signale
+const schirm = ref('start')                            // start | wahl | lauf | saetze | editor | hilfe | signale | texte | frei
 const zuletzt = ref(null)
 const gewaehlt = ref(null)
+const laufIndex = ref(0)                               // Phase, bei der der Lauf wieder einsetzt
+const laufFest = ref(null)                             // erzwungene Betriebsart (freie Zeit)
 const editorSatzId = ref(null)
 const editorSatz = computed(() => saetze.value.find(s => s.id === editorSatzId.value))
 
@@ -82,7 +87,41 @@ function dauerText(d) {
   return `${d.phases.length} ${t('v3.allgemein.phasen')} · ${zeit} ${t('v3.wahl.schiessUndVorlaufzeit')}`
 }
 
-function starte(d) { gewaehlt.value = d; zuletzt.value = d; schirm.value = 'lauf' }
+function starte(d) {
+  gewaehlt.value = d; zuletzt.value = d; meldung.value = null
+  laufIndex.value = 0; laufFest.value = null
+  schirm.value = 'lauf'
+}
+
+/** Freie Zeit: eine Serie, immer als Schützenuhr. */
+function freieZeitOeffnen(sekunden) {
+  gewaehlt.value = enrichDiscipline(freieZeitDisziplin(sekunden, t('v3.frei.name', { s: sekunden })))
+  laufIndex.value = 0; laufFest.value = 'schuetzenuhr'; meldung.value = null
+  schirm.value = 'lauf'
+}
+function laufVerlassen() { schirm.value = laufFest.value ? 'frei' : 'wahl' }
+
+// ── RO-Texte ─────────────────────────────────────────────────────────────
+const texteSchreibgeschuetzt = computed(() => !!aktiverSatz.value.readonly)
+function texteOeffnen(i) { laufIndex.value = i ?? 0; schirm.value = 'texte' }
+function texteSichern({ phasen, commandTexts }) {
+  const r = bibliothek.disziplinAendern(gewaehlt.value.id, (d) => {
+    d.phases.forEach((p, i) => {
+      const neu = phasen[i]
+      if (!neu) return
+      if (neu.ansage) p.ansage = neu.ansage; else delete p.ansage
+      p.roCommands = neu.roCommands
+      p.roCommandsEigen = true
+    })
+    if (commandTexts) d.commandTexts = commandTexts; else delete d.commandTexts
+  })
+  if (!r) { meldung.value = t('v3.ro.fehler'); return }
+  stand.value++
+  gewaehlt.value = r.disziplin
+  zuletzt.value = r.disziplin
+  meldung.value = r.kopieAngelegt ? t('v3.ro.kopieAngelegt') : null
+  schirm.value = 'lauf'
+}
 function sichern(satz) { bibliothek.save(satz); stand.value++ }
 function aktivieren(id) { bibliothek.setActive(id); stand.value++ }
 function loeschen(id) { bibliothek.remove(id); stand.value++ }
@@ -100,8 +139,18 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
       @starten="starte"
       @erstellen="erstellen"
       @saetze="schirm = 'saetze'"
+      @frei="schirm = 'frei'"
       @signale="schirm = 'signale'"
       @hilfe="schirm = 'hilfe'" />
+
+    <!-- Schützenuhr mit freier Zeit -->
+    <FreieZeitView v-else-if="schirm === 'frei'" @oeffnen="freieZeitOeffnen" @schliessen="schirm = 'start'" />
+
+    <!-- RO-Texte der laufenden Disziplin -->
+    <RoTexteView
+      v-else-if="schirm === 'texte' && gewaehlt"
+      :disziplin="gewaehlt" :start-index="laufIndex" :schreibgeschuetzt="texteSchreibgeschuetzt"
+      @sichern="texteSichern" @schliessen="schirm = 'lauf'" />
 
     <!-- Signale und Lautstärke -->
     <SignaleView v-else-if="schirm === 'signale'" @schliessen="schirm = 'start'" />
@@ -156,16 +205,21 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
     <!-- Lauf -->
     <div v-else-if="schirm === 'lauf'" class="lauf">
       <div class="navleiste">
-        <button class="k-nav" @click="schirm = 'wahl'">{{ t('v3.wahl.andereDisziplin') }}</button>
+        <button class="k-nav" @click="laufVerlassen">{{ laufFest ? t('v3.frei.andereZeit') : t('v3.wahl.andereDisziplin') }}</button>
+        <p v-if="meldung" class="meldung lauf-meldung">{{ meldung }}</p>
       </div>
       <EppMatchView
         v-if="gewaehlt.kind === 'epp'"
+        :start-index="laufIndex"
+        @texte="texteOeffnen"
         :phases="gewaehltLokal.phases"
         :varianten="eppVarianten"
         :allgemeine-hinweise="eppHinweise"
         :total-time-ms="gewaehltLokal.totalTimeMs ?? 330000"
         :prep-ms="gewaehltLokal.prepMs ?? 3000" />
-      <SequenceMatchView v-else :disziplin="gewaehltLokal" />
+      <SequenceMatchView
+        v-else :disziplin="gewaehltLokal" :modus-fest="laufFest" :bearbeitbar="!laufFest"
+        :start-index="laufIndex" @texte="texteOeffnen" />
     </div>
 
     <!-- Sätze -->
@@ -213,5 +267,6 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
 .klasse { background: var(--f-flaeche-hoch); border: 1px solid var(--f-rand); border-radius: 0.35rem; padding: 0.1rem 0.4rem; font-size: 0.68rem; letter-spacing: 0.03em; color: var(--f-akzent); }
 .abstand { margin-top: 1rem; }
 .lauf { display: flex; flex-direction: column; }
+.lauf-meldung { margin: 0.5rem 0 0; }
 .navleiste { padding: 0.75rem 0.75rem 0; background: var(--f-grund); max-width: 44rem; margin: 0 auto; width: 100%; box-sizing: border-box; }
 </style>

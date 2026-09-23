@@ -177,6 +177,32 @@ export function createLibrary(storage, legacyCollection) {
      * einer Sperre, die er nicht versteht.
      * @returns {{satz, disziplin, kopieAngelegt}}
      */
+    /**
+     * Ändert eine Disziplin des aktiven Satzes. Ist er schreibgeschützt,
+     * entsteht wie beim Anlegen zuerst eine bearbeitbare Kopie; die Kennung
+     * der Disziplin bleibt dabei gleich, damit Favoriten weiter stimmen.
+     * @param {string} id
+     * @param {(d: object) => void} aenderung verändert die übergebene Kopie
+     * @returns {{satz, disziplin, kopieAngelegt}|null}
+     */
+    disziplinAendern(id, aenderung) {
+      let satz = alleSaetze().find(s => s.id === zustand.activeSetId) ?? builtin
+      if (!satz.disciplines.some(d => d.id === id)) return null
+      let kopieAngelegt = false
+      if (satz.readonly) {
+        satz = duplicateSet(satz, 'Eigene Disziplinen')
+        kopieAngelegt = true
+      } else {
+        satz = structuredClone(satz)
+      }
+      const disziplin = satz.disciplines.find(d => d.id === id)
+      aenderung(disziplin)
+      const gesichert = this.save(satz)
+      if (!gesichert) return null
+      this.setActive(gesichert.id)
+      return { satz: gesichert, disziplin: enrichDiscipline(disziplin), kopieAngelegt }
+    },
+
     disziplinAnlegen(name, erzeuger) {
       let satz = alleSaetze().find(s => s.id === zustand.activeSetId) ?? builtin
       let kopieAngelegt = false

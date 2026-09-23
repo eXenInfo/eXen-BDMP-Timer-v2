@@ -15,7 +15,7 @@ const props = defineProps({
   zuletzt:   { type: Object, default: null },
   favoriten: { type: Array,  default: () => [] },
 })
-defineEmits(['waehlen', 'weiter', 'saetze', 'signale', 'hilfe', 'starten', 'erstellen'])
+defineEmits(['waehlen', 'weiter', 'saetze', 'frei', 'signale', 'hilfe', 'starten', 'erstellen'])
 const { t } = useI18n()
 
 const anzahl = computed(() => props.satz.disciplines.length)
@@ -75,6 +75,11 @@ const anzahl = computed(() => props.satz.disciplines.length)
         <button class="k-menue" @click="$emit('saetze')">
           <span class="k-menue-text">{{ t('v3.start.saetze') }}
             <span class="k-unter">{{ t('v3.start.saetzeUnter') }}</span></span>
+          <span class="k-menue-pfeil" aria-hidden="true">›</span>
+        </button>
+        <button class="k-menue" @click="$emit('frei')">
+          <span class="k-menue-text">{{ t('v3.start.frei') }}
+            <span class="k-unter">{{ t('v3.start.freiUnter') }}</span></span>
           <span class="k-menue-pfeil" aria-hidden="true">›</span>
         </button>
         <button class="k-menue" @click="$emit('signale')">

@@ -7,10 +7,14 @@
  * Pausen dazwischen und Haltepunkte, an denen der RO weitergibt.
  */
 import { useI18n } from 'vue-i18n'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createSequenceEngine, SeqState, SeqEvent } from '../core/sequenceEngine.js'
 import { buildAnnouncement } from '../core/ansage.js'
+import { phasenFuerSchuetzenuhr, neutraleAnzeige } from '../core/laufModus.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
+import { useLaufModus } from '../composables/useLaufModus.js'
+import { useWachHalten } from '../composables/useWachHalten.js'
+import ModusWahl from '../components/ModusWahl.vue'
 import * as audio from '../core/audio.js'
 
 const { t, locale } = useI18n()
@@ -18,12 +22,38 @@ const { t, locale } = useI18n()
 const props = defineProps({
   /** Angereicherte Disziplin: Phasen, Kommandofolge, Stellungen, Regeltexte. */
   disziplin: { type: Object, required: true },
+  /** Erzwingt eine Betriebsart, etwa 'schuetzenuhr' für die freie Zeit. */
+  modusFest: { type: String, default: null },
+  /** Ob der Knopf „RO-Texte bearbeiten“ erscheint. */
+  bearbeitbar: { type: Boolean, default: true },
+  /** Phase, bei der der Lauf einsetzt, etwa nach dem Bearbeiten der Texte. */
+  startIndex: { type: Number, default: 0 },
 })
+defineEmits(['texte'])
+
+const { modus, setzen: modusSetzen, tonAnwenden, tonFreigeben, stummEingestellt: stummLesen } = useLaufModus()
+const effektiv = computed(() => props.modusFest ?? modus.value)
+const schuetzenuhr = computed(() => effektiv.value === 'schuetzenuhr')
+const neutral = computed(() => neutraleAnzeige(effektiv.value))
+useWachHalten()
+/** Ob der Ton unter „Signale und Lautstärke“ ausgeschaltet ist (vor dem Lauf gelesen). */
+const stummEingestellt = ref(stummLesen())
 
 const hinweiseOffen = ref(false)
 const name   = computed(() => props.disziplin.name)
-const phases = computed(() => props.disziplin.phases)
+/** Im Modus Schützenuhr: jede Serie einzeln, ohne Vorlauf, Start per Tipp. */
+const phases = computed(() => schuetzenuhr.value
+  ? phasenFuerSchuetzenuhr(props.disziplin.phases)
+  : props.disziplin.phases)
 const befehle = computed(() => props.disziplin.commandSet ?? null)
+
+/**
+ * Zusätzliche Kommandos der Phase. Gibt es eine amtliche Kommandofolge,
+ * erscheinen nur selbst gepflegte Zeilen: Die aus dem Altbestand übernommenen
+ * Bruchstücke wiederholen sonst nur die Folge in älterer Fassung.
+ */
+const zusatzKommandos = computed(() =>
+  befehle.value && !phase.value?.roCommandsEigen ? [] : (phase.value?.roCommands ?? []))
 
 const clock = useEngineClock({
   onEvents(events) {
@@ -38,12 +68,26 @@ const clock = useEngineClock({
 function neuAufsetzen() {
   clock.setEngine(createSequenceEngine({ phases: phases.value }))
 }
-onMounted(() => { neuAufsetzen(); clock.start() })
+onMounted(() => {
+  tonAnwenden(props.modusFest); neuAufsetzen(); clock.start()
+  if (props.startIndex > 0 && !schuetzenuhr.value) clock.call('goToPhase', props.startIndex, now())
+})
+onBeforeUnmount(tonFreigeben)
 watch(() => props.disziplin, neuAufsetzen)
+watch(effektiv, () => { tonAnwenden(props.modusFest); neuAufsetzen() })
 
 const s = clock.snapshot
 const zustand = computed(() => s.value?.state ?? SeqState.IDLE)
-const phase   = computed(() => s.value?.phase ?? null)
+/**
+ * Die laufende Phase mit allen Feldern. Der Zeitkern gibt nur die normierten
+ * Zeitwerte zurück; Beschreibung, Distanz, Stellungen und Kommandos der
+ * Phase kommen aus der Disziplin selbst.
+ */
+const phase = computed(() => {
+  const roh = phases.value[s.value?.index ?? 0]
+  const kern = s.value?.phase
+  return roh || kern ? { ...(roh ?? {}), ...(kern ?? {}) } : null
+})
 
 const sek = (ms) => ms == null ? '—' : String(Math.ceil(ms / 1000))
 function mmss(ms) {
@@ -75,7 +119,12 @@ const beschriftung = computed(() => ({
 const laeuft = computed(() =>
   [SeqState.PREP, SeqState.RUNNING, SeqState.REP_PAUSE].includes(zustand.value))
 
+/** Die Betriebsart lässt sich nur vor dem Lauf und nach dem Ende wechseln. */
+const modusWaehlbar = computed(() => !props.modusFest &&
+  [SeqState.IDLE, SeqState.FINISHED].includes(zustand.value))
+
 const hauptaktion = computed(() => {
+  if (schuetzenuhr.value) return hauptaktionSchuetzenuhr()
   switch (zustand.value) {
     case SeqState.IDLE:
       return { text: t('v3.seq.starten'), unter: phase.value?.name ?? '', fn: starten, klasse: 'gruen' }
@@ -92,6 +141,23 @@ const hauptaktion = computed(() => {
     default: return null
   }
 })
+
+/** Schützenuhr: gleiche Knöpfe, aber einheitlich neutral und mit Worten für den Schützen. */
+function hauptaktionSchuetzenuhr() {
+  switch (zustand.value) {
+    case SeqState.IDLE:
+      return { text: t('v3.modus.startBeimSignal'), unter: phase.value?.name ?? '', fn: starten, klasse: 'neutral' }
+    case SeqState.WAITING_NEXT:
+      return { text: t('v3.modus.startBeimSignal'), unter: phase.value?.name ?? '', fn: weiter, klasse: 'neutral' }
+    case SeqState.PAUSED:
+      return { text: t('v3.seq.fortsetzen'), unter: t('v3.seq.nochSekunden', { s: sek(s.value?.remainingMs) }), fn: fortsetzen, klasse: 'neutral' }
+    case SeqState.RUNNING:
+      return { text: t('v3.seq.anhalten'), unter: t('v3.seq.zeitStopptSofort'), fn: anhalten, klasse: 'neutral' }
+    case SeqState.FINISHED:
+      return { text: t('v3.seq.neuerDurchgang'), unter: name.value, fn: zuruecksetzen, klasse: 'neutral' }
+    default: return null
+  }
+}
 
 async function starten()     { await audio.arm(); clock.call('start', now()) }
 function weiter()            { clock.call('continueNext', now()) }
@@ -129,7 +195,7 @@ const wiederholungen = computed(() => {
 </script>
 
 <template>
-  <div class="schirm">
+  <div class="schirm" :class="{ neutral }">
     <header class="kopf">
       <div class="kopf-block">
         <span class="kopf-marke">{{ t('v3.seq.disziplin') }}</span>
@@ -140,6 +206,8 @@ const wiederholungen = computed(() => {
         <strong class="kopf-wert">{{ (s?.index ?? 0) + 1 }}<span class="von">/{{ phases.length }}</span></strong>
       </div>
     </header>
+
+    <ModusWahl v-if="modusWaehlbar" :modus="effektiv" :stumm="stummEingestellt" @wahl="modusSetzen" />
 
     <main class="mitte-block">
       <p class="phase-zeile">
@@ -159,7 +227,7 @@ const wiederholungen = computed(() => {
     </main>
 
     <!-- Ablauf zum Vorlesen — steht vor den Kommandos -->
-    <section v-if="ansage && (zustand === 'idle' || zustand === 'waitingNext')" class="ansage">
+    <section v-if="!schuetzenuhr && ansage && (zustand === 'idle' || zustand === 'waitingNext')" class="ansage">
       <p class="ansage-marke">{{ t('v3.seq.ansage') }}<span class="ansage-unter">{{ t('v3.seq.ansageUnter') }}</span></p>
       <p v-if="ansage.fuehrung" class="ansage-fuehrung">{{ ansage.fuehrung }}</p>
       <p class="ansage-zeile">{{ ansage.detail }}</p>
@@ -167,7 +235,7 @@ const wiederholungen = computed(() => {
     </section>
 
     <!-- Kommandofolge vor der Serie -->
-    <section v-if="zustand === 'idle' || zustand === 'waitingNext'" class="kommandos">
+    <section v-if="!schuetzenuhr && (zustand === 'idle' || zustand === 'waitingNext')" class="kommandos">
       <p class="kommando-marke" v-if="befehle">
         {{ t('v3.seq.kommandofolge', { regel: befehle.ruleRef }) }}
       </p>
@@ -178,11 +246,11 @@ const wiederholungen = computed(() => {
           <span class="kommando-hinweis" v-if="k.hinweis">{{ k.hinweis }}</span>
         </li>
       </ol>
-      <p v-for="(k, i) in (phase?.roCommands ?? [])" :key="'e' + i" class="kommando eigen">„{{ k }}“</p>
+      <p v-for="(k, i) in zusatzKommandos" :key="'e' + i" class="kommando eigen">„{{ k }}“</p>
     </section>
 
     <!-- Kommandofolge nach der Serie -->
-    <section v-else-if="zustand === 'finished' && befehle" class="kommandos nachher">
+    <section v-else-if="!schuetzenuhr && zustand === 'finished' && befehle" class="kommandos nachher">
       <p class="kommando-marke">{{ t('v3.seq.nachSerie', { regel: befehle.ruleRef }) }}</p>
       <ol class="kommando-liste">
         <li v-for="(k, i) in befehle.nachher" :key="i">
@@ -193,14 +261,23 @@ const wiederholungen = computed(() => {
     </section>
 
     <!-- Abbruchkommando, solange geschossen wird -->
-    <section v-else-if="laeuft && befehle?.abbruch?.length" class="kommandos abbruch">
+    <section v-else-if="!schuetzenuhr && laeuft && befehle?.abbruch?.length" class="kommandos abbruch">
       <p class="kommando-marke">{{ t('v3.seq.abbruch') }}</p>
       <p class="kommando">„{{ befehle.abbruch[0].de }}“ <span class="kommando-en">{{ befehle.abbruch[0].en }}</span></p>
       <p class="kommando-hinweis">{{ befehle.abbruch[0].hinweis }}</p>
     </section>
 
+    <!-- RO-Texte ändern: direkt dort, wo sie gebraucht werden -->
+    <div v-if="bearbeitbar && !schuetzenuhr && zustand === 'idle'" class="k-liste">
+      <button class="k-menue" @click="$emit('texte', s?.index ?? 0)">
+        <span class="k-menue-text">{{ t('v3.ro.bearbeiten') }}
+          <span class="k-unter">{{ t('v3.ro.bearbeitenUnter') }}</span></span>
+        <span class="k-menue-pfeil" aria-hidden="true">›</span>
+      </button>
+    </div>
+
     <!-- Stellungen, Fertigstellung, Ablauf und Hinweise -->
-    <section v-if="!laeuft" class="hinweise">
+    <section v-if="!laeuft && !schuetzenuhr" class="hinweise">
       <button class="k-aufklapp" :aria-expanded="hinweiseOffen" @click="hinweiseOffen = !hinweiseOffen">
         <span class="k-aufklapp-text">
           {{ hinweiseOffen ? t('v3.seq.regeltexteVerbergen') : t('v3.seq.regeltexteZeigen') }}
@@ -369,4 +446,11 @@ const wiederholungen = computed(() => {
 .phase-knopf { flex: 1 1 2.5rem; min-height: 2.75rem; background: var(--flaeche); color: var(--gedaempft); border: 1px solid var(--rand); border-radius: 0.6rem; font-size: 0.9rem; cursor: pointer; }
 .phase-knopf.aktiv { background: var(--akzent); color: #1a1205; border-color: var(--akzent); font-weight: 700; }
 .phase-knopf.erledigt { color: var(--gruen); border-color: #1f4030; }
+
+/* Schützenuhr: eine Farbe für alles, damit sich nichts sichtbar umfärbt. */
+.schirm.neutral { --akzent: var(--text); --gruen: var(--gedaempft); }
+.neutral .uhr.gross { color: var(--text); }
+.haupt.neutral { background: var(--flaeche); color: var(--text); border: 2px solid var(--gedaempft); }
+.neutral .phase-knopf.aktiv { background: var(--text); color: var(--grund); border-color: var(--text); }
+.neutral .phase-knopf.erledigt { color: var(--gedaempft); border-color: var(--rand); }
 </style>

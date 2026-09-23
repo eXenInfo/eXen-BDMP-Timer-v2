@@ -438,7 +438,8 @@ export function enrichDiscipline(disziplin) {
   const regeln = findDisciplineRules(disziplin.name)
   const wahl = disziplin.commandSetId ?? 'auto'
   const befehleId = wahl === 'auto' ? regeln?.commandSet : (wahl === 'keine' ? null : wahl)
-  const befehle = befehleId ? COMMAND_SETS[befehleId] ?? null : null
+  const amtlich = befehleId ? COMMAND_SETS[befehleId] ?? null : null
+  const befehle = mitEigenenKommandos(amtlich, disziplin.commandTexts)
 
   return {
     ...disziplin,
@@ -454,6 +455,29 @@ export function enrichDiscipline(disziplin) {
     varianten:  disziplin.varianten ?? regeln?.varianten ?? [],
     phases:     mitStellungen(disziplin.phases),
   }
+}
+
+/** Die vier Gruppen einer Kommandofolge, in der Reihenfolge auf dem Stand. */
+export const KOMMANDO_GRUPPEN = ['vorher', 'start', 'abbruch', 'nachher']
+
+/**
+ * Legt eigene Kommandotexte über die amtliche Kommandofolge.
+ *
+ * Gespeichert werden nur die geänderten Gruppen; was fehlt, kommt weiter aus
+ * der Sportordnung. Leere Zeilen fallen weg. Die Kennung `eigen` zeigt der
+ * Oberfläche, dass die Folge vom Original abweicht.
+ */
+export function mitEigenenKommandos(amtlich, eigene) {
+  if (!amtlich || !eigene) return amtlich
+  const raus = { ...amtlich, eigen: false }
+  for (const g of KOMMANDO_GRUPPEN) {
+    if (!Array.isArray(eigene[g])) continue
+    raus[g] = eigene[g]
+      .map(k => ({ de: String(k?.de ?? '').trim(), en: String(k?.en ?? '').trim(), hinweis: String(k?.hinweis ?? '').trim() || undefined }))
+      .filter(k => k.de || k.en)
+    raus.eigen = true
+  }
+  return raus
 }
 
 /** Leere Disziplin mit einer ersten Phase. */

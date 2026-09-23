@@ -21,6 +21,23 @@ let master = null
 let volume = 0.8
 
 /**
+ * Stumm: kein einziger Ton, auch kein Warn- oder Abschlusston.
+ *
+ * Zwei Quellen, beide getrennt geführt:
+ *   stummEinstellung  vom Nutzer unter „Signale und Lautstärke“ gewählt,
+ *                     etwa im Training, um andere nicht zu stören;
+ *   stummLauf         von der Schützenuhr erzwungen, die im Wettkampf nur
+ *                     mitlaufen darf, wenn sie keine Töne von sich gibt.
+ * Der Probeton unter „Signale und Lautstärke“ ist ausgenommen: Er wird
+ * ausdrücklich angetippt und dient genau dem Abhören.
+ */
+let stummEinstellung = false
+let stummLauf = false
+export function setStummEinstellung(wert) { stummEinstellung = !!wert }
+export function setStumm(wert) { stummLauf = !!wert }
+export function isStumm() { return stummEinstellung || stummLauf }
+
+/**
  * Dauer der Signale in Millisekunden.
  *
  * Für das Startsignal macht die Sportordnung keine Vorgabe — sie sagt nur,
@@ -73,7 +90,8 @@ export function getVolume() {
  * Einzelner Ton. Anstieg und Abfall sind kurz gehalten, damit die Länge
  * hörbar der Vorgabe entspricht und das Ende scharf markiert ist.
  */
-export function playTone({ freqHz = 880, durationMs = 400, delayMs = 0 } = {}) {
+export function playTone({ freqHz = 880, durationMs = 400, delayMs = 0, probe = false } = {}) {
+  if (!probe && isStumm()) return false
   const c = ensureContext()
   if (!c || c.state !== 'running') return false
 
@@ -138,5 +156,5 @@ export function playAlert() {
 
 /** Signalprobe: spielt das Startsignal in einer bestimmten Länge. */
 export function probeStartSignal(durationMs = startSignalMs) {
-  return playTone({ freqHz: 880, durationMs })
+  return playTone({ freqHz: 880, durationMs, probe: true })
 }

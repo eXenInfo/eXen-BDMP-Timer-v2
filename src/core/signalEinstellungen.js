@@ -1,12 +1,13 @@
 /**
- * Lautstärke und Länge des Startsignals, gespeichert je Gerät.
+ * Stumm, Lautstärke und Länge des Startsignals, gespeichert je Gerät.
  *
  * Die Werte werden beim App-Start geladen und an die Signalausgabe
  * übergeben. Der Speicher wird hereingereicht (wie bei library.js), damit
  * sich das Modul ohne Browser testen lässt.
  *
- * Untergrenze Lautstärke 10 %: Ein versehentlich stummgeschaltetes
- * Startsignal wäre auf dem Stand gefährlicher als ein zu lautes.
+ * Untergrenze Lautstärke 10 %: Ein versehentlich unhörbares Startsignal
+ * wäre auf dem Stand gefährlicher als ein zu lautes. Ganz ohne Ton geht es
+ * nur bewusst über den Schalter „Stumm“ (Feld `stumm`).
  */
 import * as audio from './audio.js'
 
@@ -38,6 +39,7 @@ export function ladeSignale(speicher) {
   return {
     lautstaerke: begrenzeLautstaerke(roh?.lautstaerke ?? LAUTSTAERKE_STANDARD),
     startMs:     begrenzeStartLaenge(roh?.startMs ?? START_STANDARD_MS),
+    stumm:       roh?.stumm === true,
   }
 }
 
@@ -46,6 +48,7 @@ export function sichereSignale(speicher, werte) {
   const gueltig = {
     lautstaerke: begrenzeLautstaerke(werte.lautstaerke),
     startMs:     begrenzeStartLaenge(werte.startMs),
+    stumm:       werte.stumm === true,
   }
   try { speicher?.setItem(SCHLUESSEL, JSON.stringify(gueltig)) } catch { /* ohne Speicher gilt der Wert bis zum Neuladen */ }
   return gueltig
@@ -55,4 +58,5 @@ export function sichereSignale(speicher, werte) {
 export function wendeSignaleAn(werte) {
   audio.setVolume(werte.lautstaerke)
   audio.setStartSignalMs(werte.startMs)
+  audio.setStummEinstellung(werte.stumm)
 }

@@ -42,6 +42,18 @@ async function laengeWaehlen(ms) { uebernehmen({ startMs: ms }); await probe() }
     <h1>{{ t('v3.signale.titel') }}</h1>
     <p class="unter">{{ t('v3.signale.untertitel') }}</p>
 
+    <section class="block" aria-labelledby="stumm-titel">
+      <h2 id="stumm-titel" class="marke">{{ t('v3.signale.ton') }}</h2>
+      <label class="e-schalter stumm-schalter" for="stumm">
+        <input id="stumm" type="checkbox" :checked="werte.stumm" @change="uebernehmen({ stumm: $event.target.checked })" />
+        <span class="stumm-text">
+          <strong>{{ t('v3.signale.stumm') }}</strong>
+          <span class="k-unter">{{ t('v3.signale.stummUnter') }}</span>
+        </span>
+      </label>
+      <p v-if="werte.stumm" class="hinweis stumm-an">{{ t('v3.signale.stummAn') }}</p>
+    </section>
+
     <section class="block" aria-labelledby="laut-titel">
       <h2 id="laut-titel" class="marke">{{ t('v3.signale.lautstaerke') }}</h2>
       <div class="laut-reihe">
@@ -104,5 +116,8 @@ h1 { margin: 0.6rem 0 0; font-size: 1.6rem; }
 .standard { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
 .laenge:focus-visible { outline: 2px solid var(--f-akzent); outline-offset: 2px; }
 .hinweis { margin: 0; color: var(--f-gedaempft); font-size: 0.8rem; line-height: 1.5; }
+.stumm-schalter { min-height: 3.75rem; }
+.stumm-text { display: flex; flex-direction: column; gap: 0.15rem; }
+.stumm-an { color: var(--f-text); }
 .geraet { margin: 0; text-align: center; color: var(--f-gedaempft); font-size: 0.8rem; }
 </style>

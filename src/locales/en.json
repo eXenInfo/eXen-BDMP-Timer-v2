@@ -473,7 +473,9 @@
       "favoritenHinweis": "Tap to open the discipline ready to start",
       "menue": "More functions",
       "signale": "Signals and volume",
-      "signaleUnter": "volume, start signal length, test tone"
+      "signaleUnter": "silent, volume, start signal length, test tone",
+      "frei": "Shooter clock with free time",
+      "freiUnter": "no sound, no colour changes, to run along in a match"
     },
     "hilfe": {
       "titel": "Help",
@@ -526,7 +528,11 @@
       "installAndroidT": "Open the ⋮ menu at the top right and choose “Install app” or “Add to home screen”.",
       "installIos": "iPhone and iPad (Safari)",
       "installIosT": "Tap “Share” at the bottom, then choose “Add to Home Screen”.",
-      "installOffline": "Once installed, the timer starts like an app and also works without a network at the range."
+      "installOffline": "Once installed, the timer starts like an app and also works without a network at the range.",
+      "b7": "Silent and shooter clock",
+      "b7t": "Under “Signals and volume” you can switch the sound off completely, for example in training. Above every run you also choose the mode: “Range officer” runs the sequence with lead-in and signals, “Shooter clock” is for the shooter in a match: no sound, no colour changes, no lead-in; you tap on the range officer’s start signal. For any other time the start page offers the shooter clock with free time.",
+      "b8": "Changing range officer texts",
+      "b8t": "In the run, before the start, tap “Edit range officer texts”. There you can change the announcement, the commands per stage and the command sequence, and reset them to the Sportordnung."
     },
     "signale": {
       "titel": "Signals and volume",
@@ -534,12 +540,81 @@
       "lautstaerke": "Volume",
       "leiser": "Quieter",
       "lauter": "Louder",
-      "minimum": "It cannot go below 10 %, so the start signal is never silent. The device volume applies on top.",
+      "minimum": "It cannot go below 10 %, so the start signal never becomes inaudible by accident. To switch it off completely, use “Silent” above. The device volume applies on top.",
       "laenge": "Start signal length",
       "standard": "Default",
       "probe": "Play start signal",
       "probeUnter": "{ms} ms at {prozent} %",
-      "geraet": "These settings apply to this device and are kept."
+      "geraet": "These settings apply to this device and are kept.",
+      "ton": "Sound",
+      "stumm": "Silent",
+      "stummUnter": "no sound during the run, for example in training so others are not disturbed",
+      "stummAn": "The run makes no sound. The test tone below stays audible so you can check the setting."
+    },
+    "modus": {
+      "titel": "Mode",
+      "aufsicht": "Range officer",
+      "schuetzenuhr": "Shooter clock",
+      "aufsichtText": "The timer runs the sequence with lead-in and signals.",
+      "schuetzenuhrText": "To run along in a match: no sound, no colour changes, no lead-in. Tap on the range officer’s start signal; every string waits for that tap.",
+      "startBeimSignal": "Start on the signal",
+      "stummHinweis": "Sound is off. Turn it on under “Signals and volume”."
+    },
+    "frei": {
+      "titel": "Shooter clock with free time",
+      "untertitel": "Choose the duration, tap on the range officer’s start signal, keep an eye on the time left.",
+      "dauer": "Duration in seconds",
+      "oeffnen": "Open the clock",
+      "oeffnenUnter": "only starts with your tap",
+      "regel": "The clock makes no sound and does not change colours. Whether it may run along in a match is up to the range officer.",
+      "name": "Free time {s} s",
+      "andereZeit": "Choose another time"
+    },
+    "ro": {
+      "bearbeiten": "Edit range officer texts",
+      "bearbeitenUnter": "announcement, commands and command sequence of this discipline",
+      "zurueck": "Back to the run",
+      "titel": "Range officer texts",
+      "kopieHinweis": "The bundled set stays unchanged. Saving creates “Eigene Disziplinen” with your texts, and that set is then in use.",
+      "ansage": "Announcement to read out",
+      "ansageErklaerung": "First line: where to go. Further lines: the course of fire. Leave empty and the timer builds the announcement itself.",
+      "ansageFeld": "Your own text",
+      "vorschlag": "Take the suggestion",
+      "automatisch": "Announce automatically",
+      "standEigen": "This stage uses your text.",
+      "standAutomatisch": "This stage uses the automatic announcement (grey in the field).",
+      "kommandosPhase": "Extra commands for this stage",
+      "kommandosPhaseErklaerung": "Shown below the command sequence, for this stage only.",
+      "kommandosStation": "Commands for this station",
+      "kommandosStationErklaerung": "Shown before the station starts.",
+      "kommando": "Command",
+      "entfernen": "Remove",
+      "kommandoHinzu": "Add a command",
+      "kommandoEntfernen": "Remove this command",
+      "folge": "Command sequence {regel}",
+      "folgeErklaerung": "Applies to all stages of this discipline. German is shown large, English below.",
+      "folgeEigen": "The command sequence differs from the Sportordnung.",
+      "folgeAmtlich": "The command sequence matches the Sportordnung.",
+      "gruppe": {
+        "vorher": "Before the string",
+        "start": "Start",
+        "abbruch": "Cease fire",
+        "nachher": "After the string"
+      },
+      "deutsch": "German",
+      "englisch": "English",
+      "hinweis": "Explanation (optional)",
+      "zuruecksetzen": "Reset to the Sportordnung",
+      "zuruecksetzenFrage": "Discard all your own texts in the command sequence and restore the Sportordnung version?",
+      "zuruecksetzenJa": "Reset",
+      "sichern": "Save",
+      "sichernUnter": "applies to the run at once",
+      "nichtsGeaendert": "nothing changed yet",
+      "verwerfenFrage": "Your changes are not saved yet.",
+      "weiterBearbeiten": "Keep editing",
+      "verwerfen": "Discard",
+      "kopieAngelegt": "Saved. Your texts are in “Eigene Disziplinen”, and that set is now in use.",
+      "fehler": "The texts could not be saved. Is the browser storage full or blocked?"
     }
   }
 }

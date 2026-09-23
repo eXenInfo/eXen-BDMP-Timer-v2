@@ -473,7 +473,9 @@
       "favoritenHinweis": "Tippen öffnet die Disziplin startbereit",
       "menue": "Weitere Funktionen",
       "signale": "Signale und Lautstärke",
-      "signaleUnter": "Lautstärke, Länge des Startsignals, Probeton"
+      "signaleUnter": "Stumm, Lautstärke, Länge des Startsignals, Probeton",
+      "frei": "Schützenuhr mit freier Zeit",
+      "freiUnter": "ohne Ton und Farbwechsel, zum Mitlaufen im Wettkampf"
     },
     "hilfe": {
       "titel": "Hilfe",
@@ -526,7 +528,11 @@
       "installAndroidT": "Oben rechts das Menü ⋮ öffnen und „App installieren“ oder „Zum Startbildschirm hinzufügen“ wählen.",
       "installIos": "iPhone und iPad (Safari)",
       "installIosT": "Unten auf „Teilen“ tippen, dann „Zum Home-Bildschirm“ wählen.",
-      "installOffline": "Installiert startet der Timer wie eine App und funktioniert auch ohne Netz am Stand."
+      "installOffline": "Installiert startet der Timer wie eine App und funktioniert auch ohne Netz am Stand.",
+      "b7": "Stumm und Schützenuhr",
+      "b7t": "Unter „Signale und Lautstärke“ lässt sich der Ton ganz ausschalten, etwa im Training. Über jedem Lauf steht außerdem die Betriebsart: „Aufsicht“ führt den Ablauf mit Vorlauf und Signalen, „Schützenuhr“ ist für den Schützen im Wettkampf: kein Ton, keine Farbwechsel, kein Vorlauf; getippt wird beim Startsignal der Aufsicht. Für jede andere Zeit gibt es auf der Startseite die Schützenuhr mit freier Zeit.",
+      "b8": "RO-Texte ändern",
+      "b8t": "Im Lauf vor dem Start „RO-Texte bearbeiten“ antippen. Dort lassen sich die Ansage, die Kommandos je Phase und die Kommandofolge ändern und auf die Sportordnung zurücksetzen."
     },
     "signale": {
       "titel": "Signale und Lautstärke",
@@ -534,12 +540,81 @@
       "lautstaerke": "Lautstärke",
       "leiser": "Leiser",
       "lauter": "Lauter",
-      "minimum": "Unter 10 % geht es nicht, damit das Startsignal nie stumm ist. Die Lautstärke des Geräts selbst gilt zusätzlich.",
+      "minimum": "Unter 10 % geht es nicht, damit das Startsignal nie versehentlich unhörbar wird. Ganz ausschalten lässt es sich mit „Stumm“ oben. Die Lautstärke des Geräts gilt zusätzlich.",
       "laenge": "Länge des Startsignals",
       "standard": "Standard",
       "probe": "Startsignal abspielen",
       "probeUnter": "{ms} ms bei {prozent} %",
-      "geraet": "Die Einstellungen gelten auf diesem Gerät und bleiben gespeichert."
+      "geraet": "Die Einstellungen gelten auf diesem Gerät und bleiben gespeichert.",
+      "ton": "Ton",
+      "stumm": "Stumm",
+      "stummUnter": "kein Ton im Lauf, etwa im Training, um andere nicht zu stören",
+      "stummAn": "Der Lauf gibt keinen Ton ab. Der Probeton unten bleibt hörbar, damit Du die Einstellung prüfen kannst."
+    },
+    "modus": {
+      "titel": "Betriebsart",
+      "aufsicht": "Aufsicht",
+      "schuetzenuhr": "Schützenuhr",
+      "aufsichtText": "Der Timer führt den Ablauf mit Vorlauf und Signalen.",
+      "schuetzenuhrText": "Zum Mitlaufen im Wettkampf: kein Ton, kein Farbwechsel, kein Vorlauf. Beim Startsignal der Aufsicht tippen, jede Serie wartet auf diesen Tipp.",
+      "startBeimSignal": "Start beim Signal",
+      "stummHinweis": "Ton ist ausgeschaltet. Einschalten unter „Signale und Lautstärke“."
+    },
+    "frei": {
+      "titel": "Schützenuhr mit freier Zeit",
+      "untertitel": "Dauer wählen, beim Startsignal der Aufsicht tippen, Restzeit im Blick behalten.",
+      "dauer": "Dauer in Sekunden",
+      "oeffnen": "Uhr öffnen",
+      "oeffnenUnter": "startet erst mit Deinem Tipp",
+      "regel": "Die Uhr gibt keinen Ton von sich und wechselt keine Farben. Ob sie im Wettkampf mitlaufen darf, entscheidet die Aufsicht.",
+      "name": "Freie Zeit {s} s",
+      "andereZeit": "Andere Zeit wählen"
+    },
+    "ro": {
+      "bearbeiten": "RO-Texte bearbeiten",
+      "bearbeitenUnter": "Ansage, Kommandos und Kommandofolge dieser Disziplin",
+      "zurueck": "Zurück zum Lauf",
+      "titel": "RO-Texte",
+      "kopieHinweis": "Der mitgelieferte Satz bleibt unverändert. Beim Sichern entsteht „Eigene Disziplinen“ mit Deinen Texten; dieser Satz ist danach in Benutzung.",
+      "ansage": "Ansage zum Vorlesen",
+      "ansageErklaerung": "Erste Zeile: wohin es geht. Weitere Zeilen: der Ablauf. Leer lassen, dann setzt der Timer die Ansage selbst zusammen.",
+      "ansageFeld": "Eigener Text",
+      "vorschlag": "Vorschlag übernehmen",
+      "automatisch": "Automatisch ansagen",
+      "standEigen": "Diese Phase nutzt Deinen Text.",
+      "standAutomatisch": "Diese Phase nutzt die automatische Ansage (grau im Feld).",
+      "kommandosPhase": "Zusätzliche Kommandos dieser Phase",
+      "kommandosPhaseErklaerung": "Erscheinen unter der Kommandofolge, nur bei dieser Phase.",
+      "kommandosStation": "Kommandos dieser Station",
+      "kommandosStationErklaerung": "Erscheinen vor dem Start der Station.",
+      "kommando": "Kommando",
+      "entfernen": "Entfernen",
+      "kommandoHinzu": "Kommando hinzufügen",
+      "kommandoEntfernen": "Dieses Kommando entfernen",
+      "folge": "Kommandofolge {regel}",
+      "folgeErklaerung": "Gilt für alle Phasen dieser Disziplin. Deutsch wird groß angezeigt, Englisch darunter.",
+      "folgeEigen": "Die Kommandofolge weicht von der Sportordnung ab.",
+      "folgeAmtlich": "Die Kommandofolge entspricht der Sportordnung.",
+      "gruppe": {
+        "vorher": "Vor der Serie",
+        "start": "Start",
+        "abbruch": "Abbruch",
+        "nachher": "Nach der Serie"
+      },
+      "deutsch": "Deutsch",
+      "englisch": "Englisch",
+      "hinweis": "Erläuterung (optional)",
+      "zuruecksetzen": "Auf Sportordnung zurücksetzen",
+      "zuruecksetzenFrage": "Alle eigenen Texte der Kommandofolge verwerfen und die Fassung der Sportordnung wiederherstellen?",
+      "zuruecksetzenJa": "Zurücksetzen",
+      "sichern": "Sichern",
+      "sichernUnter": "gilt sofort im Lauf",
+      "nichtsGeaendert": "noch nichts geändert",
+      "verwerfenFrage": "Deine Änderungen sind noch nicht gesichert.",
+      "weiterBearbeiten": "Weiter bearbeiten",
+      "verwerfen": "Verwerfen",
+      "kopieAngelegt": "Gesichert. Deine Texte stehen in „Eigene Disziplinen“, dieser Satz ist jetzt in Benutzung.",
+      "fehler": "Die Texte konnten nicht gesichert werden. Ist der Speicher des Browsers voll oder gesperrt?"
     }
   }
 }

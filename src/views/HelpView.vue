@@ -18,7 +18,7 @@ const { angebot, installiert, jetztInstallieren } = useInstallieren()
 const offen = ref('bedienung')
 const umschalten = (name) => { offen.value = offen.value === name ? null : name }
 
-const bedienung = ['b1', 'b2', 'b3', 'b4', 'b5', 'b6']
+const bedienung = ['b1', 'b2', 'b7', 'b8', 'b3', 'b4', 'b5', 'b6']
 const faq = [1, 2, 3, 4, 5]
 const schnellstart = [1, 2, 3, 4]
 const abschnitte = [
