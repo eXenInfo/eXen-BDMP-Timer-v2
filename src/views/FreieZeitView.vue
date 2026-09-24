@@ -54,7 +54,7 @@ function mmss(s) {
 
 <style scoped>
 .frei {
-  min-height: 100dvh; background: var(--f-grund); color: var(--f-text); box-sizing: border-box;
+  min-height: calc(100dvh - env(safe-area-inset-top)); background: var(--f-grund); color: var(--f-text); box-sizing: border-box;
   padding: 0.75rem 0.75rem calc(1.5rem + env(safe-area-inset-bottom));
   display: flex; flex-direction: column; gap: 0.9rem; max-width: 40rem; margin: 0 auto;
 }

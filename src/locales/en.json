@@ -305,7 +305,7 @@
       "immerGueltig": "Always applies",
       "signalprobe": "Signal check",
       "signalprobeSchliessen": "Close signal check",
-      "signalprobeHinweis": "Applies to the start signal. The length of the second signal is set by C.17.14 and stays at 2 seconds.",
+      "signalprobeHinweis": "Applies to the start and end signal, both sound the same. The EPP stop signal is set by C.17.14 and stays at 2 seconds.",
       "waffenarten": "Weapon classes",
       "variantenTitel": "Applies to these weapon classes",
       "gleicheZeiten": "Identical timings across the listed weapon classes — one set for both.",
@@ -530,7 +530,7 @@
       "installIosT": "Tap “Share” at the bottom, then choose “Add to Home Screen”.",
       "installOffline": "Once installed, the timer starts like an app and also works without a network at the range.",
       "b7": "Silent and shooter clock",
-      "b7t": "Under “Signals and volume” you can switch the sound off completely, for example in training. Above every run you also choose the mode: “Range officer” runs the sequence with lead-in and signals, “Shooter clock” is for the shooter in a match: no sound, no colour changes, no lead-in; you tap on the range officer’s start signal. For any other time the start page offers the shooter clock with free time.",
+      "b7t": "Under “Signals and volume” you can switch the sound off completely, for example in training, and set the lead-in for all disciplines (as in discipline or 0 to 7 s). Above every run you also choose the mode: “Range officer” runs the sequence with lead-in and signals, “Shooter clock” is for the shooter in a match: no sound, no colour changes. Without a set lead-in you tap on the range officer’s start signal, with lead-in on the “Stand by” command. For any other time the start page offers the shooter clock with free time.",
       "b8": "Changing range officer texts",
       "b8t": "In the run, before the start, tap “Edit range officer texts”. There you can change the announcement, the commands per stage and the command sequence, and reset them to the Sportordnung."
     },
@@ -549,7 +549,12 @@
       "ton": "Sound",
       "stumm": "Silent",
       "stummUnter": "no sound during the run, for example in training so others are not disturbed",
-      "stummAn": "The run makes no sound. The test tone below stays audible so you can check the setting."
+      "stummAn": "The run makes no sound. The test tone below stays audible so you can check the setting.",
+      "vorlauf": "Lead-in",
+      "vorlaufWieDisziplin": "As in discipline",
+      "vorlaufHinweisDisziplin": "Each discipline uses its own lead-in (usually 5 s, EPP 3 s). The shooter clock starts without lead-in; you tap on the start signal.",
+      "vorlaufHinweis": "All disciplines start with {s} s lead-in, including EPP and the shooter clock. In the shooter clock, tap on the “Stand by” command.",
+      "iphoneStumm": "On iPhone (iOS 17 and later) the signals sound even when the device is muted. Music from other apps pauses during the run."
     },
     "modus": {
       "titel": "Mode",
@@ -558,7 +563,9 @@
       "aufsichtText": "The timer runs the sequence with lead-in and signals.",
       "schuetzenuhrText": "To run along in a match: no sound, no colour changes, no lead-in. Tap on the range officer’s start signal; every string waits for that tap.",
       "startBeimSignal": "Start on the signal",
-      "stummHinweis": "Sound is off. Turn it on under “Signals and volume”."
+      "stummHinweis": "Sound is off. Turn it on under “Signals and volume”.",
+      "startBeiAchtung": "Start on “Stand by”",
+      "schuetzenuhrTextVorlauf": "To run along in a match: no sound, no colour changes. Tap on the “Stand by” command; time starts after {s} s lead-in. Every string waits for that tap."
     },
     "frei": {
       "titel": "Shooter clock with free time",

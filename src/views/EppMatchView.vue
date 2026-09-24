@@ -13,7 +13,7 @@ import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_GENERAL_NOTES, EPP_VARIANTEN } from 
 import { buildEppAnnouncement } from '../core/ansage.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
-import { neutraleAnzeige } from '../core/laufModus.js'
+import { neutraleAnzeige, vorlaufMs } from '../core/laufModus.js'
 import { useLaufModus } from '../composables/useLaufModus.js'
 import { useWachHalten } from '../composables/useWachHalten.js'
 import ModusWahl from '../components/ModusWahl.vue'
@@ -31,12 +31,15 @@ const props = defineProps({
 })
 defineEmits(['texte'])
 
-const { modus, setzen: modusSetzen, tonAnwenden, tonFreigeben, stummEingestellt: stummLesen } = useLaufModus()
+const { modus, setzen: modusSetzen, tonAnwenden, tonFreigeben, stummEingestellt: stummLesen, vorlaufEingestellt } = useLaufModus()
 const schuetzenuhr = computed(() => modus.value === 'schuetzenuhr')
 const neutral = computed(() => neutraleAnzeige(modus.value))
 useWachHalten()
 /** Ob der Ton unter „Signale und Lautstärke“ ausgeschaltet ist (vor dem Lauf gelesen). */
 const stummEingestellt = ref(stummLesen())
+/** Vorlauf aus „Signale und Lautstärke“, `null` heißt „wie Disziplin“ (vor dem Lauf gelesen). */
+const vorlaufS = ref(vorlaufEingestellt())
+const uhrVorlaufS = computed(() => vorlaufMs(0, vorlaufS.value, 'schuetzenuhr') / 1000)
 
 const signalLaeuft = ref(false)
 const hinweiseOffen = ref(false)
@@ -57,10 +60,11 @@ const clock = useEngineClock({
 })
 
 function neuAufsetzen() {
-  // Schützenuhr: kein Vorlauf, die Zeit beginnt mit dem Tipp beim Startsignal.
+  // Vorlauf laut Einstellung; ohne Einstellung hat die Schützenuhr keinen,
+  // die Zeit beginnt dann mit dem Tipp beim Startsignal.
   clock.setEngine(createEppEngine({
     phases: props.phases, totalTimeMs: props.totalTimeMs,
-    prepMs: schuetzenuhr.value ? 0 : props.prepMs,
+    prepMs: vorlaufMs(props.prepMs, vorlaufS.value, modus.value),
   }))
 }
 onMounted(() => {
@@ -121,7 +125,9 @@ const hauptaktion = computed(() => {
 function hauptaktionRoh() {
   switch (zustand.value) {
     case EppState.IDLE:
-      if (schuetzenuhr.value) return { text: t('v3.modus.startBeimSignal'), unter: phase.value?.station ?? '', fn: starten }
+      if (schuetzenuhr.value) return {
+        text: uhrVorlaufS.value > 0 ? t('v3.modus.startBeiAchtung') : t('v3.modus.startBeimSignal'),
+        unter: phase.value?.station ?? '', fn: starten }
       return { text: t('v3.epp.stationStarten', { station: phase.value?.station ?? t('v3.epp.station') }),
                unter: t('v3.epp.startsignalAusloesen'), fn: starten, klasse: 'gruen' }
     case EppState.RUNNING_OPEN:
@@ -185,7 +191,7 @@ const restknapp  = computed(() => {
       </div>
     </header>
 
-    <ModusWahl v-if="modusWaehlbar" :modus="modus" :stumm="stummEingestellt" @wahl="modusSetzen" />
+    <ModusWahl v-if="modusWaehlbar" :modus="modus" :stumm="stummEingestellt" :vorlauf-s="uhrVorlaufS" @wahl="modusSetzen" />
 
     <!-- Restzeitansage vor Station 6, C.17.8 -->
     <div v-if="!schuetzenuhr && phase?.announceRemainingBeforeStart && zustand === 'idle'" class="ansage">
@@ -303,7 +309,7 @@ const restknapp  = computed(() => {
   --akzent: #f59e0b;
   --gruen: #16a34a;
   --rot: #dc2626;
-  min-height: 100dvh;
+  min-height: calc(100dvh - env(safe-area-inset-top));
   display: flex;
   flex-direction: column;
   gap: 0.75rem;

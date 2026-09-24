@@ -305,7 +305,7 @@
       "immerGueltig": "Immer gültig",
       "signalprobe": "Signalprobe",
       "signalprobeSchliessen": "Signalprobe schließen",
-      "signalprobeHinweis": "Gilt für das Startsignal. Die Dauer des zweiten Signals steht in C.17.14 und bleibt bei 2 Sekunden.",
+      "signalprobeHinweis": "Gilt für Start- und Endsignal, beide klingen gleich. Das Stoppsignal beim EPP steht in C.17.14 und bleibt bei 2 Sekunden.",
       "waffenarten": "Waffenarten",
       "variantenTitel": "Gilt für diese Waffenarten",
       "gleicheZeiten": "Gleiche Zeiten in allen aufgeführten Waffenarten — ein Satz für beide.",
@@ -530,7 +530,7 @@
       "installIosT": "Unten auf „Teilen“ tippen, dann „Zum Home-Bildschirm“ wählen.",
       "installOffline": "Installiert startet der Timer wie eine App und funktioniert auch ohne Netz am Stand.",
       "b7": "Stumm und Schützenuhr",
-      "b7t": "Unter „Signale und Lautstärke“ lässt sich der Ton ganz ausschalten, etwa im Training. Über jedem Lauf steht außerdem die Betriebsart: „Aufsicht“ führt den Ablauf mit Vorlauf und Signalen, „Schützenuhr“ ist für den Schützen im Wettkampf: kein Ton, keine Farbwechsel, kein Vorlauf; getippt wird beim Startsignal der Aufsicht. Für jede andere Zeit gibt es auf der Startseite die Schützenuhr mit freier Zeit.",
+      "b7t": "Unter „Signale und Lautstärke“ lässt sich der Ton ganz ausschalten, etwa im Training, und der Vorlauf für alle Disziplinen einstellen (wie Disziplin oder 0 bis 7 s). Über jedem Lauf steht außerdem die Betriebsart: „Aufsicht“ führt den Ablauf mit Vorlauf und Signalen, „Schützenuhr“ ist für den Schützen im Wettkampf: kein Ton, keine Farbwechsel. Ohne eingestellten Vorlauf wird beim Startsignal der Aufsicht getippt, mit Vorlauf beim Kommando „Achtung“. Für jede andere Zeit gibt es auf der Startseite die Schützenuhr mit freier Zeit.",
       "b8": "RO-Texte ändern",
       "b8t": "Im Lauf vor dem Start „RO-Texte bearbeiten“ antippen. Dort lassen sich die Ansage, die Kommandos je Phase und die Kommandofolge ändern und auf die Sportordnung zurücksetzen."
     },
@@ -549,7 +549,12 @@
       "ton": "Ton",
       "stumm": "Stumm",
       "stummUnter": "kein Ton im Lauf, etwa im Training, um andere nicht zu stören",
-      "stummAn": "Der Lauf gibt keinen Ton ab. Der Probeton unten bleibt hörbar, damit Du die Einstellung prüfen kannst."
+      "stummAn": "Der Lauf gibt keinen Ton ab. Der Probeton unten bleibt hörbar, damit Du die Einstellung prüfen kannst.",
+      "vorlauf": "Vorlauf",
+      "vorlaufWieDisziplin": "Wie Disziplin",
+      "vorlaufHinweisDisziplin": "Jede Disziplin nutzt ihren eigenen Vorlauf (meist 5 s, EPP 3 s). Die Schützenuhr startet ohne Vorlauf, getippt wird beim Startsignal.",
+      "vorlaufHinweis": "Alle Disziplinen starten mit {s} s Vorlauf, auch EPP und die Schützenuhr. In der Schützenuhr beim Kommando „Achtung“ tippen.",
+      "iphoneStumm": "Auf dem iPhone (ab iOS 17) klingen die Signale auch bei stummgeschaltetem Gerät. Musik aus anderen Apps pausiert dann während des Laufs."
     },
     "modus": {
       "titel": "Betriebsart",
@@ -558,7 +563,9 @@
       "aufsichtText": "Der Timer führt den Ablauf mit Vorlauf und Signalen.",
       "schuetzenuhrText": "Zum Mitlaufen im Wettkampf: kein Ton, kein Farbwechsel, kein Vorlauf. Beim Startsignal der Aufsicht tippen, jede Serie wartet auf diesen Tipp.",
       "startBeimSignal": "Start beim Signal",
-      "stummHinweis": "Ton ist ausgeschaltet. Einschalten unter „Signale und Lautstärke“."
+      "stummHinweis": "Ton ist ausgeschaltet. Einschalten unter „Signale und Lautstärke“.",
+      "startBeiAchtung": "Start bei „Achtung“",
+      "schuetzenuhrTextVorlauf": "Zum Mitlaufen im Wettkampf: kein Ton, kein Farbwechsel. Beim Kommando „Achtung“ tippen, nach {s} s Vorlauf läuft die Zeit. Jede Serie wartet auf diesen Tipp."
     },
     "frei": {
       "titel": "Schützenuhr mit freier Zeit",

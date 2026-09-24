@@ -5,9 +5,10 @@
  *                 Ob dabei Töne erklingen, regelt der Schalter „Stumm“
  *                 unter „Signale und Lautstärke“ (signalEinstellungen.js).
  *   schuetzenuhr  Uhr für den Schützen, die im Wettkampf mitläuft. Kein Ton,
- *                 kein Farbwechsel, kein Vorlauf: Der Schütze tippt beim
- *                 Startsignal der Aufsicht, und jede Serie wartet auf diesen
- *                 Tipp. So bleibt die Uhr nie vor oder hinter dem Stand.
+ *                 kein Farbwechsel. Ohne Vorlauf tippt der Schütze beim
+ *                 Startsignal der Aufsicht; mit eingestelltem Vorlauf schon
+ *                 beim Kommando „Achtung“. Jede Serie wartet auf diesen Tipp,
+ *                 so bleibt die Uhr nie vor oder hinter dem Stand.
  *
  * Die Umformung der Phasen ist eine reine Funktion. Der Zeitkern
  * (sequenceEngine) bleibt unverändert und wird nur anders gefüttert.
@@ -39,21 +40,45 @@ export const mitTon = (modus) => begrenzeModus(modus) === 'aufsicht'
 export const neutraleAnzeige = (modus) => begrenzeModus(modus) === 'schuetzenuhr'
 
 /**
+ * Vorlauf einer Phase in Millisekunden.
+ *
+ * Ein unter „Signale und Lautstärke“ eingestellter Vorlauf (0 bis 7 s) gilt
+ * für alle Disziplinen und beide Betriebsarten. Steht er auf „wie Disziplin“
+ * (`null`), behält die Aufsicht den Vorlauf der Phase, die Schützenuhr
+ * startet ohne Vorlauf beim Startsignal.
+ */
+export function vorlaufMs(phasenMs, vorlaufS, modus = MODUS_STANDARD) {
+  if (vorlaufS != null) return Math.max(0, Math.round(vorlaufS)) * 1000
+  return begrenzeModus(modus) === 'schuetzenuhr' ? 0 : Math.max(0, phasenMs ?? 0)
+}
+
+const phasenVorlauf = (p) => p.prepMs ?? (p.prepTime ?? 0) * 1000
+
+/** Phasen für die Aufsicht mit dem eingestellten Vorlauf. Ohne Einstellung unverändert. */
+export function phasenMitVorlauf(phasen, vorlaufS) {
+  if (vorlaufS == null) return phasen ?? []
+  const ms = vorlaufMs(0, vorlaufS)
+  return (phasen ?? []).map(p => ({ ...p, prepMs: ms, prepTime: ms / 1000 }))
+}
+
+/**
  * Phasen für die Schützenuhr.
  *
- * Jede Wiederholung wird eine eigene Serie, jede Serie startet ohne Vorlauf
- * und erst auf Tipp. Pausen zwischen Durchgängen entfallen, weil sie auf dem
- * Stand die Aufsicht bestimmt, nicht die Uhr.
+ * Jede Wiederholung wird eine eigene Serie, jede Serie startet erst auf Tipp,
+ * danach mit dem eingestellten Vorlauf (siehe vorlaufMs). Pausen zwischen
+ * Durchgängen entfallen, weil sie auf dem Stand die Aufsicht bestimmt, nicht
+ * die Uhr.
  */
-export function phasenFuerSchuetzenuhr(phasen) {
+export function phasenFuerSchuetzenuhr(phasen, vorlaufS = null) {
   const raus = []
   for (const p of phasen ?? []) {
     const n = Math.max(1, Math.round(p.repetitions ?? 1))
+    const prepMs = vorlaufMs(phasenVorlauf(p), vorlaufS, 'schuetzenuhr')
     for (let i = 1; i <= n; i++) {
       raus.push({
         ...p,
         name: n > 1 ? `${p.name} (${i}/${n})` : p.name,
-        prepMs: 0, prepTime: 0,
+        prepMs, prepTime: prepMs / 1000,
         repetitions: 1, repPauseMs: 0, pauseDuration: 0,
         soundAtStart: false, soundAtEnd: false,
         waitAfter: true,

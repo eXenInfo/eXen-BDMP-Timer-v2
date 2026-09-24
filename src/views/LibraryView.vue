@@ -249,7 +249,7 @@ async function nachladen() {
 
 <style scoped>
 .bibliothek {
-  min-height: 100dvh; background: var(--f-grund); color: var(--f-text);
+  min-height: calc(100dvh - env(safe-area-inset-top)); background: var(--f-grund); color: var(--f-text);
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   padding: 0.75rem 0.75rem calc(1.5rem + env(safe-area-inset-bottom));
   display: flex; flex-direction: column; gap: 0.75rem; max-width: 44rem; margin: 0 auto;

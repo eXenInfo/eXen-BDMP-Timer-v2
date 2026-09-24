@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createSequenceEngine, SeqState, SeqEvent } from '../core/sequenceEngine.js'
 import { buildAnnouncement } from '../core/ansage.js'
-import { phasenFuerSchuetzenuhr, neutraleAnzeige } from '../core/laufModus.js'
+import { phasenFuerSchuetzenuhr, phasenMitVorlauf, vorlaufMs, neutraleAnzeige } from '../core/laufModus.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import { useLaufModus } from '../composables/useLaufModus.js'
 import { useWachHalten } from '../composables/useWachHalten.js'
@@ -31,20 +31,24 @@ const props = defineProps({
 })
 defineEmits(['texte'])
 
-const { modus, setzen: modusSetzen, tonAnwenden, tonFreigeben, stummEingestellt: stummLesen } = useLaufModus()
+const { modus, setzen: modusSetzen, tonAnwenden, tonFreigeben, stummEingestellt: stummLesen, vorlaufEingestellt } = useLaufModus()
 const effektiv = computed(() => props.modusFest ?? modus.value)
 const schuetzenuhr = computed(() => effektiv.value === 'schuetzenuhr')
 const neutral = computed(() => neutraleAnzeige(effektiv.value))
 useWachHalten()
 /** Ob der Ton unter „Signale und Lautstärke“ ausgeschaltet ist (vor dem Lauf gelesen). */
 const stummEingestellt = ref(stummLesen())
+/** Vorlauf aus „Signale und Lautstärke“, `null` heißt „wie Disziplin“ (vor dem Lauf gelesen). */
+const vorlaufS = ref(vorlaufEingestellt())
+/** Vorlauf der Schützenuhr in Sekunden; 0 heißt Tipp beim Startsignal. */
+const uhrVorlaufS = computed(() => vorlaufMs(0, vorlaufS.value, 'schuetzenuhr') / 1000)
 
 const hinweiseOffen = ref(false)
 const name   = computed(() => props.disziplin.name)
-/** Im Modus Schützenuhr: jede Serie einzeln, ohne Vorlauf, Start per Tipp. */
+/** Im Modus Schützenuhr: jede Serie einzeln, Start per Tipp. Vorlauf laut Einstellung. */
 const phases = computed(() => schuetzenuhr.value
-  ? phasenFuerSchuetzenuhr(props.disziplin.phases)
-  : props.disziplin.phases)
+  ? phasenFuerSchuetzenuhr(props.disziplin.phases, vorlaufS.value)
+  : phasenMitVorlauf(props.disziplin.phases, vorlaufS.value))
 const befehle = computed(() => props.disziplin.commandSet ?? null)
 
 /**
@@ -144,13 +148,15 @@ const hauptaktion = computed(() => {
 
 /** Schützenuhr: gleiche Knöpfe, aber einheitlich neutral und mit Worten für den Schützen. */
 function hauptaktionSchuetzenuhr() {
+  const tippText = uhrVorlaufS.value > 0 ? t('v3.modus.startBeiAchtung') : t('v3.modus.startBeimSignal')
   switch (zustand.value) {
     case SeqState.IDLE:
-      return { text: t('v3.modus.startBeimSignal'), unter: phase.value?.name ?? '', fn: starten, klasse: 'neutral' }
+      return { text: tippText, unter: phase.value?.name ?? '', fn: starten, klasse: 'neutral' }
     case SeqState.WAITING_NEXT:
-      return { text: t('v3.modus.startBeimSignal'), unter: phase.value?.name ?? '', fn: weiter, klasse: 'neutral' }
+      return { text: tippText, unter: phase.value?.name ?? '', fn: weiter, klasse: 'neutral' }
     case SeqState.PAUSED:
       return { text: t('v3.seq.fortsetzen'), unter: t('v3.seq.nochSekunden', { s: sek(s.value?.remainingMs) }), fn: fortsetzen, klasse: 'neutral' }
+    case SeqState.PREP:
     case SeqState.RUNNING:
       return { text: t('v3.seq.anhalten'), unter: t('v3.seq.zeitStopptSofort'), fn: anhalten, klasse: 'neutral' }
     case SeqState.FINISHED:
@@ -207,7 +213,7 @@ const wiederholungen = computed(() => {
       </div>
     </header>
 
-    <ModusWahl v-if="modusWaehlbar" :modus="effektiv" :stumm="stummEingestellt" @wahl="modusSetzen" />
+    <ModusWahl v-if="modusWaehlbar" :modus="effektiv" :stumm="stummEingestellt" :vorlauf-s="uhrVorlaufS" @wahl="modusSetzen" />
 
     <main class="mitte-block">
       <p class="phase-zeile">
@@ -365,7 +371,7 @@ const wiederholungen = computed(() => {
 .schirm {
   --grund: #0b0d10; --flaeche: #15191f; --rand: #262c35;
   --text: #f2f5f8; --gedaempft: #9aa6b4; --akzent: #f59e0b; --gruen: #16a34a;
-  min-height: 100dvh; display: flex; flex-direction: column; gap: 0.75rem;
+  min-height: calc(100dvh - env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 0.75rem;
   padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
   background: var(--grund); color: var(--text);
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;

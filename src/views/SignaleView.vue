@@ -8,7 +8,7 @@ import { useI18n } from 'vue-i18n'
 import * as audio from '../core/audio.js'
 import {
   ladeSignale, sichereSignale, wendeSignaleAn,
-  LAUTSTAERKE_MIN, LAUTSTAERKE_MAX, START_LAENGEN_MS, START_STANDARD_MS,
+  LAUTSTAERKE_MIN, LAUTSTAERKE_MAX, START_LAENGEN_MS, START_STANDARD_MS, VORLAUF_WERTE_S,
 } from '../core/signalEinstellungen.js'
 
 defineEmits(['schliessen'])
@@ -34,6 +34,7 @@ async function probe() {
 const lauter = () => uebernehmen({ lautstaerke: werte.value.lautstaerke + 10 })
 const leiser = () => uebernehmen({ lautstaerke: werte.value.lautstaerke - 10 })
 async function laengeWaehlen(ms) { uebernehmen({ startMs: ms }); await probe() }
+const vorlaufSekunden = VORLAUF_WERTE_S.filter(v => v !== null)
 </script>
 
 <template>
@@ -52,6 +53,7 @@ async function laengeWaehlen(ms) { uebernehmen({ startMs: ms }); await probe() }
         </span>
       </label>
       <p v-if="werte.stumm" class="hinweis stumm-an">{{ t('v3.signale.stummAn') }}</p>
+      <p class="hinweis">{{ t('v3.signale.iphoneStumm') }}</p>
     </section>
 
     <section class="block" aria-labelledby="laut-titel">
@@ -83,6 +85,25 @@ async function laengeWaehlen(ms) { uebernehmen({ startMs: ms }); await probe() }
       <p class="hinweis">{{ t('v3.epp.signalprobeHinweis') }}</p>
     </section>
 
+    <section class="block" aria-labelledby="vorlauf-titel">
+      <h2 id="vorlauf-titel" class="marke">{{ t('v3.signale.vorlauf') }}</h2>
+      <button
+        class="laenge" :class="{ aktiv: werte.vorlaufS === null }" :aria-pressed="werte.vorlaufS === null"
+        @click="uebernehmen({ vorlaufS: null })">
+        {{ t('v3.signale.vorlaufWieDisziplin') }}
+        <span class="standard">{{ t('v3.signale.standard') }}</span>
+      </button>
+      <div class="laengen vorlauf">
+        <button
+          v-for="s in vorlaufSekunden" :key="s"
+          class="laenge" :class="{ aktiv: s === werte.vorlaufS }" :aria-pressed="s === werte.vorlaufS"
+          @click="uebernehmen({ vorlaufS: s })">
+          {{ s }} s
+        </button>
+      </div>
+      <p class="hinweis">{{ werte.vorlaufS === null ? t('v3.signale.vorlaufHinweisDisziplin') : t('v3.signale.vorlaufHinweis', { s: werte.vorlaufS }) }}</p>
+    </section>
+
     <button class="k-haupt" @click="probe">
       {{ t('v3.signale.probe') }}
       <span class="k-unter">{{ t('v3.signale.probeUnter', { ms: werte.startMs, prozent: werte.lautstaerke }) }}</span>
@@ -94,7 +115,7 @@ async function laengeWaehlen(ms) { uebernehmen({ startMs: ms }); await probe() }
 
 <style scoped>
 .signale {
-  min-height: 100dvh; background: var(--f-grund); color: var(--f-text);
+  min-height: calc(100dvh - env(safe-area-inset-top)); background: var(--f-grund); color: var(--f-text);
   padding: 0.75rem 0.75rem calc(1.5rem + env(safe-area-inset-bottom));
   display: flex; flex-direction: column; gap: 0.9rem; max-width: 40rem; margin: 0 auto; box-sizing: border-box;
 }
@@ -107,6 +128,7 @@ h1 { margin: 0.6rem 0 0; font-size: 1.6rem; }
 .laut-wert { text-align: center; font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .regler { width: 100%; height: 2.5rem; accent-color: var(--f-akzent); }
 .laengen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.laengen.vorlauf { grid-template-columns: repeat(4, 1fr); }
 .laenge {
   min-height: 3.5rem; font: inherit; font-size: 1rem; font-variant-numeric: tabular-nums; cursor: pointer;
   background: var(--f-flaeche-hoch); color: var(--f-text); border: 1px solid var(--f-rand); border-radius: var(--r-klein);

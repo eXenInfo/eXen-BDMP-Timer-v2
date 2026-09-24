@@ -50,9 +50,22 @@ export function isStumm() { return stummEinstellung || stummLauf }
  * kommt je Station aus den Regeldaten.
  */
 let startSignalMs = 600
-let endSignalMs   = 600
+
+/**
+ * Stummschalter des iPhones: Web Audio gilt dort als Umgebungston und
+ * verstummt, sobald der Schalter auf lautlos steht. Als Wiedergabe
+ * eingestuft (Safari ab iOS 17) klingen die Signale trotzdem. Nebenwirkung:
+ * Musik aus anderen Apps pausiert, solange der Timer Ton abgibt.
+ */
+function alsWiedergabe() {
+  try {
+    const sitzung = globalThis.navigator?.audioSession
+    if (sitzung && sitzung.type !== 'playback') sitzung.type = 'playback'
+  } catch { /* ältere Browser kennen audioSession nicht */ }
+}
 
 function ensureContext() {
+  alsWiedergabe()
   if (ctx) return ctx
   const AC = window.AudioContext || window.webkitAudioContext
   if (!AC) return null
@@ -120,11 +133,6 @@ export function setStartSignalMs(ms) {
 }
 export function getStartSignalMs() { return startSignalMs }
 
-export function setEndSignalMs(ms) {
-  endSignalMs = Math.max(100, Math.min(3000, Math.round(ms)))
-}
-export function getEndSignalMs() { return endSignalMs }
-
 /** Startsignal der Station bzw. Phase. */
 export function playStartSignal() {
   return playTone({ freqHz: 880, durationMs: startSignalMs })
@@ -138,9 +146,13 @@ export function playStopSignal(durationMs = 2000) {
   return playTone({ freqHz: 880, durationMs })
 }
 
-/** Ende einer Übung ohne eigenes Stoppsignal. */
+/**
+ * Ende einer Übung ohne eigenes Stoppsignal. Klingt wie das Startsignal:
+ * Auf dem Stand soll jedes Signal gleich erkannt werden, ein tieferer
+ * zweiter Ton wirkte auf Tester wie ein Fehler.
+ */
 export function playEndSignal() {
-  return playTone({ freqHz: 660, durationMs: endSignalMs })
+  return playTone({ freqHz: 880, durationMs: startSignalMs })
 }
 
 /** Abschluss des gesamten Ablaufs: zwei Töne. */
