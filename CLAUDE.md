@@ -38,8 +38,8 @@ Claude. Sachlich, knapp, Du-Anrede, Deutsch.
 
 ## Befehle
 - npm ci | npm run dev | npm test | npm run lint | npm run build
-- Vorschau als Einzeldatei: npx vite build --config vite.preview.config.js
-  (Ausgabe dist-preview/)
+- Vorschau als Einzeldatei: npm run build:preview
+  (Ausgabe dist-preview/index.html, nicht im Repo)
 
 ## Aufbau
 - src/core: reine Logik ohne Vue (sequenceEngine, eppEngine, laufModus, ansage, audio,

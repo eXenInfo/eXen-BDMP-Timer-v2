@@ -27,3 +27,6 @@ ios
 
 # Tests
 coverage/
+
+# Einzeldatei-Vorschau, lokal mit npm run build:preview
+dist-preview

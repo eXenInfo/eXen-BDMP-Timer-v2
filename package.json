@@ -10,7 +10,8 @@
     "icons": "node scripts/generate-icons.js",
     "lint": "eslint src",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:preview": "vite build --config vite.preview.config.js"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
