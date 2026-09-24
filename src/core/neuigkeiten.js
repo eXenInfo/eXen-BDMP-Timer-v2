@@ -7,6 +7,7 @@
  *
  * Neuester Eintrag steht oben. `stand` ist das Veröffentlichungsdatum und
  * dient zugleich als Vergleichswert (ISO-Datum sortiert als Text richtig).
+ * Ein zweiter Stand am selben Tag bekommt eine Nummer: '2026-09-24.2'.
  * Die ausführliche Fassung steht in CHANGELOG.md im Repo.
  *
  * Der Speicher wird hereingereicht, damit sich das Modul ohne Browser testen lässt.
@@ -18,6 +19,21 @@ export const GESEHEN_SCHLUESSEL = 'exen_neu_gesehen'
 export const BESTAND_SCHLUESSEL = ['bdmp.bibliothek.v1', 'exen_signale', 'exen_laufmodus']
 
 export const NEUIGKEITEN = [
+  {
+    stand: '2026-09-24.2',
+    punkte: {
+      de: [
+        'Durchgänge nach Sportordnung: Nach jedem Durchgang hält der Timer an, bis die Aufsicht weitergibt (PP1 15 m, PP2 Station A, PP3, PP4 und Super Magnum auf den Intervall-Entfernungen).',
+        'PP3, PP4 und Super Magnum: Die erste Entfernung ist eine Serie von 100 Sekunden bzw. 2 Minuten für alle 10 Schuss einschließlich Nachladen.',
+        'Zeitkontrolle Schütze: Nach 90 Sekunden hält der Timer an, die 165 Sekunden starten erst auf Tipp.',
+      ],
+      en: [
+        'Runs as per the rule book: after each run the timer stops until the range officer continues (PP1 15 m, PP2 station A, PP3, PP4 and Super Magnum on the interval distances).',
+        'PP3, PP4 and Super Magnum: the first distance is one string of 100 seconds or 2 minutes for all 10 rounds including the reload.',
+        'Shooter time check: after 90 seconds the timer stops, the 165 seconds start only on tap.',
+      ],
+    },
+  },
   {
     stand: '2026-09-24',
     punkte: {

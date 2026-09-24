@@ -4,6 +4,30 @@
 timer.exenwerk.de erst nach dem Merge nach `main`. Die Kurzfassung für die App steht in
 `src/core/neuigkeiten.js` und erscheint nach einem Update einmal auf der Startseite.
 
+## 2026-09-24 (zweiter Stand)
+
+Durchgänge und Zeiten gegen die Sportordnung (Fassung 24.02.2026) geprüft, ausgelöst durch einen
+Tester-Hinweis zu PP1.
+
+### Behoben
+- **Halt nach jedem Durchgang.** „Dann erfolgt das Nachladen und ein erneuter Durchgang“
+  (C.6A.5, C.6C.5, C.6D.5, C.6E.5): Der Timer lief bisher ohne Halt in den nächsten Durchgang.
+  Jetzt wartet er, bis die Aufsicht die Kommandofolge neu gegeben hat.
+  - PP1 (A-B-OS), 15 m: nach dem 1. Durchgang (LAR und Sports Carbine waren schon richtig)
+  - PP2, Station A: zwischen den beiden Serien zu 6 Schuss in 5 Sekunden statt 10 s Pause
+  - PP3 und PP4, Intervall-Entfernungen: je zwei Durchgänge zu 5 bzw. 3 Intervallen
+  - Super Magnum, 15 m und 10 m: je zwei Durchgänge zu 5 Intervallen
+- **Erste Entfernung als eine Serie.** PP3 (20 m), PP4 (15 m) und Super Magnum (25 m):
+  „2 mal 5 Schüsse in 100 Sekunden (2 Minuten) einschließlich Nachladen“ ist eine Serie für alle
+  10 Schuss. Bisher liefen zwei Serien zu je 100 s bzw. 2 Minuten mit 10 s Pause.
+- **Zeitkontrolle Schütze:** Nach 90 s hält der Timer an, die 165 s starten erst auf Tipp.
+
+Geprüft und unverändert: NPA Service Pistol (alle Fassungen), BDMP 1020, BDMP 1500, DKS 1020,
+Sports Carbine PP2.
+
+Hinweis: Eigene Kopien des mitgelieferten Satzes (Sätze und Disziplinen) behalten ihren alten
+Ablauf. Der mitgelieferte Satz „BDMP Standard“ ist korrigiert.
+
 ## 2026-09-24
 
 Erste Rückmeldungen der Tester.
