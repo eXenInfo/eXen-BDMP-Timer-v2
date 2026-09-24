@@ -14,8 +14,10 @@ const props = defineProps({
   satz:      { type: Object, required: true },
   zuletzt:   { type: Object, default: null },
   favoriten: { type: Array,  default: () => [] },
+  /** Noch nicht gesehene Neuigkeiten: [{ stand, punkte: [Text] }], neueste zuerst. */
+  neuigkeiten: { type: Array, default: () => [] },
 })
-defineEmits(['waehlen', 'weiter', 'saetze', 'frei', 'signale', 'hilfe', 'starten', 'erstellen'])
+defineEmits(['verstanden', 'waehlen', 'weiter', 'saetze', 'frei', 'signale', 'hilfe', 'starten', 'erstellen'])
 const { t } = useI18n()
 
 const anzahl = computed(() => props.satz.disciplines.length)
@@ -28,6 +30,17 @@ const anzahl = computed(() => props.satz.disciplines.length)
       <h1>{{ APP_INFO.name.replace('eXen ', '') }}</h1>
       <p class="unter">{{ t('v3.start.untertitel') }}</p>
     </header>
+
+    <!-- Einmal nach einem Update: was sich geändert hat -->
+    <section v-if="neuigkeiten.length" class="neu" aria-labelledby="neu-titel" role="status">
+      <h2 id="neu-titel" class="neu-kopf">{{ t('v3.neu.titel') }}</h2>
+      <ul class="neu-liste">
+        <template v-for="e in neuigkeiten" :key="e.stand">
+          <li v-for="(p, i) in e.punkte" :key="e.stand + i">{{ p }}</li>
+        </template>
+      </ul>
+      <button class="k-zweit neu-ok" @click="$emit('verstanden')">{{ t('v3.neu.verstanden') }}</button>
+    </section>
 
     <button class="k-haupt" @click="$emit('waehlen')">
       {{ t('v3.start.disziplinWaehlen') }}
@@ -120,6 +133,15 @@ const anzahl = computed(() => props.satz.disciplines.length)
 .unter { margin: 0; color: var(--f-gedaempft); font-size: 0.95rem; line-height: 1.5; }
 .sprache { margin-top: 0.5rem; }
 .rubrik { margin: 0 0 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--f-gedaempft); }
+
+/* Neu in dieser Version */
+.neu {
+  background: var(--f-flaeche); border: 1px solid var(--f-gruen); border-radius: var(--r-gross);
+  padding: 0.85rem 0.9rem 0.9rem; display: flex; flex-direction: column; gap: 0.6rem;
+}
+.neu-kopf { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.neu-liste { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.9rem; line-height: 1.45; }
+.neu-ok { width: 100%; }
 
 /* Favoriten: eigener, klar umgrenzter Block */
 .favoriten {

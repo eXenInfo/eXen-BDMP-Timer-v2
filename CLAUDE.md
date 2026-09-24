@@ -27,14 +27,16 @@ Claude. Sachlich, knapp, Du-Anrede, Deutsch.
    gezielte Frage.
 2. Vollständig umsetzen, keine Minimal-MVPs. Zeitlogik nur mit Tests ändern; jede
    Korrektur an Zeiten bekommt einen Test, der den Fehler vorher zeigt.
-3. Vor jedem Commit: npm test, npm run lint (0 Fehler), npm run build. Scheitert einer,
+3. Merkt der Nutzer die Änderung, CHANGELOG.md (ausführlich) und src/core/neuigkeiten.js
+   (Kurzfassung für die Startseite, Deutsch und Englisch, neuer Eintrag oben) nachführen.
+4. Vor jedem Commit: npm test, npm run lint (0 Fehler), npm run build. Scheitert einer,
    nicht committen.
-4. Commit-Nachricht auf Deutsch im Stil der Historie (kurze Zeile, was sich für den
+5. Commit-Nachricht auf Deutsch im Stil der Historie (kurze Zeile, was sich für den
    Nutzer ändert). Autor laut Repo-Konfig: Thomas Köhler <thomas@exen.info>.
    Trailer Co-Authored-By für Claude.
-5. Vor jedem Push: git log origin/zeitkern-neu..HEAD --oneline und git diff --stat
+6. Vor jedem Push: git log origin/zeitkern-neu..HEAD --oneline und git diff --stat
    origin/zeitkern-neu zeigen und das Go von Thomas abwarten.
-6. Nach dem Push: Commit-Hash nennen.
+7. Nach dem Push: Commit-Hash nennen.
 
 ## Befehle
 - npm ci | npm run dev | npm test | npm run lint | npm run build

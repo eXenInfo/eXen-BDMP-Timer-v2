@@ -24,6 +24,7 @@ import { nominalDurationMs } from './core/legacyImport.js'
 import legacy from '../public/disziplinen.json'
 import { WEAPON_CLASSES, createDiscipline, enrichDiscipline } from './core/disciplineRules.js'
 import PWAUpdateToast from './components/ui/PWAUpdateToast.vue'
+import { offeneNeuigkeiten, neuigkeitenGesehen, punkteIn } from './core/neuigkeiten.js'
 
 const { t, locale } = useI18n()
 
@@ -33,6 +34,11 @@ const speicher = (() => {
 })()
 
 const bibliothek = createLibrary(speicher, legacy)
+
+/** „Neu in dieser Version“, einmal nach einem Update. */
+const neuOffen = ref(offeneNeuigkeiten(speicher))
+const neuigkeiten = computed(() => neuOffen.value.map(e => ({ stand: e.stand, punkte: punkteIn(e, locale.value) })))
+function neuVerstanden() { neuigkeitenGesehen(speicher); neuOffen.value = [] }
 const stand = ref(0)                                   // erzwingt Neuberechnung nach Änderungen
 const saetze = computed(() => (stand.value, bibliothek.sets()))
 const aktiverId = computed(() => (stand.value, bibliothek.activeSetId()))
@@ -133,7 +139,8 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
     <!-- Startseite -->
     <StartView
       v-if="schirm === 'start'"
-      :satz="aktiverSatz" :zuletzt="zuletztAnzeige" :favoriten="favoriten"
+      :satz="aktiverSatz" :zuletzt="zuletztAnzeige" :favoriten="favoriten" :neuigkeiten="neuigkeiten"
+      @verstanden="neuVerstanden"
       @waehlen="schirm = 'wahl'"
       @weiter="starte(zuletzt)"
       @starten="starte"

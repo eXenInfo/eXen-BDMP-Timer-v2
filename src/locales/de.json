@@ -622,6 +622,10 @@
       "verwerfen": "Verwerfen",
       "kopieAngelegt": "Gesichert. Deine Texte stehen in „Eigene Disziplinen“, dieser Satz ist jetzt in Benutzung.",
       "fehler": "Die Texte konnten nicht gesichert werden. Ist der Speicher des Browsers voll oder gesperrt?"
+    },
+    "neu": {
+      "titel": "Neu in dieser Version",
+      "verstanden": "Verstanden"
     }
   }
 }

@@ -622,6 +622,10 @@
       "verwerfen": "Discard",
       "kopieAngelegt": "Saved. Your texts are in “Eigene Disziplinen”, and that set is now in use.",
       "fehler": "The texts could not be saved. Is the browser storage full or blocked?"
+    },
+    "neu": {
+      "titel": "New in this version",
+      "verstanden": "Got it"
     }
   }
 }
