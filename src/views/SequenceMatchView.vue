@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createSequenceEngine, SeqState, SeqEvent } from '../core/sequenceEngine.js'
 import { buildAnnouncement } from '../core/ansage.js'
-import { phasenFuerSchuetzenuhr, phasenMitVorlauf, vorlaufMs, neutraleAnzeige } from '../core/laufModus.js'
+import { phasenFuerSchuetzenuhr, phasenMitVorlauf, vorlaufMs, neutraleAnzeige, hatSchuetzenuhr } from '../core/laufModus.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import { useLaufModus } from '../composables/useLaufModus.js'
 import { useWachHalten } from '../composables/useWachHalten.js'
@@ -32,7 +32,10 @@ const props = defineProps({
 defineEmits(['texte'])
 
 const { modus, setzen: modusSetzen, tonAnwenden, tonFreigeben, stummEingestellt: stummLesen, vorlaufEingestellt } = useLaufModus()
-const effektiv = computed(() => props.modusFest ?? modus.value)
+/** Ohne lange Serie gibt es keine Schützenuhr, dann läuft immer die Aufsicht. */
+const schuetzenuhrMoeglich = computed(() => hatSchuetzenuhr(props.disziplin))
+const effektiv = computed(() => props.modusFest ??
+  (modus.value === 'schuetzenuhr' && !schuetzenuhrMoeglich.value ? 'aufsicht' : modus.value))
 const schuetzenuhr = computed(() => effektiv.value === 'schuetzenuhr')
 const neutral = computed(() => neutraleAnzeige(effektiv.value))
 useWachHalten()
@@ -45,9 +48,14 @@ const uhrVorlaufS = computed(() => vorlaufMs(0, vorlaufS.value, 'schuetzenuhr') 
 
 const hinweiseOffen = ref(false)
 const name   = computed(() => props.disziplin.name)
-/** Im Modus Schützenuhr: jede Serie einzeln, Start per Tipp. Vorlauf laut Einstellung. */
+/**
+ * Im Modus Schützenuhr: nur die langen Serien, jede einzeln, Start per Tipp.
+ * Freie Zeit und EPP-Gesamtzeit haben genau eine selbst gewählte Serie.
+ * Vorlauf laut Einstellung.
+ */
 const phases = computed(() => schuetzenuhr.value
-  ? phasenFuerSchuetzenuhr(props.disziplin.phases, vorlaufS.value)
+  ? phasenFuerSchuetzenuhr(props.disziplin.phases, vorlaufS.value,
+      { alle: !!(props.disziplin.freieZeit || props.disziplin.eppGesamtzeit) })
   : phasenMitVorlauf(props.disziplin.phases, vorlaufS.value))
 const befehle = computed(() => props.disziplin.commandSet ?? null)
 
@@ -124,7 +132,7 @@ const laeuft = computed(() =>
   [SeqState.PREP, SeqState.RUNNING, SeqState.REP_PAUSE].includes(zustand.value))
 
 /** Die Betriebsart lässt sich nur vor dem Lauf und nach dem Ende wechseln. */
-const modusWaehlbar = computed(() => !props.modusFest &&
+const modusWaehlbar = computed(() => !props.modusFest && schuetzenuhrMoeglich.value &&
   [SeqState.IDLE, SeqState.FINISHED].includes(zustand.value))
 
 const hauptaktion = computed(() => {
@@ -213,7 +221,8 @@ const wiederholungen = computed(() => {
       </div>
     </header>
 
-    <ModusWahl v-if="modusWaehlbar" :modus="effektiv" :stumm="stummEingestellt" :vorlauf-s="uhrVorlaufS" @wahl="modusSetzen" />
+    <ModusWahl v-if="modusWaehlbar" :modus="effektiv" :stumm="stummEingestellt" :vorlauf-s="uhrVorlaufS"
+      :epp="!!disziplin.eppGesamtzeit" @wahl="modusSetzen" />
 
     <main class="mitte-block">
       <p class="phase-zeile">

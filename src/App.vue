@@ -15,7 +15,8 @@ import LibraryView from './views/LibraryView.vue'
 import EditorView from './views/EditorView.vue'
 import RoTexteView from './views/RoTexteView.vue'
 import FreieZeitView from './views/FreieZeitView.vue'
-import { freieZeitDisziplin } from './core/laufModus.js'
+import { freieZeitDisziplin, eppGesamtzeitDisziplin } from './core/laufModus.js'
+import { useLaufModus } from './composables/useLaufModus.js'
 import { createLibrary } from './core/library.js'
 import { lokalisiereDisziplin } from './core/lokalisierung.js'
 import { uebersetze } from './core/textEn.js'
@@ -68,6 +69,12 @@ const favoriten = computed(() => (stand.value, bibliothek.favoritenDisziplinen()
 const zuletztAnzeige = computed(() => zuletzt.value
   ? { ...zuletzt.value, name: uebersetze(zuletzt.value.name, locale.value) } : null)
 const meldung = ref(null)
+
+/** EPP in der Schützenuhr: nur die Gesamtzeit, als eine einzige Serie. */
+const { modus: laufModus } = useLaufModus()
+const eppAlsSchuetzenuhr = computed(() => gewaehlt.value?.kind === 'epp' && laufModus.value === 'schuetzenuhr')
+const eppGesamtzeit = computed(() => eppAlsSchuetzenuhr.value
+  ? eppGesamtzeitDisziplin(gewaehltLokal.value, t('v3.modus.eppGesamtzeit')) : null)
 
 function favoritUmschalten(d) {
   if (!bibliothek.favoritUmschalten(d.id)) meldung.value = t('v3.wahl.favoritenVoll')
@@ -215,8 +222,10 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
         <button class="k-nav" @click="laufVerlassen">{{ laufFest ? t('v3.frei.andereZeit') : t('v3.wahl.andereDisziplin') }}</button>
         <p v-if="meldung" class="meldung lauf-meldung">{{ meldung }}</p>
       </div>
+      <SequenceMatchView
+        v-if="eppAlsSchuetzenuhr" :disziplin="eppGesamtzeit" :bearbeitbar="false" />
       <EppMatchView
-        v-if="gewaehlt.kind === 'epp'"
+        v-else-if="gewaehlt.kind === 'epp'"
         :start-index="laufIndex"
         @texte="texteOeffnen"
         :phases="gewaehltLokal.phases"

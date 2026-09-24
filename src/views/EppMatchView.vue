@@ -13,7 +13,7 @@ import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_GENERAL_NOTES, EPP_VARIANTEN } from 
 import { buildEppAnnouncement } from '../core/ansage.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
-import { neutraleAnzeige, vorlaufMs } from '../core/laufModus.js'
+import { vorlaufMs } from '../core/laufModus.js'
 import { useLaufModus } from '../composables/useLaufModus.js'
 import { useWachHalten } from '../composables/useWachHalten.js'
 import ModusWahl from '../components/ModusWahl.vue'
@@ -32,14 +32,11 @@ const props = defineProps({
 defineEmits(['texte'])
 
 const { modus, setzen: modusSetzen, tonAnwenden, tonFreigeben, stummEingestellt: stummLesen, vorlaufEingestellt } = useLaufModus()
-const schuetzenuhr = computed(() => modus.value === 'schuetzenuhr')
-const neutral = computed(() => neutraleAnzeige(modus.value))
 useWachHalten()
 /** Ob der Ton unter „Signale und Lautstärke“ ausgeschaltet ist (vor dem Lauf gelesen). */
 const stummEingestellt = ref(stummLesen())
 /** Vorlauf aus „Signale und Lautstärke“, `null` heißt „wie Disziplin“ (vor dem Lauf gelesen). */
 const vorlaufS = ref(vorlaufEingestellt())
-const uhrVorlaufS = computed(() => vorlaufMs(0, vorlaufS.value, 'schuetzenuhr') / 1000)
 
 const signalLaeuft = ref(false)
 const hinweiseOffen = ref(false)
@@ -60,11 +57,11 @@ const clock = useEngineClock({
 })
 
 function neuAufsetzen() {
-  // Vorlauf laut Einstellung; ohne Einstellung hat die Schützenuhr keinen,
-  // die Zeit beginnt dann mit dem Tipp beim Startsignal.
+  // Vorlauf laut Einstellung, sonst der der Disziplin. Die Schützenuhr des
+  // EPP ist eine eigene Ansicht (nur Gesamtzeit), siehe App.vue.
   clock.setEngine(createEppEngine({
     phases: props.phases, totalTimeMs: props.totalTimeMs,
-    prepMs: vorlaufMs(props.prepMs, vorlaufS.value, modus.value),
+    prepMs: vorlaufMs(props.prepMs, vorlaufS.value, 'aufsicht'),
   }))
 }
 onMounted(() => {
@@ -117,17 +114,11 @@ const laeuft   = computed(() => istOffen.value || istFest.value)
 const modusWaehlbar = computed(() =>
   [EppState.IDLE, EppState.FINISHED, EppState.EXCLUDED].includes(zustand.value) && (s.value?.stationIndex ?? 0) === 0)
 
-/** Genau eine Hauptaktion je Zustand. In der Schützenuhr alle gleich neutral. */
-const hauptaktion = computed(() => {
-  const a = hauptaktionRoh()
-  return a && schuetzenuhr.value ? { ...a, klasse: 'neutral' } : a
-})
+/** Genau eine Hauptaktion je Zustand. */
+const hauptaktion = computed(() => hauptaktionRoh())
 function hauptaktionRoh() {
   switch (zustand.value) {
     case EppState.IDLE:
-      if (schuetzenuhr.value) return {
-        text: uhrVorlaufS.value > 0 ? t('v3.modus.startBeiAchtung') : t('v3.modus.startBeimSignal'),
-        unter: phase.value?.station ?? '', fn: starten }
       return { text: t('v3.epp.stationStarten', { station: phase.value?.station ?? t('v3.epp.station') }),
                unter: t('v3.epp.startsignalAusloesen'), fn: starten, klasse: 'gruen' }
     case EppState.RUNNING_OPEN:
@@ -170,7 +161,7 @@ const restknapp  = computed(() => {
 </script>
 
 <template>
-  <div class="schirm" :class="neutral ? 'neutral' : { signal: signalLaeuft, gesperrt: zustand === 'excluded' }">
+  <div class="schirm" :class="{ signal: signalLaeuft, gesperrt: zustand === 'excluded' }">
 
     <!-- Kopfzeile: dauerhaft sichtbare, wertungsrelevante Werte -->
     <header class="kopf">
@@ -191,10 +182,10 @@ const restknapp  = computed(() => {
       </div>
     </header>
 
-    <ModusWahl v-if="modusWaehlbar" :modus="modus" :stumm="stummEingestellt" :vorlauf-s="uhrVorlaufS" @wahl="modusSetzen" />
+    <ModusWahl v-if="modusWaehlbar" :modus="modus" :stumm="stummEingestellt" epp @wahl="modusSetzen" />
 
     <!-- Restzeitansage vor Station 6, C.17.8 -->
-    <div v-if="!schuetzenuhr && phase?.announceRemainingBeforeStart && zustand === 'idle'" class="ansage">
+    <div v-if="phase?.announceRemainingBeforeStart && zustand === 'idle'" class="ansage">
       <span class="ansage-marke">{{ t('v3.epp.ansagen') }}</span>
       <strong class="ansage-wert">{{ t('v3.epp.restzeit') }} {{ mmss(s?.totalRemainingMs) }}</strong>
     </div>
@@ -219,19 +210,19 @@ const restknapp  = computed(() => {
     </main>
 
     <!-- Ablauf zum Vorlesen — steht vor den Kommandos -->
-    <section v-if="!schuetzenuhr && ansage && zustand === 'idle'" class="ansage-block">
+    <section v-if="ansage && zustand === 'idle'" class="ansage-block">
       <p class="ansage-marke2">{{ t('v3.epp.ansage') }}<span class="ansage-unter">{{ t('v3.epp.ansageUnter') }}</span></p>
       <p v-if="ansage.fuehrung" class="ansage-fuehrung">{{ ansage.fuehrung }}</p>
       <p class="ansage-zeile2">{{ ansage.detail }}</p>
     </section>
 
     <!-- RO-Kommandos der laufenden Station -->
-    <section v-if="!schuetzenuhr && phase?.roCommands?.length && zustand === 'idle'" class="kommandos">
+    <section v-if="phase?.roCommands?.length && zustand === 'idle'" class="kommandos">
       <p v-for="(k, i) in phase.roCommands" :key="i" class="kommando">„{{ k }}“</p>
     </section>
 
     <!-- RO-Texte ändern -->
-    <div v-if="bearbeitbar && !schuetzenuhr && zustand === 'idle'" class="k-liste">
+    <div v-if="bearbeitbar && zustand === 'idle'" class="k-liste">
       <button class="k-menue" @click="$emit('texte', s?.stationIndex ?? 0)">
         <span class="k-menue-text">{{ t('v3.ro.bearbeiten') }}
           <span class="k-unter">{{ t('v3.ro.bearbeitenUnter') }}</span></span>
@@ -240,7 +231,7 @@ const restknapp  = computed(() => {
     </div>
 
     <!-- Ablauf und Hinweise -->
-    <section v-if="!schuetzenuhr && phase && (phase.notes?.length || phase.afterStation?.length)" class="hinweise">
+    <section v-if="phase && (phase.notes?.length || phase.afterStation?.length)" class="hinweise">
       <button class="k-aufklapp" :aria-expanded="hinweiseOffen" @click="hinweiseOffen = !hinweiseOffen">
         <span class="k-aufklapp-text">
           {{ hinweiseOffen ? t('v3.epp.hinweiseVerbergen') : t('v3.epp.hinweiseZeigen') }}
@@ -390,14 +381,6 @@ const restknapp  = computed(() => {
 .station-knopf { flex: 1; min-height: 2.75rem; background: var(--flaeche); color: var(--gedaempft); border: 1px solid var(--rand); border-radius: 0.6rem; font-size: 0.85rem; cursor: pointer; }
 .station-knopf.aktiv { background: var(--akzent); color: #1a1205; border-color: var(--akzent); font-weight: 700; }
 .station-knopf.erledigt { color: var(--gruen); border-color: #1f4030; }
-
-/* Schützenuhr: keine Farbwechsel, weder am Grund noch an Zahlen und Knöpfen. */
-.schirm.neutral { --akzent: var(--text); --gruen: var(--gedaempft); --rot: var(--text); transition: none; }
-.neutral .uhr.gross, .neutral .kopf-wert.knapp { color: var(--text); }
-.haupt.neutral { background: var(--flaeche); color: var(--text); border: 2px solid var(--gedaempft); }
-.neutral .klein.warn { border-color: var(--rand); color: var(--text); }
-.neutral .station-knopf.aktiv { background: var(--text); color: var(--grund); border-color: var(--text); }
-.neutral .station-knopf.erledigt { color: var(--gedaempft); border-color: var(--rand); }
 
 @media (min-width: 40rem) {
   .uhr { font-size: clamp(6rem, 18vw, 11rem); }
