@@ -12,6 +12,8 @@ defineProps({
   stumm: { type: Boolean, default: false },
   /** Vorlauf der Schützenuhr in Sekunden, 0 heißt Tipp beim Startsignal. */
   vorlaufS: { type: Number, default: 0 },
+  /** EPP: Die Schützenuhr zeigt nur die Gesamtzeit. */
+  epp: { type: Boolean, default: false },
 })
 defineEmits(['wahl'])
 const { t } = useI18n()
@@ -30,6 +32,7 @@ const { t } = useI18n()
     </div>
     <p class="modus-text">{{ modus === 'schuetzenuhr' && vorlaufS > 0
       ? t('v3.modus.schuetzenuhrTextVorlauf', { s: vorlaufS }) : t('v3.modus.' + modus + 'Text') }}</p>
+    <p v-if="modus === 'schuetzenuhr'" class="modus-text">{{ epp ? t('v3.modus.schuetzenuhrEpp') : t('v3.modus.schuetzenuhrLang') }}</p>
     <p v-if="stumm && modus === 'aufsicht'" class="modus-text stumm">{{ t('v3.modus.stummHinweis') }}</p>
   </div>
 </template>

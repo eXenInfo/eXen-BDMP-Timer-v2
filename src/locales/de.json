@@ -530,7 +530,7 @@
       "installIosT": "Unten auf „Teilen“ tippen, dann „Zum Home-Bildschirm“ wählen.",
       "installOffline": "Installiert startet der Timer wie eine App und funktioniert auch ohne Netz am Stand.",
       "b7": "Stumm und Schützenuhr",
-      "b7t": "Unter „Signale und Lautstärke“ lässt sich der Ton ganz ausschalten, etwa im Training, und der Vorlauf für alle Disziplinen einstellen (wie Disziplin oder 0 bis 7 s). Über jedem Lauf steht außerdem die Betriebsart: „Aufsicht“ führt den Ablauf mit Vorlauf und Signalen, „Schützenuhr“ ist für den Schützen im Wettkampf: kein Ton, keine Farbwechsel. Ohne eingestellten Vorlauf wird beim Startsignal der Aufsicht getippt, mit Vorlauf beim Kommando „Achtung“. Für jede andere Zeit gibt es auf der Startseite die Schützenuhr mit freier Zeit.",
+      "b7t": "Unter „Signale und Lautstärke“ lässt sich der Ton ganz ausschalten, etwa im Training, und der Vorlauf für alle Disziplinen einstellen (wie Disziplin oder 0 bis 7 s). Über jedem Lauf steht außerdem die Betriebsart: „Aufsicht“ führt den Ablauf mit Vorlauf und Signalen, „Schützenuhr“ ist für den Schützen im Wettkampf: kein Ton, keine Farbwechsel, nur Serien ab 60 Sekunden, beim EPP nur die Gesamtzeit. Disziplinen ohne solche Serie haben keine Schützenuhr. Ohne eingestellten Vorlauf wird beim Startsignal der Aufsicht getippt, mit Vorlauf beim Kommando „Achtung“. Für jede andere Zeit gibt es auf der Startseite die Schützenuhr mit freier Zeit.",
       "b8": "RO-Texte ändern",
       "b8t": "Im Lauf vor dem Start „RO-Texte bearbeiten“ antippen. Dort lassen sich die Ansage, die Kommandos je Phase und die Kommandofolge ändern und auf die Sportordnung zurücksetzen."
     },
@@ -565,7 +565,10 @@
       "startBeimSignal": "Start beim Signal",
       "stummHinweis": "Ton ist ausgeschaltet. Einschalten unter „Signale und Lautstärke“.",
       "startBeiAchtung": "Start bei „Achtung“",
-      "schuetzenuhrTextVorlauf": "Zum Mitlaufen im Wettkampf: kein Ton, kein Farbwechsel. Beim Kommando „Achtung“ tippen, nach {s} s Vorlauf läuft die Zeit. Jede Serie wartet auf diesen Tipp."
+      "schuetzenuhrTextVorlauf": "Zum Mitlaufen im Wettkampf: kein Ton, kein Farbwechsel. Beim Kommando „Achtung“ tippen, nach {s} s Vorlauf läuft die Zeit. Jede Serie wartet auf diesen Tipp.",
+      "schuetzenuhrLang": "Nur Serien ab 60 Sekunden. Kurze Intervalle regelt die Drehscheibe, sie erscheinen hier nicht.",
+      "schuetzenuhrEpp": "Beim EPP läuft nur die Gesamtzeit von 5:30. Tippen beim ersten Startsignal.",
+      "eppGesamtzeit": "Gesamtzeit"
     },
     "frei": {
       "titel": "Schützenuhr mit freier Zeit",

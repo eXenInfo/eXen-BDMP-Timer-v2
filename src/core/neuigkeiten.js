@@ -20,6 +20,21 @@ export const BESTAND_SCHLUESSEL = ['bdmp.bibliothek.v1', 'exen_signale', 'exen_l
 
 export const NEUIGKEITEN = [
   {
+    stand: '2026-09-24.3',
+    punkte: {
+      de: [
+        'Schützenuhr nur noch für lange Serien ab 60 Sekunden, etwa PP1 auf 25 m. Kurze Intervalle regelt die Drehscheibe, sie erscheinen dort nicht mehr.',
+        'Disziplinen ohne lange Serie, etwa die NPA, haben keine Schützenuhr mehr.',
+        'EPP: Die Schützenuhr zeigt nur noch die Gesamtzeit von 5:30.',
+      ],
+      en: [
+        'Shooter clock only for long strings of 60 seconds or more, such as PP1 at 25 m. Short intervals are run by the turning targets and no longer appear there.',
+        'Disciplines without a long string, such as NPA, no longer have a shooter clock.',
+        'EPP: the shooter clock now shows only the total time of 5:30.',
+      ],
+    },
+  },
+  {
     stand: '2026-09-24.2',
     punkte: {
       de: [

@@ -4,8 +4,10 @@
  *   aufsicht      Der Timer führt den Ablauf mit Vorlauf und Signalen.
  *                 Ob dabei Töne erklingen, regelt der Schalter „Stumm“
  *                 unter „Signale und Lautstärke“ (signalEinstellungen.js).
- *   schuetzenuhr  Uhr für den Schützen, die im Wettkampf mitläuft. Kein Ton,
- *                 kein Farbwechsel. Ohne Vorlauf tippt der Schütze beim
+ *   schuetzenuhr  Uhr für den Schützen, die im Wettkampf mitläuft, nur für
+ *                 lange Serien (ab 60 s). Kurze Intervalle regelt auf dem Stand
+ *                 die Drehscheibe, dafür schaut niemand auf eine Uhr. Beim EPP
+ *                 läuft nur die Gesamtzeit. Kein Ton, kein Farbwechsel. Ohne Vorlauf tippt der Schütze beim
  *                 Startsignal der Aufsicht; mit eingestelltem Vorlauf schon
  *                 beim Kommando „Achtung“. Jede Serie wartet auf diesen Tipp,
  *                 so bleibt die Uhr nie vor oder hinter dem Stand.
@@ -53,6 +55,45 @@ export function vorlaufMs(phasenMs, vorlaufS, modus = MODUS_STANDARD) {
 }
 
 const phasenVorlauf = (p) => p.prepMs ?? (p.prepTime ?? 0) * 1000
+const phasenDauer = (p) => p.durationMs ?? (p.duration ?? 0) * 1000
+
+/** Kürzeste Serie, für die die Schützenuhr angeboten wird. */
+export const SCHUETZENUHR_MIN_MS = 60_000
+
+/** Nur die langen Serien, für die ein Schütze mitlaufen lässt. */
+export function langeSerien(phasen) {
+  return (phasen ?? []).filter(p => phasenDauer(p) >= SCHUETZENUHR_MIN_MS)
+}
+
+/**
+ * Ob die Schützenuhr für diese Disziplin angeboten wird: beim EPP immer
+ * (Gesamtzeit), bei der freien Zeit immer, sonst nur mit mindestens einer
+ * langen Serie.
+ */
+export function hatSchuetzenuhr(disziplin) {
+  if (!disziplin) return false
+  if (disziplin.kind === 'epp' || disziplin.freieZeit || disziplin.eppGesamtzeit) return true
+  return langeSerien(disziplin.phases).length > 0
+}
+
+/**
+ * Schützenuhr beim EPP: eine einzige Serie über die Gesamtzeit (C.17, 5:30).
+ * Getippt wird beim ersten Startsignal, die Stationen zählen nicht einzeln.
+ */
+export function eppGesamtzeitDisziplin(epp, phasenName) {
+  const ms = epp?.totalTimeMs ?? 330_000
+  return {
+    id: `${epp?.id ?? 'epp'}-gesamtzeit`,
+    name: epp?.name ?? 'EPP',
+    kind: 'sequence',
+    eppGesamtzeit: true,
+    phases: [{
+      name: phasenName ?? 'Gesamtzeit', description: '', roCommands: [],
+      prepMs: 0, durationMs: ms, repetitions: 1, repPauseMs: 0,
+      soundAtStart: false, soundAtEnd: false, waitAfter: false,
+    }],
+  }
+}
 
 /** Phasen für die Aufsicht mit dem eingestellten Vorlauf. Ohne Einstellung unverändert. */
 export function phasenMitVorlauf(phasen, vorlaufS) {
@@ -64,14 +105,16 @@ export function phasenMitVorlauf(phasen, vorlaufS) {
 /**
  * Phasen für die Schützenuhr.
  *
- * Jede Wiederholung wird eine eigene Serie, jede Serie startet erst auf Tipp,
+ * Nur lange Serien (langeSerien), außer bei freier Zeit und EPP-Gesamtzeit,
+ * die genau eine selbst gewählte Serie haben. Jede Wiederholung wird eine
+ * eigene Serie, jede Serie startet erst auf Tipp,
  * danach mit dem eingestellten Vorlauf (siehe vorlaufMs). Pausen zwischen
  * Durchgängen entfallen, weil sie auf dem Stand die Aufsicht bestimmt, nicht
  * die Uhr.
  */
-export function phasenFuerSchuetzenuhr(phasen, vorlaufS = null) {
+export function phasenFuerSchuetzenuhr(phasen, vorlaufS = null, { alle = false } = {}) {
   const raus = []
-  for (const p of phasen ?? []) {
+  for (const p of alle ? (phasen ?? []) : langeSerien(phasen)) {
     const n = Math.max(1, Math.round(p.repetitions ?? 1))
     const prepMs = vorlaufMs(phasenVorlauf(p), vorlaufS, 'schuetzenuhr')
     for (let i = 1; i <= n; i++) {

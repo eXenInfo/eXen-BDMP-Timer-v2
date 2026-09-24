@@ -4,6 +4,17 @@
 timer.exenwerk.de erst nach dem Merge nach `main`. Die Kurzfassung für die App steht in
 `src/core/neuigkeiten.js` und erscheint nach einem Update einmal auf der Startseite.
 
+## 2026-09-24 (dritter Stand)
+
+### Geändert
+- **Schützenuhr nur für lange Serien.** Sie zeigt nur noch Serien ab 60 Sekunden, zum Beispiel
+  PP1, PP3, PP4 und Super Magnum auf der ersten Entfernung, PP2 Station B und C, 1020 und 1500
+  mit 90 und 165 Sekunden. Kurze Intervalle regelt auf dem Stand die Drehscheibe.
+- **Keine Schützenuhr ohne lange Serie.** Bei Disziplinen wie der NPA gibt es nur „Aufsicht“.
+- **EPP: nur Gesamtzeit.** Die Schützenuhr beim EPP ist eine einzige Serie über 5:30, getippt
+  beim ersten Startsignal.
+- Die Schützenuhr mit freier Zeit bleibt unverändert, auch unter 60 Sekunden.
+
 ## 2026-09-24 (zweiter Stand)
 
 Durchgänge und Zeiten gegen die Sportordnung (Fassung 24.02.2026) geprüft, ausgelöst durch einen
