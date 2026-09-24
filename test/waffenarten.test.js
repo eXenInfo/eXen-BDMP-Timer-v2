@@ -57,8 +57,8 @@ describe('Eigener Satz, wenn die Zeiten abweichen', () => {
 
     const kw = hole('Police Pistol 2 (PP2)').phases
     expect(kw[0].durationMs).toBe(5_000)
-    expect(kw[1].durationMs).toBe(180_000)
-    expect(kw[2].durationMs).toBe(120_000)
+    expect(kw[2].durationMs).toBe(180_000)
+    expect(kw[3].durationMs).toBe(120_000)
   })
 
   it('der Grund für den eigenen Satz steht in den Hinweisen', () => {

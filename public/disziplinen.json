@@ -1,11 +1,21 @@
 {
   "Police Pistol 2 (PP2)": [
     {
-      "name": "Station A: 10m\n2x 6 Schuss in 5 Sekunden",
+      "name": "Station A: 10m (1. Durchgang)\n6 Schuss in 5 Sekunden",
       "prepTime": 5,
       "duration": 5,
-      "repetitions": 2,
-      "pauseDuration": 10,
+      "repetitions": 1,
+      "pauseDuration": 0,
+      "soundAtStart": true,
+      "soundAtEnd": true,
+      "pauseAfter": true
+    },
+    {
+      "name": "Station A: 10m (2. Durchgang)\n6 Schuss in 5 Sekunden",
+      "prepTime": 5,
+      "duration": 5,
+      "repetitions": 1,
+      "pauseDuration": 0,
       "soundAtStart": true,
       "soundAtEnd": true,
       "pauseAfter": true
@@ -36,27 +46,47 @@
       "name": "Stage 1: 20m\n2x 5 Schuss in 100 Sekunden",
       "prepTime": 5,
       "duration": 100,
-      "repetitions": 2,
-      "pauseDuration": 10,
+      "repetitions": 1,
+      "pauseDuration": 0,
       "soundAtStart": true,
       "soundAtEnd": true,
       "pauseAfter": true
     },
     {
-      "name": "Stage 2: 15m\n2x (5x 1 Schuss in 2s)",
+      "name": "Stage 2: 15m (1. Durchgang)\n5x 1 Schuss in 2s",
       "prepTime": 5,
       "duration": 2,
-      "repetitions": 10,
+      "repetitions": 5,
       "pauseDuration": 5,
       "soundAtStart": true,
       "soundAtEnd": true,
       "pauseAfter": true
     },
     {
-      "name": "Stage 3: 10m\n2x (max. 2-2-1 Schuss in 3x 2s)",
+      "name": "Stage 2: 15m (2. Durchgang)\n5x 1 Schuss in 2s",
       "prepTime": 5,
       "duration": 2,
-      "repetitions": 6,
+      "repetitions": 5,
+      "pauseDuration": 5,
+      "soundAtStart": true,
+      "soundAtEnd": true,
+      "pauseAfter": true
+    },
+    {
+      "name": "Stage 3: 10m (1. Durchgang)\nmax. 2-2-1 Schuss in 3x 2s",
+      "prepTime": 5,
+      "duration": 2,
+      "repetitions": 3,
+      "pauseDuration": 5,
+      "soundAtStart": true,
+      "soundAtEnd": true,
+      "pauseAfter": true
+    },
+    {
+      "name": "Stage 3: 10m (2. Durchgang)\nmax. 2-2-1 Schuss in 3x 2s",
+      "prepTime": 5,
+      "duration": 2,
+      "repetitions": 3,
       "pauseDuration": 5,
       "soundAtStart": true,
       "soundAtEnd": true,
@@ -68,27 +98,47 @@
       "name": "Stage 1: 15m\n2x 5 Schuss in 100 Sekunden",
       "prepTime": 5,
       "duration": 100,
-      "repetitions": 2,
-      "pauseDuration": 10,
+      "repetitions": 1,
+      "pauseDuration": 0,
       "soundAtStart": true,
       "soundAtEnd": true,
       "pauseAfter": true
     },
     {
-      "name": "Stage 2: 10m\n2x (5x 1 Schuss in 2s)",
+      "name": "Stage 2: 10m (1. Durchgang)\n5x 1 Schuss in 2s",
       "prepTime": 5,
       "duration": 2,
-      "repetitions": 10,
+      "repetitions": 5,
       "pauseDuration": 5,
       "soundAtStart": true,
       "soundAtEnd": true,
       "pauseAfter": true
     },
     {
-      "name": "Stage 3: 7m\n2x (max. 2-2-1 Schuss in 3x 2s)",
+      "name": "Stage 2: 10m (2. Durchgang)\n5x 1 Schuss in 2s",
       "prepTime": 5,
       "duration": 2,
-      "repetitions": 6,
+      "repetitions": 5,
+      "pauseDuration": 5,
+      "soundAtStart": true,
+      "soundAtEnd": true,
+      "pauseAfter": true
+    },
+    {
+      "name": "Stage 3: 7m (1. Durchgang)\nmax. 2-2-1 Schuss in 3x 2s",
+      "prepTime": 5,
+      "duration": 2,
+      "repetitions": 3,
+      "pauseDuration": 5,
+      "soundAtStart": true,
+      "soundAtEnd": true,
+      "pauseAfter": true
+    },
+    {
+      "name": "Stage 3: 7m (2. Durchgang)\nmax. 2-2-1 Schuss in 3x 2s",
+      "prepTime": 5,
+      "duration": 2,
+      "repetitions": 3,
       "pauseDuration": 5,
       "soundAtStart": true,
       "soundAtEnd": true,
@@ -280,7 +330,7 @@
       "pauseDuration": 5,
       "soundAtStart": true,
       "soundAtEnd": true,
-      "pauseAfter": false
+      "pauseAfter": true
     },
     {
       "name": "Stage 2: 15m (2. Durchgang)\n6x 1 Schuss in 2 Sekunden.\nWaffen laden und fertig machen.\nIst jemand nicht fertig? - ACHTUNG!",
@@ -308,27 +358,47 @@
       "name": "Stage 1: 25m\n2x 5 Schuss in 120 Sekunden",
       "prepTime": 5,
       "duration": 120,
-      "repetitions": 2,
-      "pauseDuration": 10,
+      "repetitions": 1,
+      "pauseDuration": 0,
       "soundAtStart": true,
       "soundAtEnd": true,
       "pauseAfter": true
     },
     {
-      "name": "Stage 2: 15m\n2x (5x 1 Schuss in 3s)",
+      "name": "Stage 2: 15m (1. Durchgang)\n5x 1 Schuss in 3s",
       "prepTime": 5,
       "duration": 3,
-      "repetitions": 10,
+      "repetitions": 5,
       "pauseDuration": 5,
       "soundAtStart": true,
       "soundAtEnd": true,
       "pauseAfter": true
     },
     {
-      "name": "Stage 3: 10m\n2x (5x 1 Schuss in 2s)",
+      "name": "Stage 2: 15m (2. Durchgang)\n5x 1 Schuss in 3s",
+      "prepTime": 5,
+      "duration": 3,
+      "repetitions": 5,
+      "pauseDuration": 5,
+      "soundAtStart": true,
+      "soundAtEnd": true,
+      "pauseAfter": true
+    },
+    {
+      "name": "Stage 3: 10m (1. Durchgang)\n5x 1 Schuss in 2s",
       "prepTime": 5,
       "duration": 2,
-      "repetitions": 10,
+      "repetitions": 5,
+      "pauseDuration": 5,
+      "soundAtStart": true,
+      "soundAtEnd": true,
+      "pauseAfter": true
+    },
+    {
+      "name": "Stage 3: 10m (2. Durchgang)\n5x 1 Schuss in 2s",
+      "prepTime": 5,
+      "duration": 2,
+      "repetitions": 5,
       "pauseDuration": 5,
       "soundAtStart": true,
       "soundAtEnd": true,
@@ -344,7 +414,7 @@
       "pauseDuration": 0,
       "soundAtStart": false,
       "soundAtEnd": false,
-      "pauseAfter": false
+      "pauseAfter": true
     },
     {
       "name": "165 Sekunden",
