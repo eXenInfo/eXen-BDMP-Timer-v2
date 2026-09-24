@@ -27,5 +27,7 @@ export function useLaufModus() {
   function tonFreigeben() { audio.setStumm(false) }
   /** Ob der Ton unter „Signale und Lautstärke“ ausgeschaltet ist. */
   const stummEingestellt = () => ladeSignale(geraeteSpeicher()).stumm
-  return { modus, setzen, tonAnwenden, tonFreigeben, stummEingestellt }
+  /** Eingestellter Vorlauf in Sekunden, `null` heißt „wie Disziplin“. */
+  const vorlaufEingestellt = () => ladeSignale(geraeteSpeicher()).vorlaufS
+  return { modus, setzen, tonAnwenden, tonFreigeben, stummEingestellt, vorlaufEingestellt }
 }

@@ -1,5 +1,5 @@
 /**
- * Stumm, Lautstärke und Länge des Startsignals, gespeichert je Gerät.
+ * Stumm, Lautstärke, Länge des Startsignals und Vorlauf, gespeichert je Gerät.
  *
  * Die Werte werden beim App-Start geladen und an die Signalausgabe
  * übergeben. Der Speicher wird hereingereicht (wie bei library.js), damit
@@ -17,6 +17,20 @@ export const LAUTSTAERKE_MAX = 100
 export const LAUTSTAERKE_STANDARD = 80
 export const START_STANDARD_MS = 600
 export const START_LAENGEN_MS = [400, 600, 800, 1000, 1200, 1500]
+
+/**
+ * Vorlauf in Sekunden für alle Disziplinen. `null` heißt „wie Disziplin“:
+ * Jede Phase behält ihren eigenen Vorlauf aus den Disziplindaten.
+ */
+export const VORLAUF_MAX_S = 7
+export const VORLAUF_WERTE_S = [null, 0, 1, 2, 3, 4, 5, 6, 7]
+
+export function begrenzeVorlauf(wert) {
+  if (wert === null || wert === undefined || wert === '') return null
+  const n = Number(wert)
+  if (!Number.isFinite(n)) return null
+  return Math.max(0, Math.min(VORLAUF_MAX_S, Math.round(n)))
+}
 
 export function begrenzeLautstaerke(wert) {
   const n = Number(wert)
@@ -40,6 +54,7 @@ export function ladeSignale(speicher) {
     lautstaerke: begrenzeLautstaerke(roh?.lautstaerke ?? LAUTSTAERKE_STANDARD),
     startMs:     begrenzeStartLaenge(roh?.startMs ?? START_STANDARD_MS),
     stumm:       roh?.stumm === true,
+    vorlaufS:    begrenzeVorlauf(roh?.vorlaufS),
   }
 }
 
@@ -49,6 +64,7 @@ export function sichereSignale(speicher, werte) {
     lautstaerke: begrenzeLautstaerke(werte.lautstaerke),
     startMs:     begrenzeStartLaenge(werte.startMs),
     stumm:       werte.stumm === true,
+    vorlaufS:    begrenzeVorlauf(werte.vorlaufS),
   }
   try { speicher?.setItem(SCHLUESSEL, JSON.stringify(gueltig)) } catch { /* ohne Speicher gilt der Wert bis zum Neuladen */ }
   return gueltig

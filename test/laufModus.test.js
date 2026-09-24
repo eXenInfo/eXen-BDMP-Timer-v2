@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  phasenFuerSchuetzenuhr, freieZeitDisziplin, ladeModus, sichereModus,
+  phasenFuerSchuetzenuhr, phasenMitVorlauf, vorlaufMs, freieZeitDisziplin, ladeModus, sichereModus,
   mitTon, neutraleAnzeige, MODUS_SCHLUESSEL,
 } from '../src/core/laufModus.js'
 import { createSequenceEngine, SeqState, SeqEvent } from '../src/core/sequenceEngine.js'
@@ -90,5 +90,68 @@ describe('Schützenuhr', () => {
     expect(audio.isStumm()).toBe(true)
     audio.setStummEinstellung(false)
     expect(audio.isStumm()).toBe(false)
+  })
+})
+
+describe('Vorlauf aus den Signaleinstellungen', () => {
+  const phasen = [
+    { name: 'Match 1', prepMs: 5000, durationMs: 20000, repetitions: 2, repPauseMs: 10000, soundAtStart: true, soundAtEnd: true, waitAfter: true },
+    { name: 'Alt', prepTime: 5, duration: 10, repetitions: 1 },
+  ]
+
+  it('„wie Disziplin“: Aufsicht behält den Vorlauf der Phase, Schützenuhr hat keinen', () => {
+    expect(vorlaufMs(5000, null, 'aufsicht')).toBe(5000)
+    expect(vorlaufMs(5000, null, 'schuetzenuhr')).toBe(0)
+    expect(phasenMitVorlauf(phasen, null)).toBe(phasen)
+  })
+
+  it('ein eingestellter Wert gilt in beiden Betriebsarten, auch 0', () => {
+    expect(vorlaufMs(5000, 3, 'aufsicht')).toBe(3000)
+    expect(vorlaufMs(5000, 3, 'schuetzenuhr')).toBe(3000)
+    expect(vorlaufMs(5000, 0, 'aufsicht')).toBe(0)
+  })
+
+  it('Aufsicht: jede Phase bekommt den eingestellten Vorlauf, auch alte Daten mit prepTime', () => {
+    const raus = phasenMitVorlauf(phasen, 2)
+    expect(raus.map(p => p.prepMs)).toEqual([2000, 2000])
+    expect(raus[1].prepTime).toBe(2)
+    expect(phasen[0].prepMs).toBe(5000)
+  })
+
+  it('Aufsicht mit 7 s: Startsignal genau 7 s nach dem Start', () => {
+    const e = createSequenceEngine({ phases: phasenMitVorlauf(phasen, 7) })
+    e.start(0)
+    expect(e.snapshot(0).state).toBe(SeqState.PREP)
+    expect(of(lauf(e, 0, 6900), SeqEvent.START_SIGNAL)).toEqual([])
+    expect(of(lauf(e, 6900, 7000), SeqEvent.START_SIGNAL)).toHaveLength(1)
+    expect(e.snapshot(7000).state).toBe(SeqState.RUNNING)
+  })
+
+  it('Aufsicht mit 0 s: das Startsignal fällt mit dem Tipp', () => {
+    const e = createSequenceEngine({ phases: phasenMitVorlauf(phasen, 0) })
+    const ev = e.start(0)
+    expect(of(ev, SeqEvent.START_SIGNAL)).toHaveLength(1)
+    expect(e.snapshot(0).state).toBe(SeqState.RUNNING)
+  })
+
+  it('Schützenuhr mit Vorlauf: Tipp bei „Achtung“, Zeit läuft nach dem Vorlauf, ohne Ton', () => {
+    const e = createSequenceEngine({ phases: phasenFuerSchuetzenuhr(phasen, 4) })
+    e.start(0)
+    expect(e.snapshot(0).state).toBe(SeqState.PREP)
+    const ev = lauf(e, 0, 4000)
+    expect(e.snapshot(4000).state).toBe(SeqState.RUNNING)
+    expect(of(ev, SeqEvent.START_SIGNAL)).toEqual([])
+    lauf(e, 4000, 24000)
+    expect(e.snapshot(24000).state).toBe(SeqState.WAITING_NEXT)
+  })
+
+  it('Schützenuhr mit Vorlauf: jede weitere Serie beginnt nach dem Tipp wieder mit Vorlauf', () => {
+    const e = createSequenceEngine({ phases: phasenFuerSchuetzenuhr(phasen, 4) })
+    e.start(0)
+    lauf(e, 0, 24000)
+    e.continueNext(30000)
+    expect(e.snapshot(30000).state).toBe(SeqState.PREP)
+    lauf(e, 30000, 34000)
+    expect(e.snapshot(34000).state).toBe(SeqState.RUNNING)
   })
 })

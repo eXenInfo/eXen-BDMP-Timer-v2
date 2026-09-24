@@ -10,6 +10,8 @@ defineProps({
   modus: { type: String, required: true },
   /** Ton unter „Signale und Lautstärke“ ausgeschaltet. */
   stumm: { type: Boolean, default: false },
+  /** Vorlauf der Schützenuhr in Sekunden, 0 heißt Tipp beim Startsignal. */
+  vorlaufS: { type: Number, default: 0 },
 })
 defineEmits(['wahl'])
 const { t } = useI18n()
@@ -26,7 +28,8 @@ const { t } = useI18n()
         {{ t('v3.modus.' + m) }}
       </button>
     </div>
-    <p class="modus-text">{{ t('v3.modus.' + modus + 'Text') }}</p>
+    <p class="modus-text">{{ modus === 'schuetzenuhr' && vorlaufS > 0
+      ? t('v3.modus.schuetzenuhrTextVorlauf', { s: vorlaufS }) : t('v3.modus.' + modus + 'Text') }}</p>
     <p v-if="stumm && modus === 'aufsicht'" class="modus-text stumm">{{ t('v3.modus.stummHinweis') }}</p>
   </div>
 </template>

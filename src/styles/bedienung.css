@@ -31,6 +31,19 @@ html, body {
   color: var(--f-text);
 }
 
+/*
+ * Sichere Ränder: Die installierte App zeichnet bis unter Statusleiste und
+ * Dynamic Island (viewport-fit=cover, Statusleiste transparent). Ohne diesen
+ * Abstand lagen Zurück-Knopf und Kopfzeile unter der Uhrzeit. Seitlich gilt
+ * dasselbe für Querformat mit Notch. Den unteren Rand setzt jede Ansicht selbst.
+ */
+#app {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
 :root {
   --f-grund: #0b0d10;
   --f-flaeche: #15191f;
