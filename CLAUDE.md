@@ -10,7 +10,12 @@ Claude. Sachlich, knapp, Du-Anrede, Deutsch.
 - eXenInfo/eXen-BDMP-Timer ist der Produktivstand und wird nie angefasst, auch nicht
   per PR, Issue oder Einstellung. eXen-Timer ist der Vorgänger, ebenfalls nicht anfassen.
 - Nie auf main pushen, nie force-pushen, keine Tags, keine Releases. Änderungen nach
-  main nur über einen Pull Request, den Thomas selbst merged.
+  main nur über einen Pull Request von zeitkern-neu.
+- Mergen darf Claude, aber nur nach ausdrücklichem Go von Thomas für genau diesen PR.
+  Vorher: PR-Nummer, enthaltene Commits und CI-Status nennen. Merge immer als
+  Merge-Commit (gh pr merge <nr> --merge), kein Squash, kein Rebase, Branch nicht löschen.
+  Ein Merge nach main geht sofort live auf timer.exenwerk.de.
+- Nach dem Merge: Deploy-Lauf abwarten und melden, ob die Seite den neuen Stand zeigt.
 - Keine Inhalte aus Claude_Projekte (Privat-Ablage) oder COMPLUS übernehmen.
 
 ## Arbeitsweise lokal
