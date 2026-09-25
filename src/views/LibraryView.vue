@@ -12,6 +12,10 @@ import { duplicateSet, exportSet, exportSetLegacy, importSet, mergeSet, fetchSet
 const props = defineProps({
   sets:     { type: Array,  required: true },
   activeId: { type: String, required: true },
+  /** Herkunft des mitgelieferten Satzes: { quelle: 'app' | 'nachgeladen', geladenAm? }. */
+  standardStand: { type: Object, default: () => ({ quelle: 'app' }) },
+  /** Aktualisiert den mitgelieferten Satz aus einer Datei, gibt einen Bericht zurück. */
+  standardAktualisieren: { type: Function, default: null },
 })
 const emit = defineEmits(['aktivieren', 'sichern', 'loeschen', 'bearbeiten', 'schliessen'])
 const { t } = useI18n()
@@ -82,6 +86,28 @@ function einlesen() {
     meldung.value = null
   }
 }
+
+const standardLaeuft = ref(false)
+async function standardNachladen() {
+  fehler.value = null; meldung.value = null
+  standardLaeuft.value = true
+  try {
+    const b = await props.standardAktualisieren(nachladeUrl.value)
+    meldung.value = [
+      b.neu.length ? t('v3.bib.stdNeu', { n: b.neu.length, namen: b.neu.join(', ') }) : null,
+      b.geaendert.length ? t('v3.bib.stdGeaendert', { n: b.geaendert.length, namen: b.geaendert.join(', ') }) : null,
+      b.entfallen.length ? t('v3.bib.stdEntfallen', { n: b.entfallen.length, namen: b.entfallen.join(', ') }) : null,
+      b.kopien.length ? t('v3.bib.stdKopien', { n: b.kopien.length }) : null,
+    ].filter(Boolean).join(' · ') || t('v3.bib.stdAktuell')
+    ansicht.value = 'liste'
+  } catch (e) {
+    fehler.value = e.message
+  } finally {
+    standardLaeuft.value = false
+  }
+}
+const standardDatum = computed(() => props.standardStand?.geladenAm
+  ? new Date(props.standardStand.geladenAm).toLocaleDateString() : null)
 
 async function nachladen() {
   fehler.value = null; meldung.value = null
@@ -218,9 +244,6 @@ async function nachladen() {
     <template v-else>
       <header class="titel">
         <h2>{{ t('v3.bib.nachladenTitel') }}</h2>
-        <p class="unterzeile">{{ t('v3.bib.nachladenUnter') }}
-          <strong>{{ aktiverSatz?.name }}</strong>
-        </p>
       </header>
 
       <div class="e-gruppe">
@@ -228,6 +251,22 @@ async function nachladen() {
         <input id="url" class="e-feld" v-model="nachladeUrl" />
       </div>
 
+      <!-- Mitgelieferter Satz -->
+      <section class="block-std">
+        <h3 class="rubrik">{{ t('v3.bib.stdTitel') }}</h3>
+        <p class="unterzeile">{{ t('v3.bib.stdText') }}</p>
+        <p class="unterzeile">{{ standardDatum ? t('v3.bib.stdStandNachgeladen', { datum: standardDatum }) : t('v3.bib.stdStandApp') }}</p>
+        <button class="k-haupt" :disabled="!standardAktualisieren || standardLaeuft" @click="standardNachladen">
+          {{ t('v3.bib.stdKnopf') }}
+          <span class="k-unter">{{ t('v3.bib.stdKnopfUnter') }}</span>
+        </button>
+      </section>
+
+      <!-- Eigener Satz -->
+      <h3 class="rubrik abstand">{{ t('v3.bib.eigenTitel') }}</h3>
+      <p v-if="aktiverSatz?.readonly" class="unterzeile">{{ t('v3.bib.nurEigener') }}</p>
+      <template v-else>
+      <p class="unterzeile">{{ t('v3.bib.nachladenUnter') }} <strong>{{ aktiverSatz?.name }}</strong></p>
       <div class="k-spalte">
         <button class="k-zweit" :class="{ betont: nachladeStrategie === 'nurNeue' }" @click="nachladeStrategie = 'nurNeue'">
           {{ t('v3.bib.nurNeue') }}
@@ -239,15 +278,18 @@ async function nachladen() {
         </button>
       </div>
 
-      <button class="k-haupt abstand" @click="nachladen">
+      <button class="k-zweit abstand" @click="nachladen">
         {{ t('v3.bib.jetztNachladen') }}
         <span class="k-unter">{{ nachladeStrategie === 'nurNeue' ? t('v3.bib.ergaenztNur') : t('v3.bib.ersetztBekannte') }}</span>
       </button>
+      </template>
     </template>
   </div>
 </template>
 
 <style scoped>
+.block-std { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.9rem 1rem; border: 1px solid var(--f-rand); border-radius: var(--r-mittel); background: var(--f-flaeche); }
+.block-std .rubrik { margin: 0; }
 .bibliothek {
   min-height: calc(100dvh - env(safe-area-inset-top)); background: var(--f-grund); color: var(--f-text);
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;

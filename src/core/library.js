@@ -17,12 +17,22 @@
 import { convertLegacyCollection, toLegacyPhase } from './legacyImport.js'
 import { enrichDiscipline, GENERATED_DISCIPLINES } from './disciplineRules.js'
 import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_VARIANTEN } from './eppRules.js'
+import { kopienAbgleichen, zeitAbdruck } from './kopienAbgleich.js'
 
 export const SPEICHER_SCHLUESSEL = 'bdmp.bibliothek.v1'
+/** Nachgeladener Stand des mitgelieferten Satzes (Altformat wie public/disziplinen.json). */
+export const STANDARD_SCHLUESSEL = 'bdmp.standard.v1'
 export const FORMAT = 'bdmp-timer-satz/1'
 export const MAX_FAVORITEN = 5
 
 const jetzt = () => new Date().toISOString()
+
+/** Kurzer Prüfwert eines Textes, um gleiche Daten zu erkennen. */
+function textAbdruck(text) {
+  let h = 5381
+  for (let i = 0; i < text.length; i++) h = ((h * 33) ^ text.charCodeAt(i)) >>> 0
+  return `${text.length}-${h.toString(36)}`
+}
 
 const slug = (s) => String(s ?? '')
   .toLowerCase()
@@ -97,13 +107,76 @@ export function createLibrary(storage, legacyCollection) {
 
   let zustand = lesen() ?? { sets: [], activeSetId: 'bdmp-standard', favoriten: [] }
   if (!Array.isArray(zustand.favoriten)) zustand = { ...zustand, favoriten: [] }
-  const builtin = createBuiltinSet(legacyCollection)
+
+  /*
+   * Mitgelieferter Satz: aus der App oder, wenn nachgeladen, aus dem Speicher.
+   * Der nachgeladene Stand gilt nur, solange die App dieselben Daten mitbringt
+   * wie beim Nachladen. Kommt eine neue App-Version mit eigenen Daten, sind
+   * diese neuer und der nachgeladene Stand entfällt.
+   */
+  const appAbdruck = textAbdruck(JSON.stringify(legacyCollection ?? {}))
+  function standardLesen() {
+    try {
+      const roh = JSON.parse(storage?.getItem(STANDARD_SCHLUESSEL) ?? 'null')
+      if (roh?.daten && roh.appAbdruck === appAbdruck) return roh
+      if (roh) storage?.removeItem?.(STANDARD_SCHLUESSEL)
+    } catch { /* kaputter Eintrag: App-Daten gelten */ }
+    return null
+  }
+  let standard = standardLesen()
+  let builtin = createBuiltinSet(standard?.daten ?? legacyCollection)
+
+  // Korrekturen des mitgelieferten Satzes auch in unveränderte Kopien tragen.
+  let abgleich = { geaendert: [] }
+  function kopienNachziehen() {
+    abgleich = kopienAbgleichen(zustand.sets, builtin)
+    if (abgleich.geaendert.length) {
+      zustand = { ...zustand, sets: abgleich.sets }
+      schreiben(zustand)
+    }
+  }
+  kopienNachziehen()
 
   const alleSaetze = () => [builtin, ...zustand.sets]
 
   return {
     sets: alleSaetze,
     builtin: () => builtin,
+    /** Disziplinen, deren Zeiten beim Laden aus dem mitgelieferten Satz übernommen wurden. */
+    abgeglichen: () => [...abgleich.geaendert],
+
+    /** Woher der mitgelieferte Satz stammt: aus der App oder nachgeladen (mit Datum). */
+    standardStand: () => standard ? { quelle: 'nachgeladen', geladenAm: standard.geladenAm } : { quelle: 'app' },
+
+    /**
+     * Aktualisiert den mitgelieferten Satz aus Daten im Altformat, etwa der
+     * disziplinen.json auf dem Server nach einer Änderung der Sportordnung.
+     * Eigene Sätze bleiben unberührt, unveränderte Kopien ziehen nach.
+     * @returns {{ neu: string[], geaendert: string[], entfallen: string[], kopien: object[] }}
+     */
+    standardAktualisieren(daten) {
+      if (convertLegacyCollection(daten).length === 0) throw new Error('Keine Disziplinen gefunden.')
+      const vorher = builtin
+      const nachher = createBuiltinSet(daten)
+      const kennung = (d) => d.kind === 'epp' ? d.id : `${d.name}#${zeitAbdruck(d.phases)}`
+      const alt = new Map(vorher.disciplines.map(d => [d.id, d]))
+      const neuIds = new Set(nachher.disciplines.map(d => d.id))
+      const bericht = {
+        neu: nachher.disciplines.filter(d => !alt.has(d.id)).map(d => d.name),
+        geaendert: nachher.disciplines.filter(d => alt.has(d.id) && kennung(alt.get(d.id)) !== kennung(d)).map(d => d.name),
+        entfallen: vorher.disciplines.filter(d => !neuIds.has(d.id)).map(d => d.name),
+      }
+      if (textAbdruck(JSON.stringify(daten)) === appAbdruck) {
+        standard = null
+        try { storage?.removeItem?.(STANDARD_SCHLUESSEL) } catch { /* nichts zu tun */ }
+      } else {
+        standard = { daten, appAbdruck, geladenAm: jetzt() }
+        try { storage?.setItem(STANDARD_SCHLUESSEL, JSON.stringify(standard)) } catch { /* gilt bis zum Neuladen */ }
+      }
+      builtin = nachher
+      kopienNachziehen()
+      return { ...bericht, kopien: [...abgleich.geaendert] }
+    },
     activeSetId: () => zustand.activeSetId,
 
     activeSet() {
@@ -172,12 +245,6 @@ export function createLibrary(storage, legacyCollection) {
     },
 
     /**
-     * Legt eine eigene Disziplin an. Ist der aktive Satz schreibgeschützt,
-     * entsteht zuerst eine bearbeitbare Kopie — sonst stünde der Nutzer vor
-     * einer Sperre, die er nicht versteht.
-     * @returns {{satz, disziplin, kopieAngelegt}}
-     */
-    /**
      * Ändert eine Disziplin des aktiven Satzes. Ist er schreibgeschützt,
      * entsteht wie beim Anlegen zuerst eine bearbeitbare Kopie; die Kennung
      * der Disziplin bleibt dabei gleich, damit Favoriten weiter stimmen.
@@ -203,20 +270,20 @@ export function createLibrary(storage, legacyCollection) {
       return { satz: gesichert, disziplin: enrichDiscipline(disziplin), kopieAngelegt }
     },
 
+    /**
+     * Entwurf für eine neue Disziplin, noch nicht gespeichert. Ist der aktive
+     * Satz schreibgeschützt, ist der Entwurf eine Kopie davon. Gespeichert
+     * wird erst mit save(), etwa über „Satz sichern“ im Editor. Wer ohne
+     * Sichern zurückgeht, hinterlässt nichts.
+     * @returns {{satz, disziplin, kopieAngelegt}}
+     */
     disziplinAnlegen(name, erzeuger) {
-      let satz = alleSaetze().find(s => s.id === zustand.activeSetId) ?? builtin
-      let kopieAngelegt = false
-      if (satz.readonly) {
-        satz = duplicateSet(satz, 'Eigene Disziplinen')
-        kopieAngelegt = true
-      } else {
-        satz = structuredClone(satz)
-      }
+      const aktiv = alleSaetze().find(s => s.id === zustand.activeSetId) ?? builtin
+      const kopieAngelegt = !!aktiv.readonly
+      const satz = kopieAngelegt ? duplicateSet(aktiv, 'Eigene Disziplinen') : structuredClone(aktiv)
       const disziplin = erzeuger(name)
       satz.disciplines.push(disziplin)
-      const gesichert = this.save(satz)
-      if (gesichert) this.setActive(gesichert.id)
-      return { satz: gesichert || satz, disziplin, kopieAngelegt }
+      return { satz, disziplin, kopieAngelegt }
     },
   }
 }
@@ -293,6 +360,13 @@ export function mergeSet(ziel, quelle, strategie = 'nurNeue') {
     }
   }
   return { satz: { ...ziel, disciplines, updatedAt: jetzt() }, neu, aktualisiert, behalten }
+}
+
+/** Rohdaten aus dem Netz, etwa die disziplinen.json für den mitgelieferten Satz. */
+export async function fetchDaten(url, fetchImpl = globalThis.fetch) {
+  const antwort = await fetchImpl(url, { cache: 'no-store' })
+  if (!antwort.ok) throw new Error(`Abruf fehlgeschlagen (${antwort.status}).`)
+  try { return JSON.parse(await antwort.text()) } catch { throw new Error('Die Datei ist kein gültiges JSON.') }
 }
 
 /** Nachladen aus dem Netz — im Auslieferungszustand die eigene disziplinen.json. */

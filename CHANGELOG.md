@@ -4,6 +4,25 @@
 timer.exenwerk.de erst nach dem Merge nach `main`. Die Kurzfassung für die App steht in
 `src/core/neuigkeiten.js` und erscheint nach einem Update einmal auf der Startseite.
 
+## 2026-09-25 (zweiter Stand)
+
+### Behoben
+- **Kopien übernehmen Korrekturen.** Eine eigene Kopie des Standardsatzes (etwa „Eigene
+  Disziplinen“, angelegt beim Bearbeiten von RO-Texten oder beim Erstellen einer Disziplin)
+  behielt bisher die Zeiten vom Tag der Kopie. Jetzt übernimmt sie beim Start die korrigierten
+  Zeiten, wenn ihre Zeiten genau einem früheren Auslieferungsstand entsprechen. Wer selbst einen
+  Zeitwert geändert hat, behält seine Fassung. Eigene RO-Texte und Ansagen bleiben beim Schritt
+  mit gleichem Namen erhalten.
+- **„Disziplin erstellen“ ohne Nebenwirkung.** Bisher entstand beim Antippen sofort die Kopie
+  „Eigene Disziplinen“, auch aus Versehen. Jetzt öffnet sich ein Entwurf. Erst „Satz sichern“
+  legt den Satz an, „Verwerfen und zurück“ hinterlässt nichts.
+
+### Neu
+- **Mitgelieferten Satz aktualisieren.** Unter „Sätze und Disziplinen“, „Disziplinen nachladen“
+  holt ein Knopf den aktuellen Stand der `disziplinen.json` vom Server in den Standardsatz, etwa
+  nach einer Änderung der Sportordnung. Eigene Sätze bleiben unberührt, unveränderte Kopien ziehen
+  nach. Bringt eine spätere App-Version eigene Daten mit, gelten wieder diese.
+
 ## 2026-09-25
 
 ### Geändert

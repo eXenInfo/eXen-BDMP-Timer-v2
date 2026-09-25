@@ -60,10 +60,10 @@ describe('Favoriten', () => {
 })
 
 describe('Disziplin anlegen aus der Oberfläche', () => {
-  let bib
-  beforeEach(() => { bib = createLibrary(fakeStorage(), legacy) })
+  let bib, speicher
+  beforeEach(() => { speicher = fakeStorage(); bib = createLibrary(speicher, legacy) })
 
-  it('legt aus dem schreibgeschützten Satz zuerst eine Kopie an', () => {
+  it('aus dem schreibgeschützten Satz entsteht ein Entwurf als Kopie', () => {
     const { satz, disziplin, kopieAngelegt } = bib.disziplinAnlegen('Mein Training', createDiscipline)
     expect(kopieAngelegt).toBe(true)
     expect(satz.readonly).toBe(false)
@@ -72,9 +72,18 @@ describe('Disziplin anlegen aus der Oberfläche', () => {
     expect(disziplin.phases).toHaveLength(1)
   })
 
-  it('der neue Satz ist danach der aktive', () => {
+  it('der Entwurf wird nicht gespeichert und nicht aktiv, solange nicht gesichert wird', () => {
+    bib.disziplinAnlegen('Aus Versehen', createDiscipline)
+    expect(bib.sets().filter(s => !s.readonly)).toHaveLength(0)
+    expect(bib.activeSetId()).toBe('bdmp-standard')
+    expect(createLibrary(speicher, legacy).sets()).toHaveLength(1)
+  })
+
+  it('erst mit save entsteht der eigene Satz', () => {
     const { satz } = bib.disziplinAnlegen('Mein Training', createDiscipline)
-    expect(bib.activeSetId()).toBe(satz.id)
+    const gesichert = bib.save(satz)
+    expect(bib.sets().map(s => s.name)).toContain('Eigene Disziplinen')
+    expect(gesichert.disciplines.map(d => d.name)).toContain('Mein Training')
   })
 
   it('in einem eigenen Satz wird keine zweite Kopie erzeugt', () => {
@@ -84,6 +93,7 @@ describe('Disziplin anlegen aus der Oberfläche', () => {
     expect(kopieAngelegt).toBe(false)
     expect(satz.name).toBe('Verein')
     expect(bib.sets().filter(s => !s.readonly)).toHaveLength(1)
+    expect(bib.sets().find(s => s.name === 'Verein').disciplines.map(d => d.name)).not.toContain('Zweite')
   })
 
   it('der mitgelieferte Satz bleibt unverändert', () => {

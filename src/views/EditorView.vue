@@ -20,12 +20,18 @@ const props = defineProps({
   satz: { type: Object, required: true },
   /** Öffnet diese Disziplin sofort, etwa gleich nach „Disziplin erstellen“. */
   startDisziplinId: { type: String, default: null },
+  /**
+   * Ungespeicherter Entwurf: 'kopie' (neuer eigener Satz aus dem mitgelieferten)
+   * oder 'satz' (neue Disziplin in einem eigenen Satz). „Satz sichern“ ist
+   * sofort möglich, Zurück verwirft den Entwurf.
+   */
+  entwurf: { type: String, default: '' },
 })
 const emit = defineEmits(['sichern', 'schliessen'])
 const { t } = useI18n()
 
 const arbeit = ref(structuredClone(props.satz))
-const geaendert = ref(false)
+const geaendert = ref(!!props.entwurf)
 const startIndex = props.startDisziplinId
   ? arbeit.value.disciplines.findIndex(d => d.id === props.startDisziplinId) : -1
 const ebene = ref(startIndex >= 0 ? 'phasen' : 'disziplinen')      // disziplinen | phasen | phase
@@ -215,7 +221,12 @@ const regelAbweichung = computed(() => {
 
     <!-- Ebene 2: Phasen einer Disziplin -->
     <template v-else-if="ebene === 'phasen'">
-      <button class="k-nav" @click="ebene = 'disziplinen'">{{ t('v3.editor.zurueckZuDisziplinen') }}</button>
+      <button class="k-nav" @click="entwurf ? emit('schliessen') : (ebene = 'disziplinen')">
+        {{ entwurf ? t('v3.editor.entwurfVerwerfen') : t('v3.editor.zurueckZuDisziplinen') }}
+      </button>
+      <p v-if="entwurf" class="entwurf-hinweis">
+        {{ entwurf === 'kopie' ? t('v3.editor.entwurfHinweisKopie', { name: arbeit.name }) : t('v3.editor.entwurfHinweis') }}
+      </p>
 
       <header class="titel">
         <h2>{{ disziplin.name }}</h2>
@@ -483,6 +494,11 @@ const regelAbweichung = computed(() => {
 .titel h2 { margin: 0.5rem 0 0.15rem; font-size: 1.35rem; }
 .unterzeile { margin: 0; color: var(--f-gedaempft); font-size: 0.85rem; }
 .schutz { margin: 0; color: var(--f-akzent); font-size: 0.85rem; line-height: 1.45; }
+.entwurf-hinweis {
+  margin: 0; padding: 0.6rem 0.8rem; border-radius: var(--r-klein);
+  background: var(--f-flaeche); border: 1px solid var(--f-rand); border-left: 3px solid var(--f-akzent);
+  font-size: 0.85rem; line-height: 1.45;
+}
 
 .zeile {
   width: 100%; text-align: left; background: var(--f-flaeche);

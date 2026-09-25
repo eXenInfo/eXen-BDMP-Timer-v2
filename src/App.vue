@@ -4,7 +4,7 @@
  * Dieselbe Datei läuft in der installierbaren App und in der Einzeldatei-Vorschau
  * (preview/), damit beide immer denselben Stand zeigen.
  */
-import { computed, ref } from 'vue'
+import { computed, markRaw, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import StartView from './views/StartView.vue'
 import HelpView from './views/HelpView.vue'
@@ -17,7 +17,7 @@ import RoTexteView from './views/RoTexteView.vue'
 import FreieZeitView from './views/FreieZeitView.vue'
 import { freieZeitDisziplin, eppGesamtzeitDisziplin } from './core/laufModus.js'
 import { useLaufModus } from './composables/useLaufModus.js'
-import { createLibrary } from './core/library.js'
+import { createLibrary, fetchDaten } from './core/library.js'
 import { lokalisiereDisziplin } from './core/lokalisierung.js'
 import { uebersetze } from './core/textEn.js'
 import { EPP_GENERAL_NOTES, EPP_VARIANTEN } from './core/eppRules.js'
@@ -44,6 +44,7 @@ const stand = ref(0)                                   // erzwingt Neuberechnung
 const saetze = computed(() => (stand.value, bibliothek.sets()))
 const aktiverId = computed(() => (stand.value, bibliothek.activeSetId()))
 const aktiverSatz = computed(() => (stand.value, bibliothek.activeSet()))
+const standardStand = computed(() => (stand.value, bibliothek.standardStand()))
 /** Läuft eine Disziplin aus einem eigenen Satz? Dann gelten die Zeiten aus dem Editor. */
 const laufEigen = computed(() => !aktiverSatz.value.readonly)
 
@@ -54,7 +55,9 @@ const laufIndex = ref(0)                               // Phase, bei der der Lau
 const laufFest = ref(null)                             // erzwungene Betriebsart (freie Zeit)
 const editorSatzId = ref(null)
 const editorDisziplinId = ref(null)                    // direkt geöffnete Disziplin, etwa nach „Disziplin erstellen“
-const editorSatz = computed(() => saetze.value.find(s => s.id === editorSatzId.value))
+/** Ungespeicherter Entwurf nach „Disziplin erstellen“; gespeichert wird erst beim Sichern. */
+const editorEntwurf = ref(null)                        // { satz, kopieAngelegt, zurueck }
+const editorSatz = computed(() => editorEntwurf.value?.satz ?? saetze.value.find(s => s.id === editorSatzId.value))
 
 const disziplinen = computed(() => aktiverSatz.value.disciplines)
 /** Name in der gewählten Sprache — die Bibliothek selbst bleibt deutsch. */
@@ -85,15 +88,40 @@ function favoritUmschalten(d) {
   stand.value++
 }
 
+/** Öffnet einen Entwurf. Nichts wird gespeichert, bevor im Editor „Satz sichern“ getippt wird. */
 function erstellen() {
-  const { disziplin, kopieAngelegt } = bibliothek.disziplinAnlegen(
+  const { satz, disziplin, kopieAngelegt } = bibliothek.disziplinAnlegen(
     t('v3.editor.neueDisziplinName'), createDiscipline)
-  stand.value++
-  meldung.value = kopieAngelegt ? t('v3.wahl.kopieAngelegt') : null
-  editorSatzId.value = bibliothek.activeSetId()
-  editorDisziplinId.value = disziplin?.id ?? null
+  meldung.value = null
+  // markRaw: Der Editor kopiert den Satz mit structuredClone, das geht nur ohne Vue-Proxy.
+  editorEntwurf.value = { satz: markRaw(satz), kopieAngelegt, zurueck: schirm.value }
+  editorSatzId.value = satz.id
+  editorDisziplinId.value = disziplin.id
   schirm.value = 'editor'
   return disziplin
+}
+function editorSichern(satz) {
+  const entwurf = editorEntwurf.value
+  const gesichert = bibliothek.save(satz)
+  if (entwurf && gesichert) {
+    bibliothek.setActive(gesichert.id)
+    meldung.value = entwurf.kopieAngelegt ? t('v3.wahl.kopieAngelegt') : null
+  }
+  editorEntwurf.value = null
+  stand.value++
+  schirm.value = entwurf ? 'wahl' : 'saetze'
+}
+function editorSchliessen() {
+  const entwurf = editorEntwurf.value
+  editorEntwurf.value = null
+  schirm.value = entwurf?.zurueck ?? 'saetze'
+}
+
+/** Mitgelieferten Satz aus der Datei auf dem Server aktualisieren. */
+async function standardAktualisieren(url) {
+  const bericht = bibliothek.standardAktualisieren(await fetchDaten(url))
+  stand.value++
+  return bericht
 }
 
 function dauerText(d) {
@@ -247,15 +275,16 @@ function bearbeiten(id) { editorSatzId.value = id; editorDisziplinId.value = nul
     <LibraryView
       v-else-if="schirm === 'saetze'"
       :sets="saetze" :active-id="aktiverId"
+      :standard-stand="standardStand" :standard-aktualisieren="standardAktualisieren"
       @aktivieren="aktivieren" @sichern="sichern" @loeschen="loeschen"
       @bearbeiten="bearbeiten" @schliessen="schirm = 'start'" />
 
     <!-- Editor -->
     <EditorView
       v-else-if="schirm === 'editor' && editorSatz"
-      :satz="editorSatz" :start-disziplin-id="editorDisziplinId"
-      @sichern="s => { sichern(s); schirm = 'saetze' }"
-      @schliessen="schirm = 'saetze'" />
+      :satz="editorSatz" :start-disziplin-id="editorDisziplinId" :entwurf="editorEntwurf ? (editorEntwurf.kopieAngelegt ? 'kopie' : 'satz') : ''"
+      @sichern="editorSichern"
+      @schliessen="editorSchliessen" />
     <PWAUpdateToast />
   </div>
 </template>
