@@ -54,6 +54,15 @@ export function vorlaufMs(phasenMs, vorlaufS, modus = MODUS_STANDARD) {
   return begrenzeModus(modus) === 'schuetzenuhr' ? 0 : Math.max(0, phasenMs ?? 0)
 }
 
+/**
+ * Welcher globale Vorlauf für die Aufsicht gilt. In eigenen Sätzen stehen
+ * die Zeiten je Schritt im Editor und gewinnen, der globale Wert gilt dort
+ * nicht (`null` heißt: Vorlauf der Phase).
+ */
+export function aufsichtVorlauf(vorlaufS, eigeneZeiten) {
+  return eigeneZeiten ? null : vorlaufS
+}
+
 const phasenVorlauf = (p) => p.prepMs ?? (p.prepTime ?? 0) * 1000
 const phasenDauer = (p) => p.durationMs ?? (p.duration ?? 0) * 1000
 

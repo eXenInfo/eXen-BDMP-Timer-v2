@@ -1,27 +1,35 @@
 <script setup>
 /**
- * Editor für einen Satz: Disziplinen, Phasen und alle Texte.
+ * Editor für einen Satz: Disziplinen, Schritte und alle Texte.
  *
- * Drei Ebenen, jede mit einer Navigationsleiste in voller Breite. Der
+ * Drei Ebenen, jede mit einer Navigationsleiste in voller Breite. Die
+ * Schritte einer Disziplin stehen alle auf einer Seite und sind dort direkt
+ * bearbeitbar: Vorlauf, Laufzeit, Wiederholungen, Pause, Töne, danach Halt
+ * oder weiter. Die dritte Ebene enthält nur noch die Texte eines Schritts
+ * (beim EPP die ganze Station). Der
  * mitgelieferte Satz ist schreibgeschützt; wer ihn ändern will, legt zuerst
  * eine Kopie an. Das verhindert, dass der Auslieferungsstand still verändert
  * wird und niemand mehr weiß, was original war.
  */
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { createDiscipline, COMMAND_SET_OPTIONS } from '../core/disciplineRules.js'
+import { createDiscipline, leererSchritt, COMMAND_SET_OPTIONS } from '../core/disciplineRules.js'
 import { buildAnnouncement, buildEppAnnouncement } from '../core/ansage.js'
 
 const props = defineProps({
   satz: { type: Object, required: true },
+  /** Öffnet diese Disziplin sofort, etwa gleich nach „Disziplin erstellen“. */
+  startDisziplinId: { type: String, default: null },
 })
 const emit = defineEmits(['sichern', 'schliessen'])
 const { t } = useI18n()
 
 const arbeit = ref(structuredClone(props.satz))
 const geaendert = ref(false)
-const ebene = ref('disziplinen')      // disziplinen | phasen | phase
-const dIndex = ref(0)
+const startIndex = props.startDisziplinId
+  ? arbeit.value.disciplines.findIndex(d => d.id === props.startDisziplinId) : -1
+const ebene = ref(startIndex >= 0 ? 'phasen' : 'disziplinen')      // disziplinen | phasen | phase
+const dIndex = ref(Math.max(0, startIndex))
 const pIndex = ref(0)
 const loeschFrage = ref(null)
 const dLoeschFrage = ref(null)
@@ -38,10 +46,24 @@ function oeffneDisziplin(i) { dIndex.value = i; ebene.value = 'phasen' }
 function oeffnePhase(i)     { pIndex.value = i; ebene.value = 'phase' }
 
 function sekunden(ms) { return Math.round((ms ?? 0) / 1000) }
-function setSekunden(feld, wert) {
+function setSekunden(feld, wert, ziel = phase.value) {
   const zahl = Math.max(0, Math.round(Number(wert) || 0))
-  phase.value[feld] = zahl * 1000
+  ziel[feld] = zahl * 1000
   merken()
+}
+function setWiederholungen(ziel, wert) {
+  ziel.repetitions = Math.max(1, Math.round(Number(wert) || 1))
+  merken()
+}
+function setzen(ziel, feld, wert) { ziel[feld] = wert; merken() }
+
+/** Ein Satz, der den Schritt so beschreibt, wie er abläuft. */
+function schrittText(p) {
+  const teile = [t('v3.editor.textVorlauf', { s: sekunden(p.prepMs) })]
+  teile.push(p.repetitions > 1
+    ? t('v3.editor.textSerien', { n: p.repetitions, s: sekunden(p.durationMs), pause: sekunden(p.repPauseMs) })
+    : t('v3.editor.textSerie', { s: sekunden(p.durationMs) }))
+  return teile.join(', ')
 }
 
 function ansageAendern(i, wert) { phase.value.roCommands[i] = wert; merken() }
@@ -120,14 +142,10 @@ function phaseLoeschen(i) {
   loeschFrage.value = null
   merken()
 }
+/** Neuer Schritt am Ende, ohne Vorgaben: alle Zeiten 0, keine Töne, kein Halt. */
 function phaseNeu() {
-  disziplin.value.phases.push({
-    name: t('v3.editor.neuePhase'), description: '', roCommands: [],
-    prepMs: 3000, durationMs: 10000, repetitions: 1, repPauseMs: 0,
-    soundAtStart: true, soundAtEnd: true, waitAfter: false,
-  })
+  disziplin.value.phases.push(leererSchritt(t('v3.editor.neuePhase')))
   merken()
-  oeffnePhase(disziplin.value.phases.length - 1)
 }
 
 /** Weicht eine EPP-Station von der Sportordnung ab? */
@@ -225,6 +243,86 @@ const regelAbweichung = computed(() => {
         </div>
       </fieldset>
 
+      <!-- Schritte einer Sequenz: alle Werte direkt hier -->
+      <template v-if="!istEpp">
+        <fieldset v-for="(p, i) in disziplin.phases" :key="'s' + i" class="karte schritt" :disabled="arbeit.readonly">
+          <div class="schritt-kopf">
+            <span class="schritt-nr">{{ i + 1 }}</span>
+            <input class="e-feld" :aria-label="t('v3.editor.ueberschrift')" :value="p.name"
+                   @input="e => setzen(p, 'name', e.target.value)" />
+          </div>
+          <div class="e-paar">
+            <div class="e-gruppe">
+              <label class="e-marke" :for="'vl' + i">{{ t('v3.editor.vorlauf') }}</label>
+              <input :id="'vl' + i" class="e-feld" type="number" min="0" inputmode="numeric" :value="sekunden(p.prepMs)"
+                     @input="e => setSekunden('prepMs', e.target.value, p)" />
+            </div>
+            <div class="e-gruppe">
+              <label class="e-marke" :for="'lz' + i">{{ t('v3.editor.schiesszeit') }}</label>
+              <input :id="'lz' + i" class="e-feld" type="number" min="0" inputmode="numeric" :value="sekunden(p.durationMs)"
+                     @input="e => setSekunden('durationMs', e.target.value, p)" />
+            </div>
+          </div>
+          <div class="e-paar">
+            <div class="e-gruppe">
+              <label class="e-marke" :for="'wh' + i">{{ t('v3.editor.durchgaenge') }}</label>
+              <input :id="'wh' + i" class="e-feld" type="number" min="1" inputmode="numeric" :value="p.repetitions"
+                     @input="e => setWiederholungen(p, e.target.value)" />
+            </div>
+            <div class="e-gruppe">
+              <label class="e-marke" :for="'pz' + i">{{ t('v3.editor.pauseDazwischen') }}</label>
+              <input :id="'pz' + i" class="e-feld" type="number" min="0" inputmode="numeric" :value="sekunden(p.repPauseMs)"
+                     :disabled="p.repetitions <= 1" @input="e => setSekunden('repPauseMs', e.target.value, p)" />
+            </div>
+          </div>
+          <div class="schalter-reihe">
+            <label class="e-schalter">
+              <input type="checkbox" :checked="p.soundAtStart" @change="e => setzen(p, 'soundAtStart', e.target.checked)" />
+              {{ t('v3.editor.startsignalAn') }}
+            </label>
+            <label class="e-schalter">
+              <input type="checkbox" :checked="p.soundAtEnd" @change="e => setzen(p, 'soundAtEnd', e.target.checked)" />
+              {{ t('v3.editor.endsignalAn') }}
+            </label>
+          </div>
+          <div class="danach" role="radiogroup" :aria-label="t('v3.editor.danach')">
+            <span class="e-marke">{{ t('v3.editor.danach') }}</span>
+            <label class="e-schalter">
+              <input type="radio" :name="'danach' + i" :checked="p.waitAfter" @change="setzen(p, 'waitAfter', true)" />
+              {{ t('v3.editor.danachHalt') }}
+            </label>
+            <label class="e-schalter">
+              <input type="radio" :name="'danach' + i" :checked="!p.waitAfter" @change="setzen(p, 'waitAfter', false)" />
+              {{ i === disziplin.phases.length - 1 ? t('v3.editor.danachEnde') : t('v3.editor.danachWeiter') }}
+            </label>
+          </div>
+          <p class="zeile-neben">{{ schrittText(p) }}</p>
+
+          <button class="k-menue" type="button" @click="oeffnePhase(i)">
+            <span class="k-menue-text">{{ t('v3.editor.texteBearbeiten') }}
+              <span class="k-unter">{{ t('v3.editor.texteBearbeitenUnter') }}</span></span>
+            <span class="k-menue-pfeil" aria-hidden="true">›</span>
+          </button>
+
+          <div class="karten-werkzeug" v-if="!arbeit.readonly">
+            <button class="k-zweit schmal" type="button" :disabled="i === 0" @click="phaseVerschieben(i, -1)">{{ t('v3.editor.hoch') }}</button>
+            <button class="k-zweit schmal" type="button" :disabled="i === disziplin.phases.length - 1" @click="phaseVerschieben(i, 1)">{{ t('v3.editor.runter') }}</button>
+            <button class="k-zweit schmal" type="button" @click="phaseDoppeln(i)">{{ t('v3.editor.doppeln') }}</button>
+            <button class="k-gefahr schmal" type="button" @click="loeschFrage = i">{{ t('v3.bib.loeschen') }}</button>
+          </div>
+
+          <div v-if="loeschFrage === i" class="rueckfrage">
+            <p>{{ t('v3.editor.loeschFrage', { name: p.name }) }}</p>
+            <div class="k-reihe">
+              <button class="k-zweit" type="button" @click="loeschFrage = null">{{ t('v3.allgemein.behalten') }}</button>
+              <button class="k-gefahr" type="button" @click="phaseLoeschen(i)">{{ t('v3.allgemein.endgueltigLoeschen') }}</button>
+            </div>
+          </div>
+        </fieldset>
+      </template>
+
+      <!-- EPP-Stationen: je Station eine eigene Seite -->
+      <template v-else>
       <div v-for="(p, i) in disziplin.phases" :key="i" class="karte">
         <button class="zeile blank" @click="oeffnePhase(i)">
           <span class="zeile-haupt">{{ i + 1 }}. {{ p.station ?? p.name }}</span>
@@ -257,6 +355,7 @@ const regelAbweichung = computed(() => {
           </div>
         </div>
       </div>
+      </template>
 
       <div class="k-spalte abstand" v-if="!arbeit.readonly">
         <button class="k-zweit" @click="phaseNeu">{{ t('v3.editor.phaseHinzufuegen') }}</button>
@@ -323,7 +422,7 @@ const regelAbweichung = computed(() => {
         </div>
       </fieldset>
 
-      <fieldset class="block" :disabled="arbeit.readonly">
+      <fieldset class="block" v-if="istEpp" :disabled="arbeit.readonly">
         <template v-if="istEpp">
           <div class="e-paar">
             <div class="e-gruppe">
@@ -360,47 +459,6 @@ const regelAbweichung = computed(() => {
             </div>
           </div>
           <p v-if="regelAbweichung" class="regel-warnung">{{ regelAbweichung }}</p>
-        </template>
-
-        <template v-else>
-          <div class="e-paar">
-            <div class="e-gruppe">
-              <label class="e-marke">{{ t('v3.editor.vorlauf') }}</label>
-              <input class="e-feld" type="number" min="0" :value="sekunden(phase.prepMs)"
-                     @input="e => setSekunden('prepMs', e.target.value)" />
-            </div>
-            <div class="e-gruppe">
-              <label class="e-marke">{{ t('v3.editor.schiesszeit') }}</label>
-              <input class="e-feld" type="number" min="0" :value="sekunden(phase.durationMs)"
-                     @input="e => setSekunden('durationMs', e.target.value)" />
-            </div>
-          </div>
-          <div class="e-paar">
-            <div class="e-gruppe">
-              <label class="e-marke">{{ t('v3.editor.durchgaenge') }}</label>
-              <input class="e-feld" type="number" min="1" :value="phase.repetitions"
-                     @input="e => { phase.repetitions = Math.max(1, Number(e.target.value) || 1); merken() }" />
-            </div>
-            <div class="e-gruppe">
-              <label class="e-marke">{{ t('v3.editor.pauseDazwischen') }}</label>
-              <input class="e-feld" type="number" min="0" :value="sekunden(phase.repPauseMs)"
-                     @input="e => setSekunden('repPauseMs', e.target.value)" />
-            </div>
-          </div>
-          <div class="k-spalte">
-            <label class="e-schalter">
-              <input type="checkbox" :checked="phase.soundAtStart" @change="e => { phase.soundAtStart = e.target.checked; merken() }" />
-              {{ t('v3.editor.startsignalAn') }}
-            </label>
-            <label class="e-schalter">
-              <input type="checkbox" :checked="phase.soundAtEnd" @change="e => { phase.soundAtEnd = e.target.checked; merken() }" />
-              {{ t('v3.editor.endsignalAn') }}
-            </label>
-            <label class="e-schalter">
-              <input type="checkbox" :checked="phase.waitAfter" @change="e => { phase.waitAfter = e.target.checked; merken() }" />
-              {{ t('v3.editor.danachWarten') }}
-            </label>
-          </div>
         </template>
       </fieldset>
 
@@ -459,6 +517,16 @@ const regelAbweichung = computed(() => {
 .ansage-zeile { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; margin-bottom: 0.5rem; }
 .regel-warnung { margin: 0.25rem 0 0; color: var(--f-akzent); font-size: 0.85rem; line-height: 1.45; }
 .abstand { margin-top: 0.5rem; }
+
+/* Ein Schritt mit allen Werten */
+.schritt { margin: 0; min-width: 0; }
+.schritt:disabled { opacity: 0.6; }
+.schritt-kopf { display: grid; grid-template-columns: 2.25rem 1fr; gap: 0.5rem; align-items: center; }
+.schritt-nr {
+  display: flex; align-items: center; justify-content: center; height: 2.25rem; border-radius: 50%;
+  background: var(--f-flaeche-hoch); border: 1px solid var(--f-rand); font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.schalter-reihe, .danach { display: flex; flex-direction: column; gap: 0.35rem; }
 .feldhinweis { margin: 0.35rem 0 0; color: var(--f-gedaempft); font-size: 0.8rem; line-height: 1.45; }
 select.e-feld { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--f-gedaempft) 50%), linear-gradient(135deg, var(--f-gedaempft) 50%, transparent 50%); background-position: calc(100% - 18px) 1.45rem, calc(100% - 12px) 1.45rem; background-size: 6px 6px, 6px 6px; background-repeat: no-repeat; padding-right: 2.2rem; }
 </style>

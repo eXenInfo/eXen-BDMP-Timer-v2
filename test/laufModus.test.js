@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   phasenFuerSchuetzenuhr, phasenMitVorlauf, vorlaufMs, freieZeitDisziplin, ladeModus, sichereModus,
-  langeSerien, hatSchuetzenuhr, eppGesamtzeitDisziplin, SCHUETZENUHR_MIN_MS,
+  langeSerien, hatSchuetzenuhr, eppGesamtzeitDisziplin, SCHUETZENUHR_MIN_MS, aufsichtVorlauf,
   mitTon, neutraleAnzeige, MODUS_SCHLUESSEL,
 } from '../src/core/laufModus.js'
 import { createSequenceEngine, SeqState, SeqEvent } from '../src/core/sequenceEngine.js'
@@ -215,5 +215,24 @@ describe('Schützenuhr nur für lange Serien', () => {
     expect(e.snapshot(329_900).state).toBe(SeqState.RUNNING)
     lauf(e, 329_900, 330_000)
     expect(e.snapshot(330_000).state).toBe(SeqState.FINISHED)
+  })
+})
+
+describe('Vorlauf in eigenen Sätzen', () => {
+  const eigene = [{ name: 'Eigener Schritt', prepMs: 7000, durationMs: 30_000, repetitions: 1 }]
+
+  it('der globale Vorlauf gilt nur im mitgelieferten Satz', () => {
+    expect(aufsichtVorlauf(3, false)).toBe(3)
+    expect(aufsichtVorlauf(3, true)).toBe(null)
+    expect(aufsichtVorlauf(null, true)).toBe(null)
+  })
+
+  it('eigener Satz: der Vorlauf aus dem Editor läuft, auch wenn global 3 s eingestellt sind', () => {
+    const e = createSequenceEngine({ phases: phasenMitVorlauf(eigene, aufsichtVorlauf(3, true)) })
+    e.start(0)
+    lauf(e, 0, 6900)
+    expect(e.snapshot(6900).state).toBe(SeqState.PREP)
+    lauf(e, 6900, 7000)
+    expect(e.snapshot(7000).state).toBe(SeqState.RUNNING)
   })
 })

@@ -4,6 +4,19 @@
 timer.exenwerk.de erst nach dem Merge nach `main`. Die Kurzfassung für die App steht in
 `src/core/neuigkeiten.js` und erscheint nach einem Update einmal auf der Startseite.
 
+## 2026-09-25
+
+### Geändert
+- **Editor mit allen Schritten auf einer Seite.** Jeder Schritt ist direkt bearbeitbar: Name,
+  Vorlauf, Laufzeit, Wiederholungen ohne Halt, Pause dazwischen, Start- und Endton, danach Halt
+  oder direkt weiter. Darunter steht in einem Satz, wie der Schritt abläuft. Texte (Beschreibung,
+  Ansage, RO-Kommandos) liegen auf einer eigenen Seite je Schritt. EPP-Stationen wie bisher.
+- **Keine Vorgaben mehr.** Neue Disziplinen und neue Schritte starten mit 0 Sekunden, ohne Töne
+  und ohne Halt.
+- **„Disziplin erstellen“ öffnet die neue Disziplin direkt** im Editor.
+- **Vorlauf in eigenen Sätzen.** Dort gilt der Vorlauf aus dem Editor. Der globale Vorlauf unter
+  „Signale und Lautstärke“ gilt nur für den mitgelieferten Satz und für die Schützenuhr.
+
 ## 2026-09-24 (dritter Stand)
 
 ### Geändert

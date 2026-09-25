@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createSequenceEngine, SeqState, SeqEvent } from '../core/sequenceEngine.js'
 import { buildAnnouncement } from '../core/ansage.js'
-import { phasenFuerSchuetzenuhr, phasenMitVorlauf, vorlaufMs, neutraleAnzeige, hatSchuetzenuhr } from '../core/laufModus.js'
+import { phasenFuerSchuetzenuhr, phasenMitVorlauf, vorlaufMs, neutraleAnzeige, hatSchuetzenuhr, aufsichtVorlauf } from '../core/laufModus.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import { useLaufModus } from '../composables/useLaufModus.js'
 import { useWachHalten } from '../composables/useWachHalten.js'
@@ -28,6 +28,8 @@ const props = defineProps({
   bearbeitbar: { type: Boolean, default: true },
   /** Phase, bei der der Lauf einsetzt, etwa nach dem Bearbeiten der Texte. */
   startIndex: { type: Number, default: 0 },
+  /** Disziplin aus einem eigenen Satz: Der Vorlauf aus dem Editor gilt, nicht der globale. */
+  eigeneZeiten: { type: Boolean, default: false },
 })
 defineEmits(['texte'])
 
@@ -43,6 +45,8 @@ useWachHalten()
 const stummEingestellt = ref(stummLesen())
 /** Vorlauf aus „Signale und Lautstärke“, `null` heißt „wie Disziplin“ (vor dem Lauf gelesen). */
 const vorlaufS = ref(vorlaufEingestellt())
+/** Vorlauf der Aufsicht: in eigenen Sätzen der aus dem Editor, sonst der globale. */
+const vorlaufAufsicht = computed(() => aufsichtVorlauf(vorlaufS.value, props.eigeneZeiten))
 /** Vorlauf der Schützenuhr in Sekunden; 0 heißt Tipp beim Startsignal. */
 const uhrVorlaufS = computed(() => vorlaufMs(0, vorlaufS.value, 'schuetzenuhr') / 1000)
 
@@ -56,7 +60,7 @@ const name   = computed(() => props.disziplin.name)
 const phases = computed(() => schuetzenuhr.value
   ? phasenFuerSchuetzenuhr(props.disziplin.phases, vorlaufS.value,
       { alle: !!(props.disziplin.freieZeit || props.disziplin.eppGesamtzeit) })
-  : phasenMitVorlauf(props.disziplin.phases, vorlaufS.value))
+  : phasenMitVorlauf(props.disziplin.phases, vorlaufAufsicht.value))
 const befehle = computed(() => props.disziplin.commandSet ?? null)
 
 /**

@@ -13,7 +13,7 @@ import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_GENERAL_NOTES, EPP_VARIANTEN } from 
 import { buildEppAnnouncement } from '../core/ansage.js'
 import { useEngineClock, now } from '../composables/useEngineClock.js'
 import * as audio from '../core/audio.js'
-import { vorlaufMs } from '../core/laufModus.js'
+import { vorlaufMs, aufsichtVorlauf } from '../core/laufModus.js'
 import { useLaufModus } from '../composables/useLaufModus.js'
 import { useWachHalten } from '../composables/useWachHalten.js'
 import ModusWahl from '../components/ModusWahl.vue'
@@ -28,6 +28,8 @@ const props = defineProps({
   allgemeineHinweise: { type: Array, default: () => EPP_GENERAL_NOTES },
   bearbeitbar: { type: Boolean, default: true },
   startIndex: { type: Number, default: 0 },
+  /** EPP aus einem eigenen Satz: Der Vorlauf der Disziplin gilt, nicht der globale. */
+  eigeneZeiten: { type: Boolean, default: false },
 })
 defineEmits(['texte'])
 
@@ -61,7 +63,7 @@ function neuAufsetzen() {
   // EPP ist eine eigene Ansicht (nur Gesamtzeit), siehe App.vue.
   clock.setEngine(createEppEngine({
     phases: props.phases, totalTimeMs: props.totalTimeMs,
-    prepMs: vorlaufMs(props.prepMs, vorlaufS.value, 'aufsicht'),
+    prepMs: vorlaufMs(props.prepMs, aufsichtVorlauf(vorlaufS.value, props.eigeneZeiten), 'aufsicht'),
   }))
 }
 onMounted(() => {
