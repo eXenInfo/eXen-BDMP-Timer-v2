@@ -20,6 +20,17 @@ export const BESTAND_SCHLUESSEL = ['bdmp.bibliothek.v1', 'exen_signale', 'exen_l
 
 export const NEUIGKEITEN = [
   {
+    stand: '2026-09-25.2',
+    punkte: {
+      de: [
+        'Eigene Kopien des Standardsatzes übernehmen korrigierte Zeiten jetzt automatisch, etwa PP3 und PP4 mit einer Serie von 100 Sekunden. Selbst geänderte Zeiten und eigene RO-Texte bleiben erhalten.',
+      ],
+      en: [
+        'Your own copies of the standard set now take over corrected times automatically, such as PP3 and PP4 with one string of 100 seconds. Times you changed yourself and your own RO texts are kept.',
+      ],
+    },
+  },
+  {
     stand: '2026-09-25',
     punkte: {
       de: [

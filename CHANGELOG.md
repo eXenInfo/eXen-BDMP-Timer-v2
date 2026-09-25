@@ -4,6 +4,16 @@
 timer.exenwerk.de erst nach dem Merge nach `main`. Die Kurzfassung für die App steht in
 `src/core/neuigkeiten.js` und erscheint nach einem Update einmal auf der Startseite.
 
+## 2026-09-25 (zweiter Stand)
+
+### Behoben
+- **Kopien übernehmen Korrekturen.** Eine eigene Kopie des Standardsatzes (etwa „Eigene
+  Disziplinen“, angelegt beim Bearbeiten von RO-Texten oder beim Erstellen einer Disziplin)
+  behielt bisher die Zeiten vom Tag der Kopie. Jetzt übernimmt sie beim Start die korrigierten
+  Zeiten, wenn ihre Zeiten genau einem früheren Auslieferungsstand entsprechen. Wer selbst einen
+  Zeitwert geändert hat, behält seine Fassung. Eigene RO-Texte und Ansagen bleiben beim Schritt
+  mit gleichem Namen erhalten.
+
 ## 2026-09-25
 
 ### Geändert

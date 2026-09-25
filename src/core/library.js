@@ -17,6 +17,7 @@
 import { convertLegacyCollection, toLegacyPhase } from './legacyImport.js'
 import { enrichDiscipline, GENERATED_DISCIPLINES } from './disciplineRules.js'
 import { EPP_PHASES, EPP_TOTAL_TIME_MS, EPP_VARIANTEN } from './eppRules.js'
+import { kopienAbgleichen } from './kopienAbgleich.js'
 
 export const SPEICHER_SCHLUESSEL = 'bdmp.bibliothek.v1'
 export const FORMAT = 'bdmp-timer-satz/1'
@@ -99,11 +100,20 @@ export function createLibrary(storage, legacyCollection) {
   if (!Array.isArray(zustand.favoriten)) zustand = { ...zustand, favoriten: [] }
   const builtin = createBuiltinSet(legacyCollection)
 
+  // Korrekturen des mitgelieferten Satzes auch in unveränderte Kopien tragen.
+  const abgleich = kopienAbgleichen(zustand.sets, builtin)
+  if (abgleich.geaendert.length) {
+    zustand = { ...zustand, sets: abgleich.sets }
+    schreiben(zustand)
+  }
+
   const alleSaetze = () => [builtin, ...zustand.sets]
 
   return {
     sets: alleSaetze,
     builtin: () => builtin,
+    /** Disziplinen, deren Zeiten beim Laden aus dem mitgelieferten Satz übernommen wurden. */
+    abgeglichen: () => [...abgleich.geaendert],
     activeSetId: () => zustand.activeSetId,
 
     activeSet() {
