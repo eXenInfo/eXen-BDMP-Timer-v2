@@ -44,6 +44,8 @@ const stand = ref(0)                                   // erzwingt Neuberechnung
 const saetze = computed(() => (stand.value, bibliothek.sets()))
 const aktiverId = computed(() => (stand.value, bibliothek.activeSetId()))
 const aktiverSatz = computed(() => (stand.value, bibliothek.activeSet()))
+/** Läuft eine Disziplin aus einem eigenen Satz? Dann gelten die Zeiten aus dem Editor. */
+const laufEigen = computed(() => !aktiverSatz.value.readonly)
 
 const schirm = ref('start')                            // start | wahl | lauf | saetze | editor | hilfe | signale | texte | frei
 const zuletzt = ref(null)
@@ -51,6 +53,7 @@ const gewaehlt = ref(null)
 const laufIndex = ref(0)                               // Phase, bei der der Lauf wieder einsetzt
 const laufFest = ref(null)                             // erzwungene Betriebsart (freie Zeit)
 const editorSatzId = ref(null)
+const editorDisziplinId = ref(null)                    // direkt geöffnete Disziplin, etwa nach „Disziplin erstellen“
 const editorSatz = computed(() => saetze.value.find(s => s.id === editorSatzId.value))
 
 const disziplinen = computed(() => aktiverSatz.value.disciplines)
@@ -88,6 +91,7 @@ function erstellen() {
   stand.value++
   meldung.value = kopieAngelegt ? t('v3.wahl.kopieAngelegt') : null
   editorSatzId.value = bibliothek.activeSetId()
+  editorDisziplinId.value = disziplin?.id ?? null
   schirm.value = 'editor'
   return disziplin
 }
@@ -138,7 +142,7 @@ function texteSichern({ phasen, commandTexts }) {
 function sichern(satz) { bibliothek.save(satz); stand.value++ }
 function aktivieren(id) { bibliothek.setActive(id); stand.value++ }
 function loeschen(id) { bibliothek.remove(id); stand.value++ }
-function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
+function bearbeiten(id) { editorSatzId.value = id; editorDisziplinId.value = null; schirm.value = 'editor' }
 </script>
 
 <template>
@@ -232,9 +236,10 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
         :varianten="eppVarianten"
         :allgemeine-hinweise="eppHinweise"
         :total-time-ms="gewaehltLokal.totalTimeMs ?? 330000"
-        :prep-ms="gewaehltLokal.prepMs ?? 3000" />
+        :prep-ms="gewaehltLokal.prepMs ?? 3000" :eigene-zeiten="laufEigen" />
       <SequenceMatchView
         v-else :disziplin="gewaehltLokal" :modus-fest="laufFest" :bearbeitbar="!laufFest"
+        :eigene-zeiten="laufEigen && !laufFest"
         :start-index="laufIndex" @texte="texteOeffnen" />
     </div>
 
@@ -248,7 +253,7 @@ function bearbeiten(id) { editorSatzId.value = id; schirm.value = 'editor' }
     <!-- Editor -->
     <EditorView
       v-else-if="schirm === 'editor' && editorSatz"
-      :satz="editorSatz"
+      :satz="editorSatz" :start-disziplin-id="editorDisziplinId"
       @sichern="s => { sichern(s); schirm = 'saetze' }"
       @schliessen="schirm = 'saetze'" />
     <PWAUpdateToast />

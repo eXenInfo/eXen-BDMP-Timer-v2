@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { createDiscipline, enrichDiscipline, COMMAND_SET_OPTIONS } from '../src/core/disciplineRules.js'
+import { createDiscipline, enrichDiscipline, leererSchritt, COMMAND_SET_OPTIONS } from '../src/core/disciplineRules.js'
 import { createLibrary, duplicateSet, exportSet, importSet } from '../src/core/library.js'
 import { createSequenceEngine, SeqState } from '../src/core/sequenceEngine.js'
 
@@ -8,22 +8,45 @@ const legacy = JSON.parse(readFileSync(new URL('../public/disziplinen.json', imp
 const fakeStorage = () => { const m = new Map(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => m.set(k, v) } }
 
 describe('Eigene Disziplin anlegen', () => {
-  it('kommt mit einer ersten Phase und sinnvollen Vorgaben', () => {
+  it('kommt mit einem ersten, leeren Schritt ohne Vorgaben', () => {
     const d = createDiscipline('Vereinstraining Schnellfeuer')
     expect(d.name).toBe('Vereinstraining Schnellfeuer')
     expect(d.kind).toBe('sequence')
     expect(d.eigen).toBe(true)
     expect(d.phases).toHaveLength(1)
-    expect(d.phases[0].prepMs).toBe(3000)
-    expect(d.phases[0].durationMs).toBe(10000)
+    expect(d.phases[0]).toMatchObject({
+      prepMs: 0, durationMs: 0, repetitions: 1, repPauseMs: 0,
+      soundAtStart: false, soundAtEnd: false, waitAfter: false,
+    })
   })
 
-  it('läuft sofort durch den Zeitkern', () => {
-    const d = createDiscipline()
-    const e = createSequenceEngine({ phases: d.phases })
+  it('ein neuer Schritt ist immer leer, unabhängig vom Schritt davor', () => {
+    const s = leererSchritt('Neuer Schritt')
+    expect(s).toMatchObject({ name: 'Neuer Schritt', prepMs: 0, durationMs: 0, repetitions: 1, repPauseMs: 0,
+      soundAtStart: false, soundAtEnd: false, waitAfter: false, roCommands: [] })
+    expect(leererSchritt()).not.toBe(leererSchritt())
+  })
+
+  it('ein leerer Schritt bringt den Zeitkern nicht aus dem Tritt', () => {
+    const e = createSequenceEngine({ phases: createDiscipline().phases })
     e.start(0)
-    for (let t = 100; t <= 14000; t += 100) e.tick(t)
-    expect(e.snapshot(14000).state).toBe(SeqState.FINISHED)
+    e.tick(100)
+    expect(e.snapshot(100).state).toBe(SeqState.FINISHED)
+  })
+
+  it('selbst eingetragene Schritte laufen genau so ab: 4 s Vorlauf, 2 × 10 s mit 3 s Pause, Halt', () => {
+    const phasen = [
+      { ...leererSchritt('A'), prepMs: 4000, durationMs: 10_000, repetitions: 2, repPauseMs: 3000, waitAfter: true },
+      { ...leererSchritt('B'), prepMs: 0, durationMs: 5000 },
+    ]
+    const e = createSequenceEngine({ phases: phasen })
+    e.start(0)
+    const zu = (t) => { for (let x = 100; x <= t; x += 100) e.tick(x); return e.snapshot(t) }
+    expect(zu(3900).state).toBe(SeqState.PREP)
+    expect(zu(4000).state).toBe(SeqState.RUNNING)
+    expect(zu(14_000).state).toBe(SeqState.REP_PAUSE)
+    expect(zu(17_000).state).toBe(SeqState.RUNNING)
+    expect(zu(27_000).state).toBe(SeqState.WAITING_NEXT)
   })
 })
 

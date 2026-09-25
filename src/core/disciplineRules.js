@@ -480,7 +480,20 @@ export function mitEigenenKommandos(amtlich, eigene) {
   return raus
 }
 
-/** Leere Disziplin mit einer ersten Phase. */
+/**
+ * Leerer Schritt: alle Zeiten 0, keine Töne, kein Halt. Bewusst ohne
+ * Vorgaben, damit jeder Wert selbst eingetragen wird und nichts Fremdes
+ * unbemerkt mitläuft.
+ */
+export function leererSchritt(name = 'Schritt 1') {
+  return {
+    name, description: '', roCommands: [],
+    prepMs: 0, durationMs: 0, repetitions: 1, repPauseMs: 0,
+    soundAtStart: false, soundAtEnd: false, waitAfter: false,
+  }
+}
+
+/** Leere Disziplin mit einem ersten, leeren Schritt. */
 export function createDiscipline(name = 'Neue Disziplin') {
   return {
     id: `eigen-${Date.now().toString(36)}`,
@@ -489,11 +502,7 @@ export function createDiscipline(name = 'Neue Disziplin') {
     eigen: true,
     commandSetId: 'auto',
     description: '',
-    phases: [{
-      name: 'Phase 1', description: '', roCommands: [],
-      prepMs: 3000, durationMs: 10000, repetitions: 1, repPauseMs: 0,
-      soundAtStart: true, soundAtEnd: true, waitAfter: false,
-    }],
+    phases: [leererSchritt()],
   }
 }
 

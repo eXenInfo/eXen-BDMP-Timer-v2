@@ -20,6 +20,21 @@ export const BESTAND_SCHLUESSEL = ['bdmp.bibliothek.v1', 'exen_signale', 'exen_l
 
 export const NEUIGKEITEN = [
   {
+    stand: '2026-09-25',
+    punkte: {
+      de: [
+        'Neuer Editor: Alle Schritte einer Disziplin stehen auf einer Seite und lassen sich direkt einstellen: Vorlauf, Laufzeit, Wiederholungen, Pause, Töne, danach Halt oder weiter.',
+        'Neue Disziplinen und neue Schritte starten leer, ohne vorgegebene Zeiten.',
+        'Eigene Sätze laufen mit dem Vorlauf aus dem Editor. Der Vorlauf unter „Signale und Lautstärke“ gilt nur noch für den mitgelieferten Satz und die Schützenuhr.',
+      ],
+      en: [
+        'New editor: all steps of a discipline are on one page and can be set directly: lead-in, run time, repeats, pause, tones, then stop or continue.',
+        'New disciplines and new steps start empty, without preset times.',
+        'Your own sets run with the lead-in from the editor. The lead-in under “Signals and volume” now only applies to the built-in set and the shooter clock.',
+      ],
+    },
+  },
+  {
     stand: '2026-09-24.3',
     punkte: {
       de: [
