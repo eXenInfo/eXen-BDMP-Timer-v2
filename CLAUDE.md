@@ -69,5 +69,7 @@ Claude. Sachlich, knapp, Du-Anrede, Deutsch.
 - Zeiten im mitgelieferten Satz geändert: neuen Zeitabdruck in src/core/kopienAbgleich.js
   (FRUEHERE_STAENDE) ergänzen, alte nie löschen. Sonst bekommen Kopien die Korrektur nicht;
   test/kopienAbgleich.test.js erzwingt das.
+- public/disziplinen.json wird mit der App gebaut und zusätzlich vom Server geladen, wenn ein
+  Nutzer „Mitgelieferten Satz aktualisieren“ tippt. Format dort immer das Altformat.
 - Texte in de.json und en.json immer beide pflegen; locales.test.js muss grün bleiben.
 - base in vite.config.js ist /eXen-BDMP-Timer-v2/, nicht ändern.

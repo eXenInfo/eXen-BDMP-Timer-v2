@@ -24,9 +24,13 @@ export const NEUIGKEITEN = [
     punkte: {
       de: [
         'Eigene Kopien des Standardsatzes übernehmen korrigierte Zeiten jetzt automatisch, etwa PP3 und PP4 mit einer Serie von 100 Sekunden. Selbst geänderte Zeiten und eigene RO-Texte bleiben erhalten.',
+        '„Disziplin erstellen“ legt nichts mehr von selbst an. Erst „Satz sichern“ speichert, „Verwerfen und zurück“ lässt alles, wie es war.',
+        'Der mitgelieferte Satz lässt sich unter „Sätze und Disziplinen“, „Disziplinen nachladen“ auf den neuesten Stand bringen, etwa nach einer Änderung der Sportordnung.',
       ],
       en: [
         'Your own copies of the standard set now take over corrected times automatically, such as PP3 and PP4 with one string of 100 seconds. Times you changed yourself and your own RO texts are kept.',
+        '“Create discipline” no longer creates anything by itself. Only “Save set” saves, “Discard and go back” leaves everything as it was.',
+        'The built-in set can be brought up to date under “Sets and disciplines”, “Load disciplines”, for example after a change to the rule book.',
       ],
     },
   },
